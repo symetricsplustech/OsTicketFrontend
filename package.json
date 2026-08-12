@@ -1,0 +1,27 @@
+{
+  "name": "osticket-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "customer",
+    "agent",
+    "admin",
+    "superadmin"
+  ],
+  "scripts": {
+    "dev": "concurrently -n customer,agent,admin,superadmin -c cyan,green,yellow,magenta \"npm:dev:customer\" \"npm:dev:agent\" \"npm:dev:admin\" \"npm:dev:superadmin\"",
+    "dev:customer": "npm --workspace customer run dev",
+    "dev:agent": "npm --workspace agent run dev",
+    "dev:admin": "npm --workspace admin run dev",
+    "dev:superadmin": "npm --workspace superadmin run dev",
+    "build": "npm run build:customer && npm run build:agent && npm run build:admin && npm run build:superadmin",
+    "build:customer": "npm --workspace customer run build",
+    "build:agent": "npm --workspace agent run build",
+    "build:admin": "npm --workspace admin run build",
+    "build:superadmin": "npm --workspace superadmin run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
