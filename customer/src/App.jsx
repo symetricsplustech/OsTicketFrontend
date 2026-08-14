@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import Home from './pages/Home.jsx';
@@ -17,30 +17,39 @@ import Profile from './pages/Profile.jsx';
 import Notifications from './pages/Notifications.jsx';
 import Protected from './components/Protected.jsx';
 
-export default function App() {
+function Shell() {
   return (
     <>
       <Header />
       <div className="content">
-        <Routes>
+        <Outlet />
+      </div>
+      <Footer />
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route element={<Protected />}>
+        <Route element={<Shell />}>
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/open" element={<OpenTicket />} />
           <Route path="/status" element={<CheckStatus />} />
           <Route path="/kb" element={<Knowledgebase />} />
           <Route path="/kb/:id" element={<FaqDetail />} />
-          <Route element={<Protected />}>
-            <Route path="/tickets" element={<MyTickets />} />
-            <Route path="/ticket/:number" element={<TicketDetail />} />
-            <Route path="/employees" element={<Employees />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/notifications" element={<Notifications />} />
-          </Route>
-        </Routes>
-      </div>
-      <Footer />
-    </>
+          <Route path="/tickets" element={<MyTickets />} />
+          <Route path="/ticket/:number" element={<TicketDetail />} />
+          <Route path="/employees" element={<Employees />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/notifications" element={<Notifications />} />
+        </Route>
+      </Route>
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
 }

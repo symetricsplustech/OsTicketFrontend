@@ -44,7 +44,7 @@ export default function CompanyDetail() {
     } finally {
       setBusy(false);
     }
-  };
+  }; 
 
   const loadRazorpayScript = () =>
     new Promise((resolve) => {
