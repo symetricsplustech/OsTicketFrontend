@@ -30,6 +30,17 @@ html, body {
   font-size: 13px;
   color: var(--admin-text);
   background: var(--admin-bg);
+  width: 100%;
+  height: 100%;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 a { color: var(--admin-link); text-decoration: none; }
@@ -43,6 +54,10 @@ h2 { font-size: 14px; }
   background: linear-gradient(to bottom, #0c5b8c 0%, #08456d 100%);
   border-bottom: 3px solid var(--admin-accent);
   color: #fff;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
 }
 .topbar-inner {
   width: 100%;
@@ -171,14 +186,17 @@ h2 { font-size: 14px; }
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 0 20px;
-  min-height: calc(100vh - 64px);
+  padding: 0;
+  flex: 1;
+  height: auto;
 }
 .sidebar {
   width: 210px;
   flex-shrink: 0;
   background: var(--admin-navy);
   padding: 14px 0;
+  margin: 0;
+  height: 100%;
 }
 .sidebar-section { margin-bottom: 8px; }
 .sidebar-section-title {
