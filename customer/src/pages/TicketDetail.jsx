@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { api, formatDateTime, initials, uploadUrl, fileSize, STATUS_COLORS } from '../lib/index.js';
 import { can, USER_PERMISSIONS } from '../lib/permissions.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import CsatDialog from '../components/CsatDialog.jsx';
 
 const ThreadEntry = ({ entry }) => {
   if (entry.type === 'system' || entry.isSystem) {
@@ -157,6 +158,7 @@ export default function TicketDetail() {
           <p className="muted">This ticket is closed. You can reopen it to continue the conversation.</p>
         )}
       </div>
+      {ticket.status === 'closed' && <CsatDialog ticketNumber={ticket.number} />}
     </>
   );
 }

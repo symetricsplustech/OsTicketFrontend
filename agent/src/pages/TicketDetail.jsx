@@ -1,15 +1,41 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, formatDateTime, formatDate, initials, uploadUrl, fileSize, STATUS_COLORS, timeAgo } from '../lib/index.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import Modal from '../components/Modal.jsx';
+import IntelligencePanel from './IntelligencePanel.jsx';
 
-const ThreadEntry = ({ entry }) => {
+const ThreadEntry = ({ entry, number, onThreads }) => {
+  const [editing, setEditing] = useState(false);
+  const [body, setBody] = useState(entry.body);
   if (entry.type === 'system' || entry.isSystem) {
     return <div className="thread-system">{entry.systemMessage || entry.body}</div>;
   }
   const isNote = entry.type === 'note';
   const name = entry.posterType === 'agent' ? (entry.agent?.name || 'Staff') : (entry.user?.name || 'User');
+
+  const startEdit = () => { setBody(entry.body); setEditing(true); };
+
+  const saveEdit = async () => {
+    try {
+      const { data } = await api.put(`/agent/tickets/${number}/threads/${entry._id}`, { body });
+      onThreads(data.threads);
+      setEditing(false);
+    } catch (err) {
+      window.alert(err.message);
+    }
+  };
+
+  const remove = async () => {
+    if (!window.confirm('Delete this thread entry?')) return;
+    try {
+      const { data } = await api.delete(`/agent/tickets/${number}/threads/${entry._id}`);
+      onThreads(data.threads);
+    } catch (err) {
+      window.alert(err.message);
+    }
+  };
+
   return (
     <div className="thread-entry">
       <div className={`avatar ${isNote ? 'note' : ''}`}>{initials(name)}</div>
@@ -18,7 +44,23 @@ const ThreadEntry = ({ entry }) => {
           <span><strong>{name}</strong>{entry.posterType === 'user' && <em className="muted"> (Customer)</em>}{isNote && <em> (Internal Note)</em>}</span>
           <span>{formatDateTime(entry.createdAt)}</span>
         </div>
-        <div className="thread-text">{entry.body}</div>
+        {editing ? (
+          <>
+            <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} />
+            <div className="buttons mt-10">
+              <button className="btn small" onClick={saveEdit}>Save</button>
+              <button className="btn small secondary" onClick={() => setEditing(false)}>Cancel</button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="thread-text">{entry.body}</div>
+            <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+              <button className="btn small secondary" onClick={startEdit}>Edit</button>
+              <button className="btn small danger" onClick={remove}>Delete</button>
+            </div>
+          </>
+        )}
         {entry.attachments?.length > 0 && (
           <div>
             {entry.attachments.map((a, i) => (
@@ -33,6 +75,7 @@ const ThreadEntry = ({ entry }) => {
 
 export default function TicketDetail() {
   const { number } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
@@ -44,6 +87,13 @@ export default function TicketDetail() {
   const [cannedId, setCannedId] = useState('');
   const [collabEmail, setCollabEmail] = useState('');
   const [collabName, setCollabName] = useState('');
+  const [splitOpen, setSplitOpen] = useState(false);
+  const [splitIds, setSplitIds] = useState([]);
+  const [splitSubject, setSplitSubject] = useState('');
+  const [splitPriority, setSplitPriority] = useState('Normal');
+  const [mentionOpen, setMentionOpen] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [mentionSel, setMentionSel] = useState(0);
   const assignRef = useRef(null);
 
   const load = () => {
@@ -53,6 +103,8 @@ export default function TicketDetail() {
   };
 
   useEffect(load, [number]);
+
+  const applyThreads = (threads) => setData((d) => ({ ...d, threads }));
 
   const post = async (url, body, options = {}) => {
     setBusy(true);
@@ -115,6 +167,80 @@ export default function TicketDetail() {
     const canned = data.canned.find((c) => c._id === id);
     if (canned) setReply(canned.response);
     setCannedId('');
+  };
+
+  const mergeTicket = () => {
+    const targetNumber = window.prompt('Enter the target ticket number to merge this ticket into:');
+    if (targetNumber) post(`/agent/tickets/${number}/merge`, { targetNumber, reason: `Merged into #${targetNumber} by agent`, notifyUser: true });
+  };
+
+  const toggleSplit = (id) => setSplitIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
+
+  const doSplit = async () => {
+    if (!splitIds.length) { setError('Select at least one thread to split out.'); return; }
+    if (!splitSubject.trim()) { setError('Subject is required for the new ticket.'); return; }
+    setBusy(true);
+    setError('');
+    try {
+      const { data } = await api.post(`/agent/tickets/${number}/split`, { threadIds: splitIds, subject: splitSubject, priority: splitPriority });
+      setSplitOpen(false);
+      setSplitIds([]);
+      setSplitSubject('');
+      setSplitPriority('Normal');
+      if (data.ticket?.number) navigate(`/agent/tickets/${data.ticket.number}`);
+      else load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const pauseSla = () => {
+    const reason = window.prompt('Reason for pausing the SLA timer:');
+    if (reason === null) return;
+    post(`/agent/tickets/${number}/sla/pause`, { reason });
+  };
+
+  const resumeSla = () => post(`/agent/tickets/${number}/sla/resume`);
+
+  const exportCsv = async () => {
+    try {
+      const res = await api.get('/agent/tickets/export', { responseType: 'blob' });
+      const url = URL.createObjectURL(res.data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'tickets-export.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const onReplyChange = (val) => {
+    setReply(val);
+    const at = val.lastIndexOf('@');
+    if (at === -1 || (at > 0 && !/\s/.test(val[at - 1]))) { setMentionOpen(false); return; }
+    const m = val.slice(at + 1).match(/^\S*/);
+    if (m !== null) {
+      setMentionQuery(m[0]);
+      setMentionSel(0);
+      setMentionOpen(true);
+    } else {
+      setMentionOpen(false);
+    }
+  };
+
+  const insertMention = (name) => {
+    const at = reply.lastIndexOf('@');
+    if (at === -1) { setReply(reply + '@' + name + ' '); }
+    else {
+      setReply(reply.slice(0, at) + '@' + name + ' ' + reply.slice(at + 1).replace(/^\S*/, ''));
+    }
+    setMentionOpen(false);
   };
 
   if (error && !data) return <div className="box"><div className="alert error">{error}</div><Link to="/agent/tickets">Back to Tickets</Link></div>;
@@ -186,7 +312,48 @@ export default function TicketDetail() {
           <span className="muted">🔒 Locked by {ticket.lockedBy?.name || 'another agent'}</span>
         )}
         <button className="btn danger" onClick={() => { if (window.confirm('Permanently delete this ticket?')) post(`/agent/tickets/${number}/delete`); }}>Delete</button>
+        <button className="btn secondary" onClick={mergeTicket}>Merge</button>
+        <button className="btn secondary" onClick={() => setSplitOpen(!splitOpen)}>Split</button>
+        <button className="btn secondary" onClick={pauseSla}>Pause SLA</button>
+        <button className="btn secondary" onClick={resumeSla}>Resume SLA</button>
+        <button className="btn secondary" onClick={exportCsv}>Export CSV</button>
       </div>
+
+      {splitOpen && (
+        <div className="box mb-10">
+          <div className="box-header"><h1>Split Ticket — move message threads to a new ticket</h1></div>
+          <div className="field">
+            <label>Select message threads</label>
+            <div style={{ maxHeight: 180, overflowY: 'auto', border: '1px solid var(--ost-border)', borderRadius: 3, padding: 8 }}>
+              {threads.filter((t) => t.type === 'message' && t.posterType !== 'system').length === 0 && <p className="muted">No message threads available to split.</p>}
+              {threads.filter((t) => t.type === 'message' && t.posterType !== 'system').map((t) => (
+                <label key={t._id} style={{ display: 'block', padding: '3px 0' }}>
+                  <input type="checkbox" checked={splitIds.includes(t._id)} onChange={() => toggleSplit(t._id)} />{' '}
+                  <span className="small muted">{formatDateTime(t.createdAt)}</span> — {String(t.body || '').slice(0, 90)}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="field"><label>New Subject <span className="req">*</span></label>
+              <input type="text" value={splitSubject} onChange={(e) => setSplitSubject(e.target.value)} placeholder="Subject for the new ticket" /></div>
+            <div className="field"><label>Priority</label>
+              <select value={splitPriority} onChange={(e) => setSplitPriority(e.target.value)}>
+                <option value="Low">Low</option>
+                <option value="Normal">Normal</option>
+                <option value="High">High</option>
+                <option value="Emergency">Emergency</option>
+              </select>
+            </div>
+          </div>
+          <div className="buttons">
+            <button className="btn small" onClick={doSplit} disabled={busy}>Split Selected Threads</button>
+            <button className="btn small secondary" onClick={() => setSplitOpen(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      <IntelligencePanel number={number} />
 
       {Object.keys(ticket.customData || {}).length > 0 && (
         <div className="box">
@@ -225,7 +392,7 @@ export default function TicketDetail() {
       <div className="box">
         <div className="box-header"><h1>Ticket Thread <span className="muted small">({ticket.subject})</span></h1></div>
         <div className="thread">
-          {threads.map((t) => <ThreadEntry key={t._id} entry={t} />)}
+          {threads.map((t) => <ThreadEntry key={t._id} entry={t} number={number} onThreads={applyThreads} />)}
         </div>
 
         <form onSubmit={submitReply}>
@@ -237,7 +404,24 @@ export default function TicketDetail() {
                 {canned.map((c) => <option key={c._id} value={c._id}>{c.title}</option>)}
               </select>
             </div>
-            <textarea value={reply} onChange={(e) => setReply(e.target.value)} required placeholder="Type your response to the customer…" />
+            <div style={{ position: 'relative' }}>
+              <textarea value={reply} onChange={(e) => onReplyChange(e.target.value)} required placeholder="Type your response to the customer… (use @ to mention an agent)" />
+              {mentionOpen && agents.filter((a) => a.name.toLowerCase().includes(mentionQuery.toLowerCase())).slice(0, 8).length > 0 && (
+                <div style={{
+                  position: 'absolute', bottom: '100%', left: 0, zIndex: 20, minWidth: 180,
+                  background: '#fff', border: '1px solid var(--ost-border)', borderRadius: 3,
+                  boxShadow: '0 2px 8px rgba(0,0,0,.15)', overflow: 'hidden',
+                }}>
+                  {agents.filter((a) => a.name.toLowerCase().includes(mentionQuery.toLowerCase())).slice(0, 8).map((a, i) => (
+                    <button key={a._id} type="button"
+                      onMouseDown={(e) => { e.preventDefault(); insertMention(a.name); }}
+                      style={{ display: 'block', width: '100%', textAlign: 'left', padding: '5px 10px', border: 'none', background: i === mentionSel ? '#eaf4fb' : '#fff', fontSize: 12.5, cursor: 'pointer' }}>
+                      {a.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div className="field">
             <label>Attachments</label>

@@ -306,3 +306,52 @@ table.list tr:hover { background: #eef6fb; }
 .modal-header { padding: 12px 18px; border-bottom: 1px solid var(--ost-border-light); font-size: 14px; font-weight: 600; color: var(--ost-blue-darker); display: flex; justify-content: space-between; }
 .modal-body { padding: 16px 18px; }
 .modal-footer { padding: 12px 18px; border-top: 1px solid var(--ost-border-light); display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ---------- Enterprise (Incidents / Problems / Changes / Assets / Approvals / Chat / Reports / Intelligence) ---------- */
+.et-flex { display: flex; align-items: center; gap: 8px; }
+.et-wrap { flex-wrap: wrap; }
+.et-between { justify-content: space-between; }
+.et-grow { flex: 1; }
+.et-gap { gap: 10px; }
+.et-mb { margin-bottom: 14px; }
+.et-mt { margin-top: 12px; }
+.et-stack { display: flex; flex-direction: column; gap: 10px; }
+.et-row { padding: 4px 0; }
+.et-pad { padding: 18px; }
+.et-box { margin-bottom: 16px; }
+.et-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--ost-border); border-radius: 3px; font-size: 12.5px; }
+.et-table th { text-align: left; padding: 8px 10px; background: #f4f8fa; color: var(--ost-blue-darker); border-bottom: 1px solid var(--ost-border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; }
+.et-table td { padding: 7px 10px; border-bottom: 1px solid var(--ost-border-light); vertical-align: top; }
+.et-table tr:last-child td { border-bottom: 0; }
+.et-sm { width: auto; display: inline-block; padding: 3px 6px; font-size: 12px; }
+.et-link { background: none; border: 0; color: var(--ost-link); cursor: pointer; font-size: inherit; padding: 0; text-decoration: underline; }
+.et-pill { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #eef2f6; color: var(--ost-text); }
+.et-pill.intent { background: #e7f0fa; color: #0b5d8e; }
+.et-pill.senti { background: #e9f6ec; color: #2f7d43; }
+.et-pill.warn { background: #fdf0e0; color: #b26a00; }
+.et-l { background: #f0f7f0; color: #2f7d43; }
+.et-m { background: #fdf6e3; color: #a97b00; }
+.et-h { background: #fdeaea; color: #c0392b; }
+.et-c { background: #c0392b; color: #fff; }
+.et-ok { background: #2f9e44; border-color: #237a33; color: #fff !important; }
+.et-bad { background: #c0392b; border-color: #962d20; color: #fff !important; }
+.et-tabs { display: flex; gap: 6px; }
+.et-tab { border: 1px solid var(--ost-border); cursor: pointer; background: #fff; }
+.et-tab-active { background: var(--ost-blue); color: #fff; border-color: var(--ost-blue); }
+.et-summary { background: #f4f8fa; border-left: 3px solid var(--ost-blue-light); padding: 8px 10px; font-size: 12.5px; line-height: 1.5; border-radius: 0 3px 3px 0; }
+.et-ai-result { background: #10263a; color: #d8e9f5; padding: 10px 12px; border-radius: 4px; font-size: 12px; white-space: pre-wrap; max-height: 260px; overflow: auto; }
+.et-tags { gap: 5px; }
+
+.et-chat-wrap { display: grid; grid-template-columns: 320px 1fr; gap: 14px; height: calc(100vh - 190px); }
+.et-chat-list { background: #fff; border: 1px solid var(--ost-border); border-radius: 4px; overflow: auto; padding: 10px; }
+.et-chat-item { display: flex; gap: 8px; align-items: center; width: 100%; text-align: left; padding: 8px; border: 1px solid transparent; border-radius: 4px; background: none; cursor: pointer; margin-bottom: 4px; font-size: 12.5px; }
+.et-chat-item:hover { background: #f4f8fa; }
+.et-chat-active { background: #e7f0fa !important; border-color: var(--ost-blue-light); }
+.et-chat-meta { display: flex; flex-direction: column; flex: 1; }
+.et-chat-thread { background: #fff; border: 1px solid var(--ost-border); border-radius: 4px; display: flex; flex-direction: column; }
+.et-chat-head { padding: 10px 14px; border-bottom: 1px solid var(--ost-border-light); display: flex; align-items: center; gap: 10px; }
+.et-chat-msgs { flex: 1; overflow: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.et-msg { max-width: 70%; padding: 8px 11px; border-radius: 8px; background: #f2f5f7; font-size: 12.5px; align-self: flex-start; }
+.et-msg-agent { align-self: flex-end; background: #e7f0fa; }
+.et-msg-sys { align-self: center; background: transparent; color: var(--ost-gray); font-style: italic; font-size: 11.5px; }
+.et-chat-input { display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--ost-border-light); }

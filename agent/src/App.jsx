@@ -15,6 +15,14 @@ import KbManage from './pages/KbManage.jsx';
 import Directory from './pages/Directory.jsx';
 import Profile from './pages/Profile.jsx';
 import Notifications from './pages/Notifications.jsx';
+import Search from './pages/Search.jsx';
+import Incidents from './pages/Incidents.jsx';
+import Problems from './pages/Problems.jsx';
+import Changes from './pages/Changes.jsx';
+import Assets from './pages/Assets.jsx';
+import Approvals from './pages/Approvals.jsx';
+import ChatInbox from './pages/ChatInbox.jsx';
+import Reports from './pages/Reports.jsx';
 
 export default function App() {
   return (
@@ -34,6 +42,14 @@ export default function App() {
           <Route path="/agent/directory" element={<Directory />} />
           <Route path="/agent/profile" element={<Profile />} />
           <Route path="/agent/notifications" element={<Notifications />} />
+          <Route path="/agent/search" element={<Search />} />
+          <Route path="/agent/incidents" element={<Incidents />} />
+          <Route path="/agent/problems" element={<Problems />} />
+          <Route path="/agent/changes" element={<Changes />} />
+          <Route path="/agent/assets" element={<Assets />} />
+          <Route path="/agent/approvals" element={<Approvals />} />
+          <Route path="/agent/chat" element={<ChatInbox />} />
+          <Route path="/agent/reports" element={<Reports />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/agent" replace />} />

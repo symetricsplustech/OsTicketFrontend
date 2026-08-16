@@ -7,6 +7,9 @@ export default function AdminOrgs() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: '', phone: '', website: '', status: 'active' });
+  const [showImport, setShowImport] = useState(false);
+  const [importCsv, setImportCsv] = useState('');
+  const [importMsg, setImportMsg] = useState('');
 
   const load = () => {
     api.get('/admin/orgs').then(({ data }) => setItems(data.items)).catch((err) => setError(err.message));
@@ -27,13 +30,66 @@ export default function AdminOrgs() {
     try { await api.delete(`/admin/organizations/${item._id}`); load(); } catch (err) { setError(err.message); }
   };
 
+  const download = async () => {
+    try {
+      const res = await api.get('/admin/export/orgs', { responseType: 'blob' });
+      const url = URL.createObjectURL(res.data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'organizations.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) { setError(err.message); }
+  };
+
+  const handleFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setImportCsv(reader.result);
+    reader.readAsText(file);
+  };
+
+  const doImport = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await api.post('/admin/import/orgs', { csv: importCsv });
+      setImportMsg(`created ${data.created}, skipped ${data.skipped}`);
+      setShowImport(false);
+      setImportCsv('');
+      load();
+    } catch (err) { setError(err.message); }
+  };
+
   return (
     <div className="box">
       <div className="box-header">
         <h1>Organizations</h1>
+        <button className="btn small secondary" onClick={download}>Export CSV</button>{' '}
+        <button className="btn small secondary" onClick={() => { setImportMsg(''); setShowImport(true); }}>Import CSV</button>{' '}
         <button className="btn small" onClick={() => { setEditing(null); setForm({ name: '', phone: '', website: '', status: 'active' }); setShowForm(true); }}>Add Organization</button>
       </div>
       {error && <div className="alert error">{error}</div>}
+      {importMsg && <div className="alert success">{importMsg}</div>}
+      {showImport && (
+        <div className="form-panel">
+          <h2>Import Organizations (CSV)</h2>
+          <form onSubmit={doImport}>
+            <div className="form-row">
+              <div className="field"><label>CSV content <span className="req">*</span></label>
+                <textarea rows={8} required value={importCsv} onChange={(e) => setImportCsv(e.target.value)} placeholder={'name,address,phone,website,domain\nAcme Inc,1 Main St,+1 555 0100,https://acme.com,acme.com'} /></div>
+            </div>
+            <div className="form-row">
+              <div className="field"><label>Or choose a file</label>
+                <input type="file" accept=".csv,text/csv" onChange={handleFile} /></div>
+            </div>
+            <div className="buttons">
+              <button className="btn small" type="submit">Import</button>
+              <button className="btn small secondary" type="button" onClick={() => { setShowImport(false); setImportCsv(''); }}>Cancel</button>
+            </div>
+          </form>
+        </div>
+      )}
       {showForm && (
         <div className="form-panel">
           <h2>{editing ? `Edit Organization: ${editing.name}` : 'Add Organization'}</h2>

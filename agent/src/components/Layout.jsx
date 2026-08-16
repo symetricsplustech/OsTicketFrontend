@@ -44,6 +44,14 @@ export default function Layout() {
           <NavLink to="/agent/users" end>Users</NavLink>
           <NavLink to="/agent/orgs" end>Organizations</NavLink>
           <NavLink to="/agent/tickets" end>Tickets</NavLink>
+          <NavLink to="/agent/incidents" end>Incidents</NavLink>
+          <NavLink to="/agent/problems" end>Problems</NavLink>
+          <NavLink to="/agent/changes" end>Changes</NavLink>
+          <NavLink to="/agent/assets" end>Assets</NavLink>
+          <NavLink to="/agent/approvals" end>Approvals</NavLink>
+          <NavLink to="/agent/chat" end>Live Chat</NavLink>
+          <NavLink to="/agent/reports" end>Reports</NavLink>
+          <NavLink to="/agent/search" end>Search</NavLink>
           <NavLink to="/agent/escalations" end>Escalations</NavLink>
           <NavLink to="/agent/kb" end>Knowledgebase</NavLink>
           <NavLink to="/agent/directory" end>Agent Directory</NavLink>

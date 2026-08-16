@@ -38,6 +38,7 @@ const Sections = [
     links: [
       { to: '/admin/help-topics', label: 'Help Topics' },
       { to: '/admin/sla-plans', label: 'SLA Plans' },
+      { to: '/admin/priorities', label: 'Priorities' },
       { to: '/admin/ticket-statuses', label: 'Ticket Statuses' },
       { to: '/admin/ticket-forms', label: 'Ticket Forms' },
       { to: '/admin/custom-fields', label: 'Custom Fields' },
@@ -65,6 +66,20 @@ const Sections = [
       { to: '/admin/teams', label: 'Teams' },
       { to: '/admin/roles', label: 'Roles' },
       { to: '/admin/departments', label: 'Departments' },
+    ],
+  },
+  {
+    title: 'Enterprise',
+    links: [
+      { to: '/admin/enterprise/realtime', label: 'Realtime Dashboard' },
+      { to: '/admin/enterprise/workflows', label: 'Workflow Automation' },
+      { to: '/admin/enterprise/skills', label: 'Skills & Routing' },
+      { to: '/admin/enterprise/contracts', label: 'Contracts & Entitlements' },
+      { to: '/admin/enterprise/status-pages', label: 'Status Pages' },
+      { to: '/admin/enterprise/surveys', label: 'CSAT / Surveys' },
+      { to: '/admin/enterprise/webhooks', label: 'Webhooks' },
+      { to: '/admin/enterprise/api-keys', label: 'API Keys' },
+      { to: '/admin/enterprise/audit', label: 'Audit Log' },
     ],
   },
 ];

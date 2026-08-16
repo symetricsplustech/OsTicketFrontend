@@ -37,6 +37,7 @@ export default function Header() {
         <div className="nav-inner">
           <div className="nav-links">
             <NavLink to="/open" end>Open New Ticket</NavLink>
+            <NavLink to="/catalog" end>Service Catalog</NavLink>
             <NavLink to="/status" end>Check Ticket Status</NavLink>
             <NavLink to="/kb" end>Knowledgebase</NavLink>
             {user && <NavLink to="/tickets" end>My Tickets</NavLink>}

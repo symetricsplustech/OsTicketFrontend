@@ -7,6 +7,31 @@ import TicketSuccess3D from '../components/TicketSuccess3D.jsx';
 import { can, USER_PERMISSIONS } from '../lib/permissions.js';
 import CustomFields, { resolveCustomFields } from '../components/CustomFields.jsx';
 
+function conditionSatisfied(condition, values) {
+  const raw = values[condition.field];
+  if (raw === undefined || raw === null || String(raw).trim() === '') return false;
+  const value = String(raw).trim().toLowerCase();
+  const target = String(condition.value ?? '').trim().toLowerCase();
+  switch (condition.operator) {
+    case 'equals': return value === target;
+    case 'not_equals': return value !== target;
+    case 'contains': return value.includes(target);
+    case 'in': return target.split(',').map((s) => s.trim()).includes(value);
+    default: return false;
+  }
+}
+
+function isFieldVisible(field, allFields, values, visited = new Set()) {
+  if (!field.conditions || field.conditions.length === 0) return true;
+  if (visited.has(field.name)) return false;
+  const next = new Set(visited).add(field.name);
+  return field.conditions.every((c) => {
+    const referenced = allFields.find((f) => f.name === c.field);
+    if (!referenced || !isFieldVisible(referenced, allFields, values, next)) return false;
+    return conditionSatisfied(c, values);
+  });
+}
+
 export default function OpenTicket() {
   const { user } = useAuth();
   const [formData, setFormData] = useState({ topics: [], departments: [] });
@@ -23,6 +48,10 @@ export default function OpenTicket() {
   const [error, setError] = useState('');
 
   const canCreate = can(user, USER_PERMISSIONS.TICKET_CREATE);
+  const priorities = formData.priorities || [];
+  const defaultPriority = priorities.find((p) => p.isDefault)?.name;
+  const customFieldList = resolveCustomFields({ customFields, forms, topicId: form.topic }) || [];
+  const visibleCustomFields = customFieldList.filter((f) => isFieldVisible(f, customFieldList, customValues));
 
   useEffect(() => {
     api.get('/tickets/open-form').then(({ data }) => {
@@ -30,7 +59,8 @@ export default function OpenTicket() {
       setEmailToTicket(data.emailToTicket || '');
       setCustomFields(data.customFields || []);
       setForms(data.forms || []);
-      setForm((f) => ({ ...f, name: user?.name || '', email: user?.email || '', phone: user?.phone || '' }));
+      const defPriority = (data.priorities || []).find((p) => p.isDefault)?.name;
+      setForm((f) => ({ ...f, name: user?.name || '', email: user?.email || '', phone: user?.phone || '', priority: defPriority || f.priority }));
     }).catch(() => {});
   }, [user]);
 
@@ -41,11 +71,12 @@ export default function OpenTicket() {
     try {
       const fd = new FormData();
       Object.entries(form).forEach(([k, v]) => fd.append(k, v));
-      fd.append('customData', JSON.stringify(customValues));
+      const visibleNames = new Set(visibleCustomFields.map((f) => f.name));
+      fd.append('customData', JSON.stringify(Object.fromEntries(Object.entries(customValues).filter(([k]) => visibleNames.has(k)))));
       files.forEach((f) => fd.append('files', f));
       const { data } = await api.post('/tickets', fd);
       setResult(data.ticket);
-      setForm({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '', subject: '', topic: '', priority: 'Normal', details: '' });
+      setForm({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '', subject: '', topic: '', priority: defaultPriority || 'Normal', details: '' });
       setCustomValues({});
       setFiles([]);
     } catch (err) {
@@ -133,11 +164,15 @@ export default function OpenTicket() {
         <div className="field">
           <label>Priority</label>
           <select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
-            <option>Low</option><option>Normal</option><option>High</option><option>Emergency</option>
+            {priorities.length ? priorities.map((p) => (
+              <option key={p._id} value={p.name}>{p.name}</option>
+            )) : (
+              <><option>Low</option><option>Normal</option><option>High</option><option>Emergency</option></>
+            )}
           </select>
         </div>
         <CustomFields
-          fields={resolveCustomFields({ customFields, forms, topicId: form.topic })}
+          fields={visibleCustomFields}
           values={customValues}
           onChange={setCustomValues}
         />

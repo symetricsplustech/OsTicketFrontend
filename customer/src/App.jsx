@@ -15,6 +15,9 @@ import FaqDetail from './pages/FaqDetail.jsx';
 import Employees from './pages/Employees.jsx';
 import Profile from './pages/Profile.jsx';
 import Notifications from './pages/Notifications.jsx';
+import ServiceCatalog from './pages/ServiceCatalog.jsx';
+import StatusPage from './pages/StatusPage.jsx';
+import ChatWidget from './components/ChatWidget.jsx';
 import Protected from './components/Protected.jsx';
 
 function Shell() {
@@ -25,6 +28,7 @@ function Shell() {
         <Outlet />
       </div>
       <Footer />
+      <ChatWidget />
     </>
   );
 }
@@ -47,8 +51,10 @@ export default function App() {
           <Route path="/employees" element={<Employees />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/catalog" element={<ServiceCatalog />} />
         </Route>
       </Route>
+      <Route path="/status/:slug" element={<StatusPage />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

@@ -11,15 +11,21 @@ export default function TicketList() {
   const [pages, setPages] = useState(1);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [savedQueues, setSavedQueues] = useState([]);
+  const [queueName, setQueueName] = useState('');
+  const [savedSel, setSavedSel] = useState('');
 
   const status = params.get('status') || 'all';
   const priority = params.get('priority') || 'all';
   const dept = params.get('dept') || 'all';
 
-  const load = () => {
+  const load = (opts = {}) => {
     setLoading(true);
     api.get('/agent/tickets', {
-      params: { status, priority, dept, q: search || undefined, page, limit: 20 },
+      params: {
+        status: opts.status ?? status, priority: opts.priority ?? priority, dept: opts.dept ?? dept,
+        q: (opts.search ?? search) || undefined, page: opts.page ?? page, limit: 20,
+      },
     })
       .then(({ data }) => { setItems(data.items); setTotal(data.total); setPages(data.pages); })
       .catch(() => {})
@@ -28,11 +34,40 @@ export default function TicketList() {
 
   useEffect(() => {
     api.get('/agent/queues').then(({ data }) => setQueues(data.queues)).catch(() => {});
+    api.get('/agent/queues/saved').then(({ data }) => setSavedQueues(data.items || [])).catch(() => {});
   }, []);
 
   useEffect(load, [status, priority, dept, page]);
 
   const setStatus = (s) => { setParams({ status: s }); setPage(1); };
+
+  const saveQueue = async () => {
+    if (!queueName.trim()) return;
+    try {
+      await api.post('/agent/queues/saved', { name: queueName.trim(), filters: { status, priority, dept, search } });
+      setQueueName('');
+      api.get('/agent/queues/saved').then(({ data }) => setSavedQueues(data.items || [])).catch(() => {});
+    } catch (err) {
+      window.alert(err.message);
+    }
+  };
+
+  const applyFilters = (f) => {
+    setParams({ status: f.status || 'all', priority: f.priority || 'all', dept: f.dept || 'all' });
+    setSearch(f.search || '');
+    setPage(1);
+    load({ status: f.status || 'all', priority: f.priority || 'all', dept: f.dept || 'all', search: f.search || '', page: 1 });
+  };
+
+  const removeQueue = async (id) => {
+    if (!window.confirm('Delete this saved queue?')) return;
+    try {
+      await api.delete(`/agent/queues/saved/${id}`);
+      setSavedQueues((qs) => qs.filter((q) => q._id !== id));
+    } catch (err) {
+      window.alert(err.message);
+    }
+  };
 
   const queueItems = [
     { key: 'all', lbl: 'All Tickets', count: queues.all },
@@ -65,6 +100,25 @@ export default function TicketList() {
             onKeyDown={(e) => { if (e.key === 'Enter') { setPage(1); load(); } }}
             style={{ width: 260 }} />
           <button className="btn secondary small" onClick={() => { setPage(1); load(); }}>Search</button>
+          <select
+            value={savedSel}
+            onChange={(e) => {
+              const q = savedQueues.find((x) => x._id === e.target.value);
+              setSavedSel('');
+              if (q) applyFilters(q.filters || {});
+            }}
+            style={{ width: 170 }}>
+            <option value="">Saved Queues…</option>
+            {savedQueues.map((q) => <option key={q._id} value={q._id}>{q.name}</option>)}
+          </select>
+          {savedQueues.map((q) => (
+            <button key={q._id} className="btn small danger" title={`Delete ${q.name}`} onClick={() => removeQueue(q._id)}>✕ {q.name}</button>
+          ))}
+          <input type="text" placeholder="Queue name…" value={queueName}
+            onChange={(e) => setQueueName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') saveQueue(); }}
+            style={{ width: 150 }} />
+          <button className="btn secondary small" onClick={saveQueue}>Save Current Filter as Queue</button>
         </div>
         {loading ? (
           <p className="muted">Loading…</p>
