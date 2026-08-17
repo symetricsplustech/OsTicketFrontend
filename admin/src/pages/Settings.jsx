@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { api } from '../lib/index.js';
 
 export default function Settings() {
@@ -6,7 +6,7 @@ export default function Settings() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  useState(() => {
+  useEffect(() => {
     api.get('/admin/settings').then(({ data }) => setRefs(data.refs)).catch((e) => setError(e.message));
   }, []);
 
