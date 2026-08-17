@@ -91,9 +91,9 @@ export default function App() {
             <Route path="/admin/enterprise/status-pages" element={<StatusPages />} />
             <Route path="/admin/enterprise/surveys" element={<Surveys />} />
             <Route path="/admin/enterprise/webhooks" element={<Webhooks />} />
-            <Route path="/admin/enterprise/api-keys" element=<ApiKeys />;
-            <Route path="/admin/enterprise/audit" element=<AuditLogs />;
-            <Route path="/admin/enterprise/realtime" element=<Realtime />;
+            <Route path="/admin/enterprise/api-keys" element={<ApiKeys />} />
+            <Route path="/admin/enterprise/audit" element={<AuditLogs />} />
+            <Route path="/admin/enterprise/realtime" element={<Realtime />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/admin" replace />} />

@@ -1,4 +1,4 @@
-import createContext from '@emotion/react';
+import React, { createContext, useContext, useState } from 'react';
 
 const I18nContext = createContext({
   locale: 'en',
@@ -10,7 +10,7 @@ const I18nContext = createContext({
 export default I18nContext;
 
 export const useTranslation = () => {
-  const context = React.useContext(I18nContext);
+  const context = useContext(I18nContext);
   if (!context) {
     throw new Error('useTranslation must be used within an I18nProvider');
   }
@@ -18,15 +18,14 @@ export const useTranslation = () => {
 };
 
 export const I18nProvider = ({ children }) => {
-  const [locale, setLocale] = React.useState('en');
+  const [locale, setLocale] = useState('en');
 
   const t = (key, replacements = {}) => {
     const translations = locales[locale] || locales['en'];
     let text = translations[key] || key;
 
-    // Apply replacements
-    Object.entries(replacements).forEach(([key, value]) => {
-      text = text.replace(new RegExp(`{${key}}`, 'g'), value);
+    Object.entries(replacements).forEach(([rKey, value]) => {
+      text = text.replace(new RegExp(`{${rKey}}`, 'g'), value);
     });
 
     return text;
