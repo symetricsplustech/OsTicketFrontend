@@ -3,133 +3,80 @@ import { api } from '../lib/index.js';
 
 const AuthContext = createContext(null);
 
+const ROLE_ORDER = ['superadmin', 'admin', 'agent', 'customer'];
+
+const ME_ENDPOINTS = {
+  superadmin: '/superadmin/auth/me',
+  admin: '/auth/agent/me',
+  agent: '/auth/agent/me',
+  customer: '/auth/me',
+};
+
+export const ROLE_HIERARCHY = { customer: 1, agent: 2, admin: 3, superadmin: 4 };
+
+export const roleHome = (role) => {
+  switch (role) {
+    case 'superadmin': return '/superadmin';
+    case 'admin': return '/admin';
+    case 'agent': return '/agent';
+    default: return '/tickets';
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null); // 'admin' | 'agent' | 'customer' | 'superadmin'
+  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [unread, setUnread] = useState(0);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
-  // Detect role from stored auth or initial login
+  // Restore session from stored auth (superadmin > admin > agent > customer)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const access = params.get('access');
-    
-    if (access) {
-      window.history.replaceState({}, '', window.location.pathname);
-      // Try each auth endpoint to detect user type
-      const authEndpoints = [
-        '/auth/superadmin/login',      // super admin login
-        '/auth/admin/login',           // admin login  
-        '/auth/agent/login',           // agent login
-        '/auth/login',                 // customer login
-        '/auth/portal-login'           // multi-portal login
-      ];
-      
-      const tryAuth = async (endpoint) => {
-        try {
-          const { data } = await api.post(endpoint, { 
-            email: sessionStorage.getItem('attempted_email') || '',
-            password: '' 
-          });
-          handleAuthResponse(data);
-        } catch (e) {
-          // Try next endpoint
-          if (endpoint === '/auth/portal-login') {
-            clearAuth();
-          }
-        }
-      };
-      
-      // Try endpoints in order (super admin first)
-      authEndpoints.reduce(async (promise, endpoint) => {
-        await promise;
-        return tryAuth(endpoint);
-      }, Promise.resolve());
-      
-      return;
-    }
-
-    // Check stored auth for each role type
-    const storedRoles = ['superadmin', 'admin', 'agent', 'customer'];
-    
-    const checkStoredAuth = async (role) => {
-      try {
-        let endpoint;
-        
-        switch (role) {
-          case 'superadmin':
-            endpoint = '/auth/superadmin/me';
-            break;
-          case 'admin':
-            endpoint = '/auth/admin/me';
-            break;
-          case 'agent':
-            endpoint = '/auth/agent/me';
-            break;
-          case 'customer':
-            endpoint = '/auth/me';
-            break;
-        }
-        
-        if (!endpoint) return;
-        
-        const token = sessionStorage.getItem(`${role}_token`);
-        const { data } = await api.get(endpoint, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        const u = data.user;
-        const isSuper = u && u.isSuperAdmin;
-        
-        setUser(u);
-        setRole(role);
-        setIsSuperAdmin(isSuper);
+    const checkStoredAuth = async (roles) => {
+      if (!roles.length) {
         setLoading(false);
-        
-        if (isSuper) {
-          sessionStorage.setItem('superadmin_token', data.token || '');
-          sessionStorage.setItem('superadmin_user', JSON.stringify(u));
-        } else if (role === 'admin') {
-          sessionStorage.setItem('admin_token', data.token || '');
-          sessionStorage.setItem('admin_user', JSON.stringify(u));
-        } else if (role === 'agent') {
-          sessionStorage.setItem('agent_token', data.token || '');
-          sessionStorage.setItem('agent_user', JSON.stringify(u));
-        } else if (role === 'customer') {
-          sessionStorage.setItem('customer_token', data.token || '');
-          sessionStorage.setItem('customer_user', JSON.stringify(u));
-        }
-        
-      } catch (e) {
-        const idx = storedRoles.indexOf(role);
-        if (idx < storedRoles.length - 1) {
-          checkStoredAuth(storedRoles[idx + 1]);
-        } else {
-          setLoading(false);
-        }
+        return;
       }
+      const roleName = roles[0];
+      const token = sessionStorage.getItem(`${roleName}_token`);
+      if (!token) {
+        checkStoredAuth(roles.slice(1));
+        return;
+      }
+      try {
+        const { data } = await api.get(ME_ENDPOINTS[roleName], {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const u = data.user;
+        if (u) {
+          sessionStorage.setItem(`${roleName}_user`, JSON.stringify(u));
+          setUser(u);
+          setRole(roleName);
+          setIsSuperAdmin(roleName === 'superadmin' || !!u.isSuperAdmin);
+          setLoading(false);
+          return;
+        }
+      } catch (e) {
+        // Try next role
+      }
+      checkStoredAuth(roles.slice(1));
     };
-    
-    // Check in order: superadmin > admin > agent > customer
-    checkStoredAuth('superadmin');
+
+    checkStoredAuth(ROLE_ORDER);
   }, []);
 
-  // Handle auth response from any endpoint
-  const handleAuthResponse = useCallback((data) => {
-    const u = data.user;
+  // Set auth state directly (used by unified login page)
+  const setAuth = useCallback((token, u, roleName) => {
     if (!u) return;
-    
-    const isSuper = u.isSuperAdmin || u.role === 'superadmin' || u.isAdmin === true;
-    
+    sessionStorage.setItem(`${roleName}_token`, token || '');
+    sessionStorage.setItem(`${roleName}_user`, JSON.stringify(u));
     setUser(u);
-    setRole('superadmin');
-    setIsSuperAdmin(isSuper);
+    setRole(roleName);
+    setIsSuperAdmin(roleName === 'superadmin' || !!u.isSuperAdmin);
     setLoading(false);
-    
-    // Store super admin auth
-    sessionStorage.setItem('superadmin_token', data.token || '');
-    sessionStorage.setItem('superadmin_user', JSON.stringify(u));
+    setError('');
   }, []);
 
   // Clear all auth
@@ -138,174 +85,64 @@ export const AuthProvider = ({ children }) => {
     setRole(null);
     setIsSuperAdmin(false);
     setLoading(false);
-    sessionStorage.removeItem('superadmin_token');
-    sessionStorage.removeItem('superadmin_user');
-    sessionStorage.removeItem('admin_token');
-    sessionStorage.removeItem('admin_user');
-    sessionStorage.removeItem('agent_token');
-    sessionStorage.removeItem('agent_user');
-    sessionStorage.removeItem('customer_token');
-    sessionStorage.removeItem('customer_user');
+    setBusy(false);
+    ROLE_ORDER.forEach((r) => {
+      sessionStorage.removeItem(`${r}_token`);
+      sessionStorage.removeItem(`${r}_user`);
+    });
   }, []);
 
-  // Login function - centralized
+  // Login via the unified portal-login endpoint (returns role for all 4 types)
   const login = useCallback(async (email, password) => {
     setBusy(true);
     setError('');
-    
-    // Try super admin first
     try {
-      const { data } = await api.post('/auth/superadmin/login', { email, password });
-      if (data.isSuperAdmin || data.user?.isSuperAdmin) {
-        await handleAuthResponse(data);
-        setBusy(false);
-        return { success: true, role: 'superadmin', user: data.user };
-      }
+      const { data } = await api.post('/auth/portal-login', { email, password });
+      if (!data.user) throw new Error('Invalid email or password');
+      const roleName = data.role || 'customer';
+      setAuth(data.token, data.user, roleName);
+      setBusy(false);
+      return { success: true, role: roleName, user: data.user };
     } catch (e) {
-      // Continue to next role
+      setError(e.message || 'Invalid email or password');
+      setBusy(false);
+      return { success: false, role: null, user: null };
     }
-    
-    // Try admin
-    try {
-      const { data } = await api.post('/auth/admin/login', { email, password });
-      const isAdmin = data.user && (data.user.isAdmin || data.user.role?.isAdmin);
-      if (isAdmin || data.isAdmin) {
-        await handleAuthResponse(data);
-        setBusy(false);
-        const role = isAdmin && !data.user?.isSuperAdmin ? 'admin' : 'superadmin';
-        return { success: true, role, user: data.user };
-      }
-    } catch (e) {
-      // Continue to next role
-    }
-    
-    // Try agent
-    try {
-      const { data } = await api.post('/auth/agent/login', { email, password });
-      const isAgent = data.user && data.user.isActive;
-      if (isAgent) {
-        setUser(data.user);
-        setRole('agent');
-        setIsSuperAdmin(false);
-        setLoading(false);
-        setBusy(false);
-        return { success: true, role: 'agent', user: data.user };
-      }
-    } catch (e) {
-      // Continue to next role
-    }
-    
-    // Try customer
-    try {
-      const { data } = await api.post('/auth/login', { email, password });
-      if (data.user) {
-        setUser(data.user);
-        setRole('customer');
-        setIsSuperAdmin(false);
-        setLoading(false);
-        setBusy(false);
-        return { success: true, role: 'customer', user: data.user };
-      }
-    } catch (e) {
-      // Continue to next role
-    }
-    
-    setError('Invalid email or password');
-    setBusy(false);
-    return { success: false, role: null, user: null };
-  }, []);
+  }, [setAuth]);
 
   // Logout - centralized
   const logout = useCallback(() => {
     clearAuth();
-    window.location.href = '/auth/logout';
-  }, []);
+    window.location.href = '/login';
+  }, [clearAuth]);
 
-  // Get current user with role detection
+  // Get current user with role detection (refreshes stored session)
   const getCurrentUser = useCallback(async () => {
-    // Try super admin first
-    try {
-      const token = sessionStorage.getItem('superadmin_token');
-      if (token) {
-        const { data } = await api.get('/auth/superadmin/me', {
-          headers: { Authorization: `Bearer ${token}` }
+    for (const roleName of ROLE_ORDER) {
+      const token = sessionStorage.getItem(`${roleName}_token`);
+      if (!token) continue;
+      try {
+        const { data } = await api.get(ME_ENDPOINTS[roleName], {
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (data.user) {
           setUser(data.user);
-          setRole('superadmin');
-          setIsSuperAdmin(true);
+          setRole(roleName);
+          setIsSuperAdmin(roleName === 'superadmin' || !!data.user.isSuperAdmin);
           return data.user;
         }
+      } catch (e) {
+        // Continue
       }
-    } catch (e) {
-      // Continue
     }
-    
-    // Try admin
-    try {
-      const token = sessionStorage.getItem('admin_token');
-      if (token) {
-        const { data } = await api.get('/auth/admin/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (data.user) {
-          setUser(data.user);
-          setRole('admin');
-          setIsSuperAdmin(data.user.isAdmin || data.user.role?.isAdmin || false);
-          return data.user;
-        }
-      }
-    } catch (e) {
-      // Continue
-    }
-    
-    // Try agent
-    try {
-      const token = sessionStorage.getItem('agent_token');
-      if (token) {
-        const { data } = await api.get('/auth/agent/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (data.user) {
-          setUser(data.user);
-          setRole('agent');
-          setIsSuperAdmin(false);
-          return data.user;
-        }
-      }
-    } catch (e) {
-      // Continue
-    }
-    
-    // Try customer
-    try {
-      const token = sessionStorage.getItem('customer_token');
-      if (token) {
-        const { data } = await api.get('/auth/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (data.user) {
-          setUser(data.user);
-          setRole('customer');
-          setIsSuperAdmin(false);
-          return data.user;
-        }
-      }
-    } catch (e) {
-      // Continue
-    }
-    
-    setUser(null);
-    setRole(null);
-    setIsSuperAdmin(false);
-    setLoading(false);
+    clearAuth();
     return null;
-  }, []);
+  }, [clearAuth]);
 
   // Check permissions based on role
   const hasPermission = useCallback((perm) => {
     if (!role) return false;
-    if (role === 'superadmin') return true; // Super admin has all permissions
+    if (role === 'superadmin') return true;
     if (role === 'admin') {
       const adminPerms = [
         'ticket_view', 'ticket_create', 'ticket_edit', 'ticket_delete',
@@ -333,7 +170,7 @@ export const AuthProvider = ({ children }) => {
   // Get all permissions for role
   const getPermissions = useCallback(() => {
     if (!role) return [];
-    if (role === 'superadmin') return ['*']; // All permissions
+    if (role === 'superadmin') return ['*'];
     if (role === 'admin') return [
       'ticket_view', 'ticket_create', 'ticket_edit', 'ticket_delete',
       'ticket_assign', 'ticket_close', 'ticket_reopen', 'ticket_transfer',
@@ -349,24 +186,47 @@ export const AuthProvider = ({ children }) => {
     return [];
   }, [role]);
 
-  // Busy state
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  // Load unread notification count for the current role
+  const notifEndpoint = useCallback(() => {
+    if (role === 'superadmin') return '/superadmin/notifications';
+    if (role === 'admin') return '/admin/notifications';
+    if (role === 'agent') return '/agent/notifications';
+    return '/users/notifications';
+  }, [role]);
+
+  const loadUnread = useCallback(async () => {
+    try {
+      const { data } = await api.get(notifEndpoint());
+      setUnread(data.unread || 0);
+    } catch (e) {
+      // ignore
+    }
+  }, [notifEndpoint]);
+
+  // Refresh the current user's profile
+  const refresh = useCallback(async () => {
+    return getCurrentUser();
+  }, [getCurrentUser]);
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      role, 
-      isSuperAdmin, 
-      loading, 
-      unread, 
-      login, 
-      logout, 
-      getCurrentUser, 
-      hasPermission, 
-      getPermissions, 
-      busy, 
-      error 
+    <AuthContext.Provider value={{
+      user,
+      role,
+      isSuperAdmin,
+      loading,
+      unread,
+      setUnread,
+      login,
+      logout,
+      setAuth,
+      clearAuth,
+      getCurrentUser,
+      loadUnread,
+      refresh,
+      hasPermission,
+      getPermissions,
+      busy,
+      error,
     }}>
       {children}
     </AuthContext.Provider>
