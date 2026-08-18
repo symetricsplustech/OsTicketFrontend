@@ -19,6 +19,8 @@ import ServiceCatalog from './pages/ServiceCatalog.jsx';
 import StatusPage from './pages/StatusPage.jsx';
 import ChatWidget from './components/ChatWidget.jsx';
 import Protected from './components/Protected.jsx';
+import { I18nProvider } from './context/I18nContext';
+import { AuthProvider } from './context/AuthContext';
 
 function Shell() {
   return (
@@ -35,27 +37,31 @@ function Shell() {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route element={<Protected />}>
-        <Route element={<Shell />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/open" element={<OpenTicket />} />
-          <Route path="/status" element={<CheckStatus />} />
-          <Route path="/kb" element={<Knowledgebase />} />
-          <Route path="/kb/:id" element={<FaqDetail />} />
-          <Route path="/tickets" element={<MyTickets />} />
-          <Route path="/ticket/:number" element={<TicketDetail />} />
-          <Route path="/employees" element={<Employees />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/catalog" element={<ServiceCatalog />} />
-        </Route>
-      </Route>
-      <Route path="/status/:slug" element={<StatusPage />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+    <AuthProvider>
+      <I18nProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route element={<Protected superAdminOnly={false} />}>
+            <Route element={<Shell />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/open" element={<OpenTicket />} />
+              <Route path="/status" element={<CheckStatus />} />
+              <Route path="/kb" element={<Knowledgebase />} />
+              <Route path="/kb/:id" element={<FaqDetail />} />
+              <Route path="/tickets" element={<MyTickets />} />
+              <Route path="/ticket/:number" element={<TicketDetail />} />
+              <Route path="/employees" element={<Employees />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/catalog" element={<ServiceCatalog />} />
+            </Route>
+          </Route>
+          <Route path="/status/:slug" element={<StatusPage />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </I18nProvider>
+    </AuthProvider>
   );
 }
