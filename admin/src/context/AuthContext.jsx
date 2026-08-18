@@ -369,7 +369,7 @@ export const AuthProvider = ({ children }) => {
       error 
     }}>
       {children}
-    </AuthProvider>
+    </AuthContext.Provider>
   );
 };
 
