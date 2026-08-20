@@ -50,6 +50,7 @@ export default function Login() {
     <div className="auth-wrap">
       <div className="auth-tabs">
         <Link to="/login" className="active">Sign In</Link>
+        <Link to="/register">Create Account</Link>
       </div>
       <div className="box login-box">
         <div className="box-header"><h1>Support Center Sign In</h1></div>
@@ -79,6 +80,8 @@ export default function Login() {
           </div>
           <div className="mt-10 small login-forgot">
             <Link to="/forgot-password">Forgot your password?</Link>
+            {' · '}
+            <Link to="/register">Create an account</Link>
           </div>
         </form>
       </div>
