@@ -31,11 +31,19 @@ export default function IntelligencePanel({ number }) {
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [number]);
 
   const run = async (kind, body = {}) => {
+    const payload = { ...body };
+    if (['summarize', 'rewrite', 'translate'].includes(kind)) {
+      payload.text = String(payload.text || aiInput || item?.summary || '').trim();
+      if (!payload.text) {
+        setError('Enter text above before using this AI action.');
+        return;
+      }
+    }
     setAiBusy(kind);
     setAiResult('');
     setError('');
     try {
-      const res = await en.aiAction(kind, number, body);
+      const res = await en.aiAction(kind, number, payload);
       const text = res.topics?.map((t) => `• ${t}`).join('\n') || res.summary || res.rewritten || res.translated || res.reply || res.result || res.suggestions?.join('\n') || JSON.stringify(res).slice(0, 400);
       setAiResult(text);
     } catch (e) {
@@ -107,9 +115,9 @@ export default function IntelligencePanel({ number }) {
       </div>
       <div className="et-flex et-wrap">
         <button className="btn btn-small" disabled={!!aiBusy} onClick={() => run('summarize')}>Summarize</button>
-        <button className="btn btn-small" disabled={!!aiBusy} onClick={() => run('rewrite', { kind: 'professional', body: aiInput || undefined })}>Rewrite draft</button>
+        <button className="btn btn-small" disabled={!!aiBusy} onClick={() => run('rewrite', { tone: 'professional' })}>Rewrite draft</button>
         <button className="btn btn-small" disabled={!!aiBusy} onClick={() => run('translate', { target: 'es' })}>Translate (ES)</button>
-        <button className="btn btn-small" disabled={!!aiBusy} onClick={() => run('assist', { query: aiInput || 'recommend next action' })}>Recommend</button>
+        <button className="btn btn-small" disabled={!!aiBusy} onClick={() => run('assist', { message: aiInput || 'recommend next action' })}>Recommend</button>
       </div>
       <textarea className="field et-mt" rows={2} placeholder="Draft text to rewrite / question to ask AI…" value={aiInput} onChange={(e) => setAiInput(e.target.value)} />
       {aiBusy && <div className="muted">Working…</div>}

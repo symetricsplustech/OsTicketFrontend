@@ -6,7 +6,7 @@ export const en = {
   refreshIntelligence: (number) => api.post(`/ai/intelligence/${number}/refresh`).then((r) => r.data.item),
   aiAction: (kind, number, body = {}) => {
     const urls = { summarize: '/ai/summarize', rewrite: '/ai/rewrite', translate: '/ai/translate', assist: `/ai/assist/${number}` };
-    return api.post(urls[kind], { number, ...body }).then((r) => r.data);
+    return api.post(urls[kind], body).then((r) => r.data);
   },
   qaTicket: (number) => api.post(`/ai/qa/${number}`).then((r) => r.data),
   handoff: (number, body) => api.post(`/ai/handoff/${number}`, body).then((r) => r.data),
