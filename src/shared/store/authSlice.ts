@@ -31,17 +31,17 @@ export const loginThunk = createAsyncThunk<
       ...u,
       role: role || u.role,
       permissions: permissions || u.permissions || [],
-      modules: moduleKeys || u.moduleKeys || [],
+      modules: normalizeModuleKeys(moduleKeys || u.moduleKeys || u.modules || []),
     };
 
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify({ user: resolvedUser, tenant: t }));
 
-    // Fetch modules
+    // Fetch modules (backend may return string keys or { moduleKey } docs)
     let modules: string[] = [];
     try {
       const modRes = await api.get('/auth/modules');
-      modules = (modRes.data.modules || []).map((m: any) => m.moduleKey || m.key);
+      modules = normalizeModuleKeys(modRes.data.modules);
     } catch {}
 
     return { user: resolvedUser, tenant: t, modules };
@@ -65,11 +65,10 @@ export const hydrateThunk = createAsyncThunk('auth/hydrate', async (_, { dispatc
       const parsed = JSON.parse(storedUser);
       dispatch(setCredentials({ user: parsed.user, tenant: parsed.tenant }));
 
-      // Fetch modules
+      // Fetch modules (backend may return string keys or { moduleKey } docs)
       try {
         const modRes = await api.get('/auth/modules');
-        const modules = (modRes.data.modules || []).map((m: any) => m.moduleKey || m.key);
-        dispatch(setModules(modules));
+        dispatch(setModules(normalizeModuleKeys(modRes.data.modules)));
       } catch {}
     } catch {
       localStorage.removeItem('token');
@@ -82,10 +81,21 @@ export const hydrateThunk = createAsyncThunk('auth/hydrate', async (_, { dispatc
 export const refreshModulesThunk = createAsyncThunk('auth/refreshModules', async (_, { dispatch }) => {
   try {
     const modRes = await api.get('/auth/modules');
-    const modules = (modRes.data.modules || []).map((m: any) => m.moduleKey || m.key);
-    dispatch(setModules(modules));
+    dispatch(setModules(normalizeModuleKeys(modRes.data.modules)));
   } catch {}
 });
+
+// Backend returns either string keys (superadmin branch) or
+// tenant_modules docs ({ moduleKey, ... }). Normalize to string keys.
+export function normalizeModuleKeys(raw: any): string[] {
+  if (!Array.isArray(raw)) return [];
+  const out: string[] = [];
+  for (const m of raw) {
+    const key = typeof m === 'string' ? m : m?.moduleKey || m?.key;
+    if (key && !out.includes(key)) out.push(key);
+  }
+  return out;
+}
 
 const authSlice = createSlice({
   name: 'auth',

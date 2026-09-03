@@ -75,6 +75,12 @@ export default function TicketDetail() {
   const [statuses, setStatuses] = useState<TicketStatus[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [tasks, setTasks] = useState<Array<{ _id?: string; id?: string; title: string; status?: string }>>([]);
+  const [newTask, setNewTask] = useState('');
+  const [closureCodes, setClosureCodes] = useState<{ resolutionCodes: string[]; closureCodes: string[] }>({ resolutionCodes: [], closureCodes: [] });
+  const [resolutionCode, setResolutionCode] = useState('');
+  const [closureCode, setClosureCode] = useState('');
+  const [slaPaused, setSlaPaused] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -88,6 +94,9 @@ export default function TicketDetail() {
         setAgents(ticketRes.data.agents || agentsRes.data.agents || []);
         setDepartments(ticketRes.data.depts || deptsRes.data.departments || []);
         setStatuses(ticketRes.data.statuses || []);
+        const t = normaliseTicket(ticketRes.data) as any;
+        if (Array.isArray(t.tasks)) setTasks(t.tasks);
+        api.get('/gaps2/closure-codes').then((r) => setClosureCodes(r.data)).catch(() => {});
       } catch { /* fallback */ } finally { setLoading(false); }
     };
     load();
@@ -170,6 +179,43 @@ export default function TicketDetail() {
       setSelectedDept('');
       toast.success('Ticket transferred');
     } catch { toast.error('Failed to transfer'); }
+  };
+
+  const handleAddTask = async () => {
+    if (!ticket || !newTask.trim()) return;
+    try {
+      const res = await api.post(`/agent/tickets/${ticket.number}/tasks`, { title: newTask.trim(), status: 'open' });
+      setTasks((ts) => [...ts, res.data.task || res.data || { title: newTask.trim(), status: 'open' }]);
+      setNewTask('');
+      toast.success('Task added');
+    } catch { toast.error('Failed to add task'); }
+  };
+
+  const handleToggleTask = async (task: any) => {
+    if (!ticket) return;
+    const id = task._id || task.id;
+    const next = task.status === 'done' ? 'open' : 'done';
+    try {
+      if (id) await api.put(`/agent/tickets/${ticket.number}/tasks/${id}`, { status: next });
+      setTasks((ts) => ts.map((t) => (t === task ? { ...t, status: next } : t)));
+    } catch { toast.error('Failed to update task'); }
+  };
+
+  const handleSla = async (action: 'pause' | 'resume') => {
+    if (!ticket) return;
+    try {
+      await api.post(`/agent/tickets/${ticket.number}/sla/${action}`, {});
+      setSlaPaused(action === 'pause');
+      toast.success(`SLA ${action}d`);
+    } catch { toast.error(`Failed to ${action} SLA`); }
+  };
+
+  const handleClosure = async () => {
+    if (!ticket || !resolutionCode || !closureCode) return toast.error('Pick resolution + closure codes');
+    try {
+      await api.put(`/gaps2/tickets/${ticket.number}/closure`, { resolutionCode, closureCode });
+      toast.success('Closure codes saved');
+    } catch { toast.error('Failed to save closure codes'); }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -325,6 +371,48 @@ export default function TicketDetail() {
               <button className="w-full btn-secondary text-sm flex items-center gap-2 justify-center"><Link2 className="h-4 w-4" /> Link Asset</button>
               <button className="w-full btn-secondary text-sm flex items-center gap-2 justify-center"><GitMerge className="h-4 w-4" /> Merge Tickets</button>
               <button className="w-full btn-secondary text-sm flex items-center gap-2 justify-center"><SplitSquareHorizontal className="h-4 w-4" /> Split Ticket</button>
+            </div>
+          </div>
+
+          <div className="card p-5">
+            <h3 className="font-semibold text-sm mb-3">Tasks</h3>
+            <div className="space-y-1.5 mb-2">
+              {tasks.length === 0 && <p className="text-xs text-gray-400">No tasks yet.</p>}
+              {tasks.map((t, i) => (
+                <label key={t._id || t.id || i} className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input type="checkbox" checked={t.status === 'done'} onChange={() => handleToggleTask(t)} className="rounded" />
+                  <span className={t.status === 'done' ? 'line-through text-gray-400' : ''}>{t.title}</span>
+                </label>
+              ))}
+            </div>
+            <div className="flex gap-1.5">
+              <input value={newTask} onChange={(e) => setNewTask(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
+                placeholder="New task…" className="input-field text-sm flex-1" />
+              <button onClick={handleAddTask} className="btn-primary text-sm px-3">Add</button>
+            </div>
+          </div>
+
+          <div className="card p-5">
+            <h3 className="font-semibold text-sm mb-3">SLA {slaPaused && <span className="text-xs text-orange-600">(paused)</span>}</h3>
+            <div className="flex gap-2">
+              <button onClick={() => handleSla('pause')} disabled={slaPaused} className="btn-secondary text-sm flex-1 disabled:opacity-40">Pause</button>
+              <button onClick={() => handleSla('resume')} disabled={!slaPaused} className="btn-secondary text-sm flex-1 disabled:opacity-40">Resume</button>
+            </div>
+          </div>
+
+          <div className="card p-5">
+            <h3 className="font-semibold text-sm mb-3">Closure</h3>
+            <div className="space-y-2">
+              <select value={resolutionCode} onChange={(e) => setResolutionCode(e.target.value)} className="input-field text-sm w-full">
+                <option value="">Resolution code…</option>
+                {closureCodes.resolutionCodes.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <select value={closureCode} onChange={(e) => setClosureCode(e.target.value)} className="input-field text-sm w-full">
+                <option value="">Closure code…</option>
+                {closureCodes.closureCodes.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <button onClick={handleClosure} className="w-full btn-secondary text-sm">Save codes</button>
             </div>
           </div>
         </div>

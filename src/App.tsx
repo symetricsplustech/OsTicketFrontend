@@ -184,6 +184,18 @@ const ImportWizard = lazy(() => import('@modules/settings/pages/ImportWizard'));
 const ApprovalInbox = lazy(() => import('@modules/settings/pages/ApprovalInbox'));
 const DecisionTablesPage = lazy(() => import('@modules/workflow/pages/DecisionTables'));
 const TicketCrud = lazy(() => import('@modules/helpdesk/pages/TicketCrud'));
+const MyWork = lazy(() => import('@modules/helpdesk/pages/MyWork'));
+const MajorIncidents = lazy(() => import('@modules/helpdesk/pages/MajorIncidents'));
+const CabBoard = lazy(() => import('@modules/helpdesk/pages/CabBoard'));
+const KnownErrors = lazy(() => import('@modules/helpdesk/pages/KnownErrors'));
+const Escalations = lazy(() => import('@modules/helpdesk/pages/Escalations'));
+const SlaMonitor = lazy(() => import('@modules/helpdesk/pages/SlaMonitor'));
+const Requests = lazy(() => import('@modules/helpdesk/pages/Requests'));
+const AssignmentRouting = lazy(() => import('@modules/helpdesk/pages/AssignmentRouting'));
+const CsatDashboard = lazy(() => import('@modules/helpdesk/pages/CsatDashboard'));
+const HelpdeskReports = lazy(() => import('@modules/helpdesk/pages/HelpdeskReports'));
+const HelpdeskAdmin = lazy(() => import('@modules/helpdesk/pages/HelpdeskAdmin'));
+const AuditTrail = lazy(() => import('@modules/helpdesk/pages/AuditTrail'));
 const IncidentCrud = lazy(() => import('@modules/helpdesk/pages/IncidentCrud'));
 const ProblemCrud = lazy(() => import('@modules/helpdesk/pages/ProblemCrud'));
 const ChangeCrud = lazy(() => import('@modules/helpdesk/pages/ChangeCrud'));
@@ -272,7 +284,7 @@ function AppRoutes() {
           <Route index element={<Suspense fallback={<LoadingSpinner />}><Dashboard /></Suspense>} />
 
           {/* Help Desk */}
-          <Route path="tickets" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><TicketCrud /></Suspense></ModuleGuard>} />
+          <Route path="tickets/manage" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><TicketCrud /></Suspense></ModuleGuard>} />
           <Route path="incidents-crud" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><IncidentCrud /></Suspense></ModuleGuard>} />
           <Route path="problems-crud" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><ProblemCrud /></Suspense></ModuleGuard>} />
           <Route path="changes-crud" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><ChangeCrud /></Suspense></ModuleGuard>} />
@@ -375,6 +387,18 @@ function AppRoutes() {
           <Route path="warroom" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><WarRoom /></Suspense></ModuleGuard>} />
           <Route path="diagnosis" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><IncidentDiagnosis /></Suspense></ModuleGuard>} />
           <Route path="ticket-board" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><TicketBoard /></Suspense></ModuleGuard>} />
+          <Route path="my-work" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><MyWork /></Suspense></ModuleGuard>} />
+          <Route path="major-incidents" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><MajorIncidents /></Suspense></ModuleGuard>} />
+          <Route path="cab" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><CabBoard /></Suspense></ModuleGuard>} />
+          <Route path="known-errors" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><KnownErrors /></Suspense></ModuleGuard>} />
+          <Route path="escalations" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><Escalations /></Suspense></ModuleGuard>} />
+          <Route path="sla-monitor" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><SlaMonitor /></Suspense></ModuleGuard>} />
+          <Route path="requests" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><Requests /></Suspense></ModuleGuard>} />
+          <Route path="assignment" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><AssignmentRouting /></Suspense></ModuleGuard>} />
+          <Route path="csat" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><CsatDashboard /></Suspense></ModuleGuard>} />
+          <Route path="helpdesk-reports" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><HelpdeskReports /></Suspense></ModuleGuard>} />
+          <Route path="helpdesk-admin" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><HelpdeskAdmin /></Suspense></ModuleGuard>} />
+          <Route path="audit-trail" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><AuditTrail /></Suspense></ModuleGuard>} />
 
           {/* ITOM ops */}
           <Route path="ops-tools" element={<ModuleGuard module="itom"><Suspense fallback={<LoadingSpinner />}><OpsTools /></Suspense></ModuleGuard>} />
