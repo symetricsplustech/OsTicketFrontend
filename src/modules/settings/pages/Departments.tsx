@@ -56,8 +56,9 @@ export default function Departments() {
               <input type="text" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-1 input-field" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1 input-field" />
+              <label className="block text-sm font-medium text-gray-700">Inbox email (mailbox routing)</label>
+              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="billing@company.com" className="mt-1 input-field" />
+              <p className="text-xs text-gray-400 mt-1">Mail sent here routes to this dept (+ its SLA).</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Manager</label>

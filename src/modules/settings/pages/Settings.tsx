@@ -66,6 +66,21 @@ export default function Settings() {
     }
   };
 
+  const handleSaveAutoClose = async () => {
+    setSaving(true);
+    try {
+      await api.put('/admin/settings', { section: 'tickets', values: {
+        autoCloseEnabled: !!(settings as any).autoCloseEnabled,
+        autoCloseAfterHours: Number((settings as any).autoCloseAfterHours) || 72,
+      } });
+      toast.success('Auto-close settings saved');
+    } catch {
+      toast.error('Failed to save auto-close settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600" /></div>;
 
   return (
@@ -172,6 +187,23 @@ export default function Settings() {
                     <option value="pending">Pending</option>
                   </select>
                 </div>
+              </div>
+              <div className="pt-2 border-t">
+                <h3 className="text-sm font-semibold text-gray-800 mb-2">Resolved → Closed auto-close</h3>
+                <div className="flex items-center gap-3">
+                  <input type="checkbox" checked={!!(settings as any).tickets?.autoCloseEnabled}
+                    onChange={(e) => setSettings({ ...settings, tickets: { ...(settings as any).tickets, autoCloseEnabled: e.target.checked } })}
+                    className="rounded border-gray-300 text-brand-600" />
+                  <label className="text-sm text-gray-700">Auto-close resolved tickets with no customer reply after</label>
+                  <input type="number" min={1} value={(settings as any).tickets?.autoCloseAfterHours ?? 72}
+                    onChange={(e) => setSettings({ ...settings, tickets: { ...(settings as any).tickets, autoCloseAfterHours: parseInt(e.target.value) || 72 } })}
+                    className="w-20 px-2 py-1 border border-gray-300 rounded-lg text-sm" />
+                  <span className="text-sm text-gray-500">hours</span>
+                </div>
+                <button onClick={handleSaveAutoClose} disabled={saving}
+                  className="mt-3 px-4 py-2 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700 disabled:opacity-50">
+                  {saving ? 'Saving...' : 'Save Auto-close'}
+                </button>
               </div>
               <div className="pt-2">
                 <button onClick={handleSaveSettings} disabled={saving}

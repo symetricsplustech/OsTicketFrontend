@@ -230,7 +230,7 @@ export default function TicketDetail() {
   const thread = ticket.thread || [];
   const availableStatuses = statuses.reduce<TicketStatus[]>(
     (items, status) => (items.some((item) => item.key === status.key) ? items : [...items, status]),
-    ['open', 'assigned', 'overdue', 'closed', 'archived'].map((key) => ({ key, name: key })),
+    ['open', 'assigned', 'overdue', 'resolved', 'closed', 'archived'].map((key) => ({ key, name: key })),
   );
 
   return (
