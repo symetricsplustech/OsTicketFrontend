@@ -43,6 +43,7 @@ const allNavItems: NavItem[] = [
   { label: 'SLA Monitor', path: '/sla-monitor', icon: Clock, module: 'helpdesk' },
   { label: 'Assignment', path: '/assignment', icon: GitBranch, module: 'helpdesk' },
   { label: 'CSAT', path: '/csat', icon: Heart, module: 'helpdesk' },
+  { label: 'Support Email', path: '/support-email', icon: Mail, module: 'helpdesk' },
   { label: 'HD Reports', path: '/helpdesk-reports', icon: LineChart, module: 'helpdesk' },
   { label: 'HD Admin', path: '/helpdesk-admin', icon: Layers, module: 'helpdesk' },
   { label: 'Audit Trail', path: '/audit-trail', icon: ScrollText, module: 'helpdesk' },

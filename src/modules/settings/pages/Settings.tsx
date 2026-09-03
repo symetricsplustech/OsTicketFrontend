@@ -119,6 +119,12 @@ export default function Settings() {
                 </div>
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700">Support inbox (customers mail THIS address to create tickets)</label>
+                <input type="email" placeholder="support@your-company.com" value={((company as any).supportEmail as string) || ''} onChange={(e) => setCompany({ ...company, supportEmail: e.target.value })}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                <p className="text-xs text-gray-400 mt-1">Inbound routing matches To/Cc against this, then company email, then domain.</p>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700">Domain</label>
                 <input type="text" value={(company.domain as string) || ''} onChange={(e) => setCompany({ ...company, domain: e.target.value })}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />

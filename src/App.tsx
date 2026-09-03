@@ -193,6 +193,7 @@ const SlaMonitor = lazy(() => import('@modules/helpdesk/pages/SlaMonitor'));
 const Requests = lazy(() => import('@modules/helpdesk/pages/Requests'));
 const AssignmentRouting = lazy(() => import('@modules/helpdesk/pages/AssignmentRouting'));
 const CsatDashboard = lazy(() => import('@modules/helpdesk/pages/CsatDashboard'));
+const SupportEmail = lazy(() => import('@modules/helpdesk/pages/SupportEmail'));
 const HelpdeskReports = lazy(() => import('@modules/helpdesk/pages/HelpdeskReports'));
 const HelpdeskAdmin = lazy(() => import('@modules/helpdesk/pages/HelpdeskAdmin'));
 const AuditTrail = lazy(() => import('@modules/helpdesk/pages/AuditTrail'));
@@ -396,6 +397,7 @@ function AppRoutes() {
           <Route path="requests" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><Requests /></Suspense></ModuleGuard>} />
           <Route path="assignment" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><AssignmentRouting /></Suspense></ModuleGuard>} />
           <Route path="csat" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><CsatDashboard /></Suspense></ModuleGuard>} />
+          <Route path="support-email" element={<ProtectedRoute><Suspense fallback={<LoadingSpinner />}><SupportEmail /></Suspense></ProtectedRoute>} />
           <Route path="helpdesk-reports" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><HelpdeskReports /></Suspense></ModuleGuard>} />
           <Route path="helpdesk-admin" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><HelpdeskAdmin /></Suspense></ModuleGuard>} />
           <Route path="audit-trail" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><AuditTrail /></Suspense></ModuleGuard>} />
