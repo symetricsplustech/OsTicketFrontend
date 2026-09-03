@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '@shared/lib/api';
+import { useAuth } from '@core/auth/useAuth';
 import { formatDate } from '@shared/lib/format';
 import { StatusBadge } from '@shared/components/RecordTable';
 import toast from 'react-hot-toast';
@@ -28,6 +29,8 @@ interface Blackout {
 }
 
 export default function CabBoard() {
+  const { hasPermission } = useAuth();
+  const canDecide = hasPermission('approvals.decide');
   const [pending, setPending] = useState<Change[]>([]);
   const [blackouts, setBlackouts] = useState<Blackout[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +46,8 @@ export default function CabBoard() {
         api.get('/gaps2/blackout-windows').catch(() => ({ data: [] })),
       ]);
       const all: Change[] = cRes.data.changes || [];
-      setPending(all.filter((c) => c.status === 'pending_approval'));
+      // 'for_approval' is canonical; 'pending_approval' kept for legacy rows
+      setPending(all.filter((c) => c.status === 'for_approval' || c.status === 'pending_approval'));
       setBlackouts(Array.isArray(bRes.data) ? bRes.data : bRes.data?.records || []);
     } catch {
       setPending([]);
@@ -140,21 +144,23 @@ export default function CabBoard() {
                 <td className="px-5 py-3"><StatusBadge status={c.risk || c.riskLevel || 'medium'} /></td>
                 <td className="px-5 py-3 text-sm text-gray-500">{formatDate(c.createdAt)}</td>
                 <td className="px-5 py-3">
-                  <div className="flex flex-col gap-1.5">
-                    <div className="flex gap-1.5">
-                      <button onClick={() => decide(c._id, 'approved')} className="px-2.5 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700">Approve</button>
-                      <button onClick={() => decide(c._id, 'rejected')} className="px-2.5 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">Reject</button>
+                  {canDecide ? (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex gap-1.5">
+                        <button onClick={() => decide(c._id, 'approved')} className="px-2.5 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700">Approve</button>
+                        <button onClick={() => decide(c._id, 'rejected')} className="px-2.5 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">Reject</button>
+                      </div>
+                      <div className="flex gap-1">
+                        <input
+                          value={decision[c._id] || ''}
+                          onChange={(e) => setDecision((d) => ({ ...d, [c._id]: e.target.value }))}
+                          placeholder="Emergency justification…"
+                          className="input-field text-xs py-1 w-44"
+                        />
+                        <button onClick={() => emergencyApprove(c._id)} className="px-2 py-1 text-xs border border-orange-300 text-orange-700 rounded hover:bg-orange-50">⚡</button>
+                      </div>
                     </div>
-                    <div className="flex gap-1">
-                      <input
-                        value={decision[c._id] || ''}
-                        onChange={(e) => setDecision((d) => ({ ...d, [c._id]: e.target.value }))}
-                        placeholder="Emergency justification…"
-                        className="input-field text-xs py-1 w-44"
-                      />
-                      <button onClick={() => emergencyApprove(c._id)} className="px-2 py-1 text-xs border border-orange-300 text-orange-700 rounded hover:bg-orange-50">⚡</button>
-                    </div>
-                  </div>
+                  ) : <span className="text-xs text-gray-400" title="Requires approvals.decide">Voting restricted</span>}
                 </td>
               </tr>
             ))}

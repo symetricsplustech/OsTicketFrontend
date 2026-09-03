@@ -35,7 +35,7 @@ export default function MajorIncidents() {
     try {
       const res = await api.get('/enterprise/incidents');
       const all: MajorIncident[] = res.data.incidents || [];
-      setItems(all.filter((i) => i.isMajor || i.severity === 'critical' || i.priority === 'critical'));
+      setItems(all.filter((i) => i.isMajor || i.severity === 'Sev1'));
     } catch {
       setItems([]);
     } finally {
@@ -50,10 +50,10 @@ export default function MajorIncidents() {
     setSaving(true);
     try {
       await api.post('/enterprise/incidents', {
-        ...form,
-        priority: 'critical',
+        title: form.title,
+        description: form.description,
+        severity: form.severity, // backend maps critical/high/medium/low -> Sev scale
         isMajor: true,
-        status: 'declared',
       });
       toast.success('Major incident declared');
       setShowForm(false);

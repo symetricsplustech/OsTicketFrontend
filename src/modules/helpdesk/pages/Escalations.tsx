@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '@shared/lib/api';
+import { useAuth } from '@core/auth/useAuth';
 import { formatDate } from '@shared/lib/format';
 import { StatusBadge } from '@shared/components/RecordTable';
 import toast from 'react-hot-toast';
@@ -24,6 +25,8 @@ interface Escalation {
 const TYPES = ['priority', 'sla', 'functional', 'hierarchical', 'manager', 'vip', 'unassigned', 'overdue'];
 
 export default function Escalations() {
+  const { hasPermission } = useAuth();
+  const canManage = hasPermission('escalations.manage');
   const [items, setItems] = useState<Escalation[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -88,7 +91,11 @@ export default function Escalations() {
           <h1 className="text-2xl font-bold text-gray-900">Escalations</h1>
           <p className="text-sm text-gray-500">Priority, SLA, functional &amp; hierarchical escalations</p>
         </div>
-        <button onClick={() => setShowForm(true)} className="btn-primary text-sm">Raise Escalation</button>
+        {canManage ? (
+          <button onClick={() => setShowForm(true)} className="btn-primary text-sm">Raise Escalation</button>
+        ) : (
+          <span className="text-xs text-gray-400" title="Requires escalations.manage">Read-only (no escalations.manage)</span>
+        )}
       </div>
 
       {showForm && (
@@ -139,11 +146,13 @@ export default function Escalations() {
                 <td className="px-5 py-3"><StatusBadge status={e.status || 'open'} /></td>
                 <td className="px-5 py-3 text-sm text-gray-500">{formatDate(e.createdAt)}</td>
                 <td className="px-5 py-3">
-                  <div className="flex gap-2 text-xs">
-                    <button onClick={() => update(e._id, 'acknowledged')} className="text-brand-600 hover:underline">Ack</button>
-                    <button onClick={() => update(e._id, 'resolved')} className="text-green-600 hover:underline">Resolve</button>
-                    <button onClick={() => remove(e._id)} className="text-red-500 hover:underline">Withdraw</button>
-                  </div>
+                  {canManage ? (
+                    <div className="flex gap-2 text-xs">
+                      <button onClick={() => update(e._id, 'acknowledged')} className="text-brand-600 hover:underline">Ack</button>
+                      <button onClick={() => update(e._id, 'resolved')} className="text-green-600 hover:underline">Resolve</button>
+                      <button onClick={() => remove(e._id)} className="text-red-500 hover:underline">Withdraw</button>
+                    </div>
+                  ) : <span className="text-xs text-gray-300">—</span>}
                 </td>
               </tr>
             ))}
