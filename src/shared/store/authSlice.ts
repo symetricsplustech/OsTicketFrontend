@@ -46,7 +46,10 @@ export const loginThunk = createAsyncThunk<
 
     return { user: resolvedUser, tenant: t, modules };
   } catch (err: any) {
-    return rejectWithValue(err.response?.data?.message || 'Login failed');
+    if (!err.response) {
+      return rejectWithValue(`Backend unreachable at ${api.defaults.baseURL} — is the API server running?`);
+    }
+    return rejectWithValue(err.response?.data?.message || err.response?.data?.error || 'Login failed');
   }
 });
 
