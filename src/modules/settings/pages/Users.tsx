@@ -22,6 +22,8 @@ interface Customer {
   status: string;
   phone?: string;
   organization?: { name: string };
+  userType?: string;
+  orgRole?: string;
   role?: string;
   createdAt: string;
 }
@@ -42,7 +44,7 @@ export default function Users() {
     name: '', email: '', password: '', phone: '', isAdmin: false, department: '',
   });
   const [customerForm, setCustomerForm] = useState({
-    name: '', email: '', password: '', phone: '', organization: '',
+    name: '', email: '', password: '', phone: '', organization: '', userType: 'employee', orgRole: 'member',
   });
 
   const loadAgents = async () => {
@@ -98,10 +100,12 @@ export default function Users() {
         password: customerForm.password,
         phone: customerForm.phone,
         status: 'active',
+        userType: customerForm.userType,
+        orgRole: customerForm.orgRole,
       });
       toast.success('Customer created');
       setShowForm(false);
-      setCustomerForm({ name: '', email: '', password: '', phone: '', organization: '' });
+      setCustomerForm({ name: '', email: '', password: '', phone: '', organization: '', userType: 'employee', orgRole: 'member' });
       loadCustomers();
     } catch { toast.error('Failed to create customer'); } finally { setSaving(false); }
   };
@@ -214,6 +218,24 @@ export default function Users() {
               <input type="text" value={customerForm.phone} onChange={(e) => setCustomerForm({ ...customerForm, phone: e.target.value })}
                 className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Type</label>
+              <select value={customerForm.userType} onChange={(e) => setCustomerForm({ ...customerForm, userType: e.target.value, orgRole: e.target.value === 'external' ? customerForm.orgRole : 'member' })}
+                className="mt-1 w-full border rounded-lg px-3 py-2 text-sm">
+                <option value="employee">Company employee</option>
+                <option value="external">External customer</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Org role</label>
+              <select value={customerForm.orgRole} onChange={(e) => setCustomerForm({ ...customerForm, orgRole: e.target.value })}
+                disabled={customerForm.userType !== 'external'}
+                title={customerForm.userType !== 'external' ? 'Only external customers can be org managers' : 'Org managers approve their org requests'}
+                className="mt-1 w-full border rounded-lg px-3 py-2 text-sm disabled:opacity-40">
+                <option value="member">End user</option>
+                <option value="manager">Organization manager</option>
+              </select>
+            </div>
             <div className="flex items-end gap-2 col-span-2">
               <button type="submit" disabled={saving} className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700 disabled:opacity-50">
                 {saving ? 'Creating...' : 'Create Customer'}
@@ -282,18 +304,24 @@ export default function Users() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Organization</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {loading ? <tr><td colSpan={5} className="px-6 py-12 text-center text-gray-400">Loading...</td></tr> :
-                customers.length === 0 ? <tr><td colSpan={5} className="px-6 py-12 text-center text-gray-400">No customers found. Customers can submit tickets through the portal.</td></tr> :
+              {loading ? <tr><td colSpan={6} className="px-6 py-12 text-center text-gray-400">Loading...</td></tr> :
+                customers.length === 0 ? <tr><td colSpan={6} className="px-6 py-12 text-center text-gray-400">No customers found. Customers can submit tickets through the portal.</td></tr> :
                 customers.map((u) => (
                   <tr key={u._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm font-medium">{u.name}</td>
                     <td className="px-6 py-4 text-sm text-gray-500">{u.email}</td>
                     <td className="px-6 py-4 text-sm text-gray-500">{u.organization?.name || '—'}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 text-xs rounded-full ${u.userType === 'external' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`}>
+                        {u.userType === 'external' ? (u.orgRole === 'manager' ? 'Org manager' : 'External') : 'Employee'}
+                      </span>
+                    </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 text-xs rounded-full ${u.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
                         {u.status}
