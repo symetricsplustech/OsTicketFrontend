@@ -58,7 +58,7 @@ export default function Users() {
       const params: Record<string, string | number> = { page, limit: 20 };
       if (search) params.search = search;
       const res = await api.get('/admin/users', { params });
-      setCustomers(res.data.users || []);
+      setCustomers(res.data.items || res.data.users || []);
       setTotal(res.data.total || 0);
     } catch { setCustomers([]); } finally { setLoading(false); }
   };

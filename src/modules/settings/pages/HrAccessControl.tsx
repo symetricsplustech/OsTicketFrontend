@@ -13,7 +13,8 @@ const normalizeCandidates = (data: unknown): Candidate[] => {
   if (Array.isArray(data)) rows = data as Record<string, unknown>[];
   else if (data && typeof data === 'object') {
     const obj = data as Record<string, unknown>;
-    if (Array.isArray(obj.users)) rows = obj.users as Record<string, unknown>[];
+    if (Array.isArray(obj.items)) rows = obj.items as Record<string, unknown>[];
+    else if (Array.isArray(obj.users)) rows = obj.users as Record<string, unknown>[];
     else if (Array.isArray(obj.agents)) rows = obj.agents as Record<string, unknown>[];
   }
   return rows

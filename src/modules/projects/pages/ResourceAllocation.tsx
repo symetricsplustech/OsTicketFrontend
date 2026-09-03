@@ -68,7 +68,7 @@ export default function ResourceAllocation() {
         try {
           const res = await api.get('/agents');
           const data = res.data;
-          rawUsers = (Array.isArray(data) ? data : data?.users || data?.agents || []) as RawUser[];
+        rawUsers = (Array.isArray(data) ? data : data?.items || data?.users || data?.agents || []) as RawUser[];
         } catch {
           rawUsers = [];
         }

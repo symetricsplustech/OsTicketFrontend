@@ -91,7 +91,7 @@ export default function TicketDetail() {
           api.get('/admin/departments').catch(() => ({ data: { departments: [] } })),
         ]);
         setTicket(normaliseTicket(ticketRes.data));
-        setAgents(ticketRes.data.agents || agentsRes.data.agents || []);
+        setAgents(ticketRes.data.agents || agentsRes.data.items || agentsRes.data.agents || []);
         setDepartments(ticketRes.data.depts || deptsRes.data.departments || []);
         setStatuses(ticketRes.data.statuses || []);
         const t = normaliseTicket(ticketRes.data) as any;
