@@ -29,7 +29,7 @@ interface RecentTicket {
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, modules, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats>({ open: 0, assigned: 0, overdue: 0, closed: 0, mine: 0, today: 0, total: 0 });
   const [recent, setRecent] = useState<RecentTicket[]>([]);
@@ -40,8 +40,18 @@ export default function Dashboard() {
     return <Navigate to="/superadmin" replace />;
   }
 
-  // Admin users go to setup wizard
-  if (user?.role === 'admin' || user?.isAdmin) {
+  // While auth/modules resolve, wait — never bounce to setup on stale state.
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600" />
+      </div>
+    );
+  }
+
+  // Admins go to the setup wizard ONLY when the tenant has no active
+  // modules yet (fresh tenant). Otherwise they get the real dashboard.
+  if ((user?.role === 'admin' || (user as any)?.isAdmin) && modules.length === 0) {
     return <Navigate to="/setup" replace />;
   }
 

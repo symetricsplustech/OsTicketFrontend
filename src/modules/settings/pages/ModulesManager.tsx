@@ -5,8 +5,10 @@ import {
   usePreviewModuleChangeMutation, useSetModuleStatusMutation, useGetUsageSummaryQuery,
   useGetActivationHistoryQuery,
 } from '@shared/store/apiEndpoints';
+import { useAuth } from '@core/auth/useAuth';
 
 export default function ModulesManager() {
+  const { refreshModules } = useAuth();
   const { data: catalog = [], isLoading, refetch } = useGetModuleCatalogQuery();
   const { data: usage } = useGetUsageSummaryQuery();
   const { data: history = [] } = useGetActivationHistoryQuery();
@@ -32,6 +34,9 @@ export default function ModulesManager() {
     try {
       const res = await activate({ key: m.key, mode: 'active' }).unwrap();
       refetch();
+      // Refresh the auth module list so sidebar guards pass immediately
+      // without forcing the user to re-login.
+      refreshModules().catch(() => {});
     } catch (e: any) {
       setError(e?.data?.error || `Failed to activate ${m.key}`);
     }
@@ -43,6 +48,7 @@ export default function ModulesManager() {
     try {
       await activate({ key: m.key, mode: 'trial' }).unwrap();
       refetch();
+      refreshModules().catch(() => {});
     } catch (e: any) { setError(e?.data?.error || 'Trial failed'); }
     setPendingKey(null);
   };
@@ -52,6 +58,7 @@ export default function ModulesManager() {
     try {
       await deactivate({ key: m.key, graceDays: 30 }).unwrap();
       refetch();
+      refreshModules().catch(() => {});
     } catch (e: any) { setError(e?.data?.error || 'Deactivate failed'); }
     setPendingKey(null);
   };

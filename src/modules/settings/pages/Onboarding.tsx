@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '@shared/lib/api';
+import { useAuth } from '@core/auth/useAuth';
 import toast from 'react-hot-toast';
 import { CheckCircle, Building2, UserCheck, Users, Ticket, ArrowRight, ArrowLeft, PartyPopper, Plus, Trash2 } from 'lucide-react';
 
@@ -16,6 +17,11 @@ const STEPS: { id: Step; label: string; icon: React.ReactNode }[] = [
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const { refreshModules } = useAuth();
+  // Leave setup with a fresh module list so sidebar guards pass at once.
+  const finishOnboarding = () => {
+    refreshModules().catch(() => {}).finally(() => navigate('/tickets'));
+  };
   const [currentStep, setCurrentStep] = useState<Step>('overview');
   const [completedSteps, setCompletedSteps] = useState<Set<Step>>(new Set());
   const [saving, setSaving] = useState(false);
@@ -207,14 +213,14 @@ export default function Onboarding() {
             <div className="text-center space-y-4">
               <PartyPopper className="h-12 w-12 text-green-500 mx-auto" />
               <p className="text-lg font-medium text-gray-900">You're all set!</p>
-              <button onClick={() => navigate('/tickets')}
+              <button onClick={finishOnboarding}
                 className="px-8 py-3 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700">
                 Go to Tickets
               </button>
             </div>
           ) : (
             <div className="text-center">
-              <button onClick={() => navigate('/tickets')}
+              <button onClick={finishOnboarding}
                 className="text-sm text-gray-500 hover:text-gray-700 underline">
                 Skip for now
               </button>
@@ -439,7 +445,7 @@ export default function Onboarding() {
             Back
           </button>
           <div className="flex gap-3">
-            <button onClick={() => navigate('/tickets')} className="px-5 py-2.5 text-sm text-gray-500 hover:text-gray-700 underline">
+            <button onClick={finishOnboarding} className="px-5 py-2.5 text-sm text-gray-500 hover:text-gray-700 underline">
               Skip for now
             </button>
             <button onClick={
