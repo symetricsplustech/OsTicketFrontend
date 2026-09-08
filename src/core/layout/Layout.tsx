@@ -47,6 +47,7 @@ const allNavItems: NavItem[] = [
   { label: 'HD Reports', path: '/helpdesk-reports', icon: LineChart, module: 'helpdesk' },
   { label: 'HD Admin', path: '/helpdesk-admin', icon: Layers, module: 'helpdesk' },
   { label: 'Audit Trail', path: '/audit-trail', icon: ScrollText, module: 'helpdesk' },
+  { label: 'Ops Workspace', path: '/ops-workspace', icon: LayoutDashboard, module: 'helpdesk' },
   // CRM
   { label: 'Leads', path: '/leads', icon: UserPlus, module: 'crm', section: 'CRM' },
   { label: 'Accounts', path: '/accounts', icon: Briefcase, module: 'crm' },

@@ -203,6 +203,7 @@ const Otto = lazy(() => import('@modules/helpdesk/pages/Otto'));
 const Alerts = lazy(() => import('@modules/helpdesk/pages/Alerts'));
 const CMDBImpact = lazy(() => import('@modules/helpdesk/pages/CMDBImpact'));
 const CustomAuth = lazy(() => import('@modules/settings/pages/CustomAuth'));
+const OpsWorkspace = lazy(() => import('@modules/helpdesk/pages/OpsWorkspace'));
 const IncidentCrud = lazy(() => import('@modules/helpdesk/pages/IncidentCrud'));
 const ProblemCrud = lazy(() => import('@modules/helpdesk/pages/ProblemCrud'));
 const ChangeCrud = lazy(() => import('@modules/helpdesk/pages/ChangeCrud'));
@@ -411,6 +412,7 @@ function AppRoutes() {
           <Route path="alert-manager" element={<ModuleGuard module="itom"><Suspense fallback={<LoadingSpinner />}><Alerts /></Suspense></ModuleGuard>} />
           <Route path="cmdb-impact" element={<ModuleGuard module="itam"><Suspense fallback={<LoadingSpinner />}><CMDBImpact /></Suspense></ModuleGuard>} />
           <Route path="settings/custom-auth" element={<AdminRoute><ModuleGuard module="settings"><Suspense fallback={<LoadingSpinner />}><CustomAuth /></Suspense></ModuleGuard></AdminRoute>} />
+          <Route path="ops-workspace" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><OpsWorkspace /></Suspense></ModuleGuard>} />
 
           {/* ITOM ops */}
           <Route path="ops-tools" element={<ModuleGuard module="itom"><Suspense fallback={<LoadingSpinner />}><OpsTools /></Suspense></ModuleGuard>} />
