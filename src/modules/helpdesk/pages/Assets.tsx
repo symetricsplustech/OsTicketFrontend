@@ -7,19 +7,19 @@ import { Server } from 'lucide-react';
 
 interface Asset {
   _id: string;
-  assetId: string;
+  serial: string;
   name: string;
   type: string;
   status: string;
-  ipAddress?: string;
+  ip?: string;
   environment?: string;
   location?: string;
   assignedTo?: { name: string };
   createdAt: string;
 }
 
-const ASSET_TYPES = ['Server', 'Desktop', 'Laptop', 'Network Device', 'Storage', 'Printer', 'Mobile', 'Other'];
-const STATUSES = ['in_stock', 'deployed', 'maintenance', 'retired', 'missing'];
+const ASSET_TYPES = ['server', 'desktop', 'laptop', 'router', 'switch', 'firewall', 'printer', 'application', 'network', 'service', 'other'];
+const STATUSES = ['active', 'maintenance', 'retired', 'lost'];
 
 export default function Assets() {
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -27,7 +27,7 @@ export default function Assets() {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: '', assetId: '', type: 'Server', status: 'in_stock', ipAddress: '', location: '', environment: 'production' });
+  const [form, setForm] = useState({ name: '', serial: '', type: 'server', status: 'active', ip: '', location: '', environment: 'production' });
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -49,7 +49,7 @@ export default function Assets() {
       await api.post('/enterprise/assets', form);
       toast.success('Asset created');
       setShowForm(false);
-      setForm({ name: '', assetId: '', type: 'Server', status: 'in_stock', ipAddress: '', location: '', environment: 'production' });
+      setForm({ name: '', serial: '', type: 'server', status: 'active', ip: '', location: '', environment: 'production' });
       load();
     } catch { toast.error('Failed to create asset'); } finally { setSaving(false); }
   };
@@ -71,7 +71,7 @@ export default function Assets() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Asset ID *</label>
-              <input type="text" required value={form.assetId} onChange={(e) => setForm({ ...form, assetId: e.target.value })} className="mt-1 input-field" placeholder="e.g. SRV-001" />
+              <input type="text" required value={form.serial} onChange={(e) => setForm({ ...form, serial: e.target.value })} className="mt-1 input-field" placeholder="e.g. SRV-001" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Type</label>
@@ -87,7 +87,7 @@ export default function Assets() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">IP Address</label>
-              <input type="text" value={form.ipAddress} onChange={(e) => setForm({ ...form, ipAddress: e.target.value })} className="mt-1 input-field" placeholder="192.168.1.1" />
+              <input type="text" value={form.ip} onChange={(e) => setForm({ ...form, ip: e.target.value })} className="mt-1 input-field" placeholder="192.168.1.1" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Location</label>
@@ -96,7 +96,7 @@ export default function Assets() {
             <div>
               <label className="block text-sm font-medium text-gray-700">Environment</label>
               <select value={form.environment} onChange={(e) => setForm({ ...form, environment: e.target.value })} className="mt-1 input-field">
-                <option>production</option><option>staging</option><option>development</option><option>testing</option>
+                <option>production</option><option>staging</option><option>development</option><option>test</option>
               </select>
             </div>
             <div className="flex items-end gap-2 col-span-2">
@@ -137,15 +137,14 @@ export default function Assets() {
                       <Server className="h-5 w-5 text-gray-400" />
                       <div>
                         <p className="text-sm font-medium">{a.name}</p>
-                        <p className="text-xs text-gray-500">{a.assetId}</p>
+                        <p className="text-xs text-gray-500">{a.serial}</p>
                       </div>
                     </Link>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">{a.type}</td>
-                  <td className="px-6 py-4 text-sm font-mono text-gray-500">{a.ipAddress || '—'}</td>
+                  <td className="px-6 py-4 text-sm font-mono text-gray-500">{a.ip || '—'}</td>
                   <td className="px-6 py-4"><span className={`px-2 py-1 text-xs rounded-full ${
-                    a.status === 'deployed' ? 'bg-green-100 text-green-700' :
-                    a.status === 'in_stock' ? 'bg-blue-100 text-blue-700' :
+                    a.status === 'active' ? 'bg-green-100 text-green-700' :
                     a.status === 'maintenance' ? 'bg-yellow-100 text-yellow-700' :
                     'bg-gray-100 text-gray-700'
                   }`}>{a.status}</span></td>

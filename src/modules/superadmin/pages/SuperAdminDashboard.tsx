@@ -41,6 +41,17 @@ export default function SuperAdminDashboard() {
         <StatCard label="Total Agents" value={counts.agents || 0} icon={Users} color="bg-orange-100 text-orange-600" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="MRR" value={`₹${Math.round(counts.mrr || 0).toLocaleString()}`} icon={TrendingUp} color="bg-emerald-100 text-emerald-600" />
+        <StatCard label="ARR" value={`₹${Math.round(counts.arr || 0).toLocaleString()}`} icon={DollarSign} color="bg-green-100 text-green-600" />
+        <StatCard label="Open Tickets" value={counts.openTickets || 0} icon={Ticket} color="bg-blue-100 text-blue-600" />
+        <StatCard label="SLA Breaches" value={counts.slaBreaches || 0} icon={AlertCircle} color="bg-red-100 text-red-600" />
+      </div>
+      <div className="rounded-xl border bg-white p-4 text-sm text-gray-600">
+        <span className="mr-6"><strong>{counts.newToday || 0}</strong> tenants today</span>
+        <span className="mr-6"><strong>{counts.newThisMonth || 0}</strong> this month</span>
+        <span><strong>{counts.failedInvoices || 0}</strong> failed payments</span>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Total Tickets" value={counts.tickets || 0} icon={Ticket} color="bg-red-100 text-red-600" />
         <StatCard label="Revenue" value={`$${(counts.totalRevenue || 0).toLocaleString()}`} icon={DollarSign} color="bg-emerald-100 text-emerald-600" />
         <StatCard label="Pending Invoices" value={counts.pendingInvoices || 0} icon={CreditCard} color="bg-amber-100 text-amber-600" />

@@ -3,6 +3,7 @@ import api from '@shared/lib/api';
 import type { User, Tenant } from '@shared/types';
 import { platformApi } from './platformApi';
 import type { RootState } from './store';
+import { PLATFORM_PERMISSION_ALIASES } from '@shared/permissions';
 
 interface AuthState {
   user: User | null;
@@ -18,13 +19,18 @@ const initialState: AuthState = {
   loading: true,
 };
 
+export interface LoginRejection {
+  message: string;
+  twoFactorRequired?: boolean;
+}
+
 export const loginThunk = createAsyncThunk<
   { user: User; tenant: Tenant | null; modules: string[] },
-  { email: string; password: string },
-  { rejectValue: string }
->('auth/login', async ({ email, password }, { dispatch, rejectWithValue }) => {
+  { email: string; password: string; totpCode?: string },
+  { rejectValue: LoginRejection }
+>('auth/login', async ({ email, password, totpCode }, { dispatch, rejectWithValue }) => {
   try {
-    const res = await api.post('/auth/portal-login', { email, password });
+    const res = await api.post('/auth/portal-login', { email, password, ...(totpCode ? { totpCode } : {}) });
     const { token, user: u, tenant: t, role, permissions, moduleKeys } = res.data;
 
     const resolvedUser: User = {
@@ -47,9 +53,12 @@ export const loginThunk = createAsyncThunk<
     return { user: resolvedUser, tenant: t, modules };
   } catch (err: any) {
     if (!err.response) {
-      return rejectWithValue(`Backend unreachable at ${api.defaults.baseURL} — is the API server running?`);
+      return rejectWithValue({ message: `Backend unreachable at ${api.defaults.baseURL} — is the API server running?` });
     }
-    return rejectWithValue(err.response?.data?.message || err.response?.data?.error || 'Login failed');
+    return rejectWithValue({
+      message: err.response?.data?.message || err.response?.data?.error || 'Login failed',
+      twoFactorRequired: !!err.response?.data?.details?.twoFactorRequired,
+    });
   }
 });
 
@@ -141,10 +150,14 @@ export const selectIsSuperAdmin = (state: RootState) => state.auth.user?.role ==
 // Permission helpers (pure functions)
 export function hasPermission(user: User | null, permission: string): boolean {
   if (!user) return false;
-  if (user.role === 'superadmin') return true;
+  const platformRole = (user as any).platformRole;
+  if (user.role === 'superadmin' && platformRole === 'platform_owner') return true;
+  if (user.permissions?.includes('*')) return true;
+  const resolvedPermission = PLATFORM_PERMISSION_ALIASES[permission] || permission;
+  if (user.permissions?.includes(resolvedPermission)) return true;
   if (user.permissions?.includes(permission)) return true;
   if (user.permissions?.some(p => {
-    const parts = permission.split('.');
+    const parts = resolvedPermission.split('.');
     for (let i = parts.length - 1; i > 0; i--) {
       const parent = parts.slice(0, i).join('.manage');
       if (p === parent) return true;

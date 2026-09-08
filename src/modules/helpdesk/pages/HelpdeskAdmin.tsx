@@ -26,10 +26,10 @@ export default function HelpdeskAdmin() {
         setTopics(r.data.topics || r.data || []);
       } else if (t === 'canned') {
         const r = await api.get('/agent/canned').catch(() => ({ data: { canned: [] } }));
-        setCanned(r.data.canned || r.data || []);
+        setCanned(r.data.items || r.data.canned || []);
       } else if (t === 'announcements') {
         const r = await api.get('/agent/announcements').catch(() => ({ data: { announcements: [] } }));
-        setAnnouncements(r.data.announcements || r.data || []);
+        setAnnouncements(r.data.items || r.data.announcements || []);
       } else if (t === 'closure') {
         const r = await api.get('/gaps2/closure-codes').catch(() => ({ data: null }));
         setCodes(r.data);
@@ -57,7 +57,7 @@ export default function HelpdeskAdmin() {
   const createCanned = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/agent/canned', { title: draft.title, message: draft.message });
+      await api.post('/agent/canned', { title: draft.title, response: draft.message });
       toast.success('Canned response created');
       setDraft({ ...draft, title: '', message: '' });
       load('canned');
@@ -67,7 +67,7 @@ export default function HelpdeskAdmin() {
   const createAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/agent/announcements', { title: draft.title, message: draft.message });
+      await api.post('/agent/announcements', { title: draft.title, body: draft.message });
       toast.success('Announcement published');
       setDraft({ ...draft, title: '', message: '' });
       load('announcements');
@@ -136,7 +136,7 @@ export default function HelpdeskAdmin() {
               </form>
               <ul className="divide-y text-sm">
                 {canned.map((c: any) => (
-                  <li key={c._id} className="py-2"><p className="font-medium">{c.title}</p><p className="text-gray-500 text-xs line-clamp-1">{c.message}</p></li>
+                  <li key={c._id} className="py-2"><p className="font-medium">{c.title}</p><p className="text-gray-500 text-xs line-clamp-1">{c.response}</p></li>
                 ))}
                 {canned.length === 0 && <li className="py-4 text-gray-400 text-sm">No canned responses.</li>}
               </ul>
@@ -154,7 +154,7 @@ export default function HelpdeskAdmin() {
               </form>
               <ul className="divide-y text-sm">
                 {announcements.map((a: any) => (
-                  <li key={a._id} className="py-2"><p className="font-medium">{a.title}</p><p className="text-gray-500 text-xs">{a.message}</p></li>
+                  <li key={a._id} className="py-2"><p className="font-medium">{a.title}</p><p className="text-gray-500 text-xs">{a.body}</p></li>
                 ))}
                 {announcements.length === 0 && <li className="py-4 text-gray-400 text-sm">No announcements.</li>}
               </ul>

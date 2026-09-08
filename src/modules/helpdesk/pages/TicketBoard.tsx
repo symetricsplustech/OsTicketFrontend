@@ -1,5 +1,6 @@
 import api from '@shared/lib/api';
 import React, { useCallback, useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { Ticket as TicketIcon } from 'lucide-react';
 
 interface Ticket {
@@ -16,14 +17,24 @@ const COLUMNS = ['new', 'open', 'pending', 'resolved', 'closed'] as const;
 const STATUS_TO_COLUMN: Record<string, (typeof COLUMNS)[number]> = {
   new: 'new',
   open: 'open',
+  triaged: 'open',
   assigned: 'open',
   active: 'open',
   in_progress: 'open',
+  escalated: 'open',
   pending: 'pending',
+  pending_customer: 'pending',
+  pending_vendor: 'pending',
+  pending_approval: 'pending',
   on_hold: 'pending',
   waiting: 'pending',
   resolved: 'resolved',
+  verification: 'resolved',
   closed: 'closed',
+  cancelled: 'closed',
+  rejected: 'closed',
+  duplicate: 'closed',
+  spam: 'closed',
   archived: 'closed',
 };
 
@@ -59,11 +70,20 @@ export default function TicketBoard() {
     setDragOver(null);
     const id = event.dataTransfer.getData('text/plain');
     if (!id) return;
+    let resolution: Record<string, string> | undefined;
+    if (column === 'resolved') {
+      const code = window.prompt('Resolution code (e.g. fixed / workaround / wont-fix):', 'fixed');
+      if (!code) return;
+      const solution = window.prompt('Solution summary (required):', '');
+      if (!solution?.trim()) return;
+      resolution = { code: code.trim(), solution: solution.trim() };
+    }
     setMovingId(id);
     try {
-      await api.post('/bulk/status', { ticketIds: [id], status: column });
+      await api.post('/bulk/status', { ticketIds: [id], status: column, ...(resolution ? { resolution } : {}) });
       await load();
-    } catch {
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || 'Status change failed');
       await load();
     } finally {
       setMovingId(null);

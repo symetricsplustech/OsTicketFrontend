@@ -15,7 +15,7 @@ export default function SlaPlans() {
   const [plans, setPlans] = useState<SlaPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: '', gracePeriod: '4', schedule: '24/7', notes: '' });
+  const [form, setForm] = useState({ name: '', gracePeriod: '4', schedule: '24/7', timezone: 'Asia/Kolkata', assignmentMinutes: '5', responseMinutes: '15', updateMinutes: '30', resolutionMinutes: '120', notes: '' });
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -31,10 +31,10 @@ export default function SlaPlans() {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.post('/admin/sla-plans', { ...form, gracePeriod: Number(form.gracePeriod) });
+      await api.post('/admin/sla-plans', { ...form, gracePeriod: Number(form.gracePeriod), targets: { assignment: Number(form.assignmentMinutes) / 60, first_response: Number(form.responseMinutes) / 60, update: Number(form.updateMinutes) / 60, resolution: Number(form.resolutionMinutes) / 60 } });
       toast.success('SLA plan created');
       setShowForm(false);
-      setForm({ name: '', gracePeriod: '4', schedule: '24/7', notes: '' });
+      setForm({ name: '', gracePeriod: '4', schedule: '24/7', timezone: 'Asia/Kolkata', assignmentMinutes: '5', responseMinutes: '15', updateMinutes: '30', resolutionMinutes: '120', notes: '' });
       load();
     } catch { toast.error('Failed to create SLA plan'); } finally { setSaving(false); }
   };
@@ -70,6 +70,8 @@ export default function SlaPlans() {
               <label className="block text-sm font-medium text-gray-700">Notes</label>
               <input type="text" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="mt-1 input-field" />
             </div>
+            {([['Assignment', 'assignmentMinutes'], ['First response', 'responseMinutes'], ['Update frequency', 'updateMinutes'], ['Resolution', 'resolutionMinutes']] as const).map(([label, key]) => <div key={key}><label className="block text-sm font-medium text-gray-700">{label} (minutes)</label><input type="number" min="1" value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })} className="mt-1 input-field" /></div>)}
+            <div><label className="block text-sm font-medium text-gray-700">Time zone</label><input value={form.timezone} onChange={e => setForm({ ...form, timezone: e.target.value })} className="mt-1 input-field" /></div>
             <div className="flex items-end gap-2 col-span-2">
               <button type="submit" disabled={saving} className="btn-primary">{saving ? 'Creating...' : 'Create SLA Plan'}</button>
               <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>

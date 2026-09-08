@@ -20,10 +20,12 @@ export function useAuth() {
   const loading = useAppSelector(selectAuthLoading);
 
   const login = useCallback(
-    async (email: string, password: string) => {
-      const result = await dispatch(loginThunk({ email, password }));
+    async (email: string, password: string, totpCode?: string) => {
+      const result = await dispatch(loginThunk({ email, password, totpCode }));
       if (loginThunk.rejected.match(result)) {
-        throw new Error(result.payload || 'Login failed');
+        const err: any = new Error(result.payload?.message || 'Login failed');
+        err.twoFactorRequired = result.payload?.twoFactorRequired;
+        throw err;
       }
     },
     [dispatch],

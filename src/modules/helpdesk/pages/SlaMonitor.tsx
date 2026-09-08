@@ -27,6 +27,7 @@ export default function SlaMonitor() {
   const [plans, setPlans] = useState<SlaPlan[]>([]);
   const [breaches, setBreaches] = useState<Breach[]>([]);
   const [breachCount, setBreachCount] = useState(0);
+  const [summary, setSummary] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [ticketNumber, setTicketNumber] = useState('');
   const [showPlan, setShowPlan] = useState(false);
@@ -35,13 +36,15 @@ export default function SlaMonitor() {
   const load = async () => {
     setLoading(true);
     try {
-      const [pRes, oRes] = await Promise.all([
+      const [pRes, oRes, dRes] = await Promise.all([
         api.get('/admin/sla-plans').catch(() => ({ data: { plans: [] } })),
         api.get('/gaps2/ola-breaches').catch(() => ({ data: { breaches: [], breachCount: 0 } })),
+        api.get('/admin/sla-dashboard').catch(() => ({ data: { data: {} } })),
       ]);
       setPlans(pRes.data.plans || pRes.data || []);
       setBreaches(oRes.data.breaches || []);
       setBreachCount(oRes.data.breachCount ?? (oRes.data.breaches || []).length);
+      setSummary(dRes.data?.data || {});
     } catch {
       setPlans([]);
     } finally {
@@ -102,6 +105,12 @@ export default function SlaMonitor() {
             <button onClick={() => pauseResume('resume')} className="btn-secondary text-xs">Resume</button>
           </div>
         </div>
+      </div>
+      <div className="grid gap-4 md:grid-cols-4">
+        <div className="card p-4"><p className="text-2xl font-bold">{summary.withinSla || 0}</p><p className="text-sm text-gray-500">Within SLA</p></div>
+        <div className="card p-4"><p className="text-2xl font-bold text-amber-600">{summary.atRisk || 0}</p><p className="text-sm text-gray-500">At risk</p></div>
+        <div className="card p-4"><p className="text-2xl font-bold">{Number(summary.response?.compliance ?? 100).toFixed(1)}%</p><p className="text-sm text-gray-500">Response compliance</p></div>
+        <div className="card p-4"><p className="text-2xl font-bold">{Number(summary.resolution?.compliance ?? 100).toFixed(1)}%</p><p className="text-sm text-gray-500">Resolution compliance</p></div>
       </div>
 
       {showPlan && (

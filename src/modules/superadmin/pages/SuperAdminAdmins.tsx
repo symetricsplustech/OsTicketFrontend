@@ -14,6 +14,7 @@ const PLATFORM_ROLES = [
   { value: 'platform_owner', label: 'Platform Owner' },
   { value: 'platform_administrator', label: 'Platform Administrator' },
   { value: 'platform_support_administrator', label: 'Support Administrator' },
+  { value: 'platform_billing_administrator', label: 'Billing Administrator' },
   { value: 'platform_security_administrator', label: 'Security Administrator' },
   { value: 'platform_auditor', label: 'Platform Auditor' },
 ];

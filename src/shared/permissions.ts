@@ -11,6 +11,7 @@
 
 // ─── SaaS Platform Permissions ────────────────────────────────────────
 export const SAAS_PERMISSIONS = {
+  DASHBOARD_READ: 'saas.dashboard.read',
   // Tenants
   TENANT_CREATE: 'saas.tenant.create',
   TENANT_READ: 'saas.tenant.read',
@@ -59,6 +60,13 @@ export const SAAS_PERMISSIONS = {
   OPERATIONS_QUEUE_MANAGE: 'saas.operations.queue.manage',
   OPERATIONS_WORKER_MANAGE: 'saas.operations.worker.manage',
   OPERATIONS_SCHEDULER_MANAGE: 'saas.operations.scheduler.manage',
+  PLATFORM_CONFIGURE: 'saas.platform.configure',
+  ADMIN_MANAGE: 'saas.admin.manage',
+  BILLING_READ: 'saas.billing.read',
+  BILLING_MANAGE: 'saas.billing.manage',
+  SLA_READ: 'saas.sla.read',
+  SLA_MANAGE: 'saas.sla.manage',
+  SLA_MEASURE: 'saas.sla.measure',
 } as const;
 
 // ─── Tenant Admin Permissions ──────────────────────────────────────────
@@ -273,22 +281,22 @@ export type Permission = (typeof ALL_PERMISSIONS)[keyof typeof ALL_PERMISSIONS];
 // ─── Platform Permission Aliases (backend uses platform.* prefix) ─────
 // Maps saas.* permissions to platform.* for backend compatibility
 export const PLATFORM_PERMISSION_ALIASES: Record<string, string> = {
-  'platform.view_dashboard': SAAS_PERMISSIONS.AUDIT_READ,
-  'platform.manage_dashboard': SAAS_PERMISSIONS.AUDIT_READ,
+  'platform.view_dashboard': SAAS_PERMISSIONS.DASHBOARD_READ,
+  'platform.manage_dashboard': SAAS_PERMISSIONS.DASHBOARD_READ,
   'platform.view_tenants': SAAS_PERMISSIONS.TENANT_READ,
   'platform.manage_tenants': SAAS_PERMISSIONS.TENANT_CREATE,
   'platform.view_plans': SAAS_PERMISSIONS.PLAN_READ,
   'platform.manage_plans': SAAS_PERMISSIONS.PLAN_CREATE,
   'platform.view_audit': SAAS_PERMISSIONS.AUDIT_READ,
   'platform.manage_audit': SAAS_PERMISSIONS.AUDIT_EXPORT,
-  'platform.view_superadmins': SAAS_PERMISSIONS.SECURITY_READ,
-  'platform.manage_superadmins': SAAS_PERMISSIONS.SECURITY_CONFIGURE,
-  'platform.view_invoices': SAAS_PERMISSIONS.PLAN_READ,
-  'platform.manage_invoices': SAAS_PERMISSIONS.PLAN_UPDATE,
-  'platform.manage_payments': SAAS_PERMISSIONS.PLAN_UPDATE,
+  'platform.view_superadmins': SAAS_PERMISSIONS.ADMIN_MANAGE,
+  'platform.manage_superadmins': SAAS_PERMISSIONS.ADMIN_MANAGE,
+  'platform.view_invoices': SAAS_PERMISSIONS.BILLING_READ,
+  'platform.manage_invoices': SAAS_PERMISSIONS.BILLING_MANAGE,
+  'platform.manage_payments': SAAS_PERMISSIONS.BILLING_MANAGE,
   'platform.impersonate': SAAS_PERMISSIONS.SUPPORT_IMPERSONATE,
-  'platform.view_platform': SAAS_PERMISSIONS.OPERATIONS_HEALTH_READ,
-  'platform.manage_platform': SAAS_PERMISSIONS.SECURITY_CONFIGURE,
+  'platform.view_platform': SAAS_PERMISSIONS.PLATFORM_CONFIGURE,
+  'platform.manage_platform': SAAS_PERMISSIONS.PLATFORM_CONFIGURE,
   'platform.view_operations': SAAS_PERMISSIONS.OPERATIONS_HEALTH_READ,
   'platform.manage_operations': SAAS_PERMISSIONS.OPERATIONS_QUEUE_MANAGE,
   'platform.view_modules': SAAS_PERMISSIONS.MODULE_READ,

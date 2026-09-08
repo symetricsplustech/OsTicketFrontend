@@ -41,7 +41,7 @@ export default function Users() {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [agentForm, setAgentForm] = useState({
-    name: '', email: '', password: '', phone: '', isAdmin: false, department: '',
+    name: '', email: '', password: '', phone: '', isAdmin: false, department: '', level: 'L1',
   });
   const [customerForm, setCustomerForm] = useState({
     name: '', email: '', password: '', phone: '', organization: '', userType: 'employee', orgRole: 'member',
@@ -81,11 +81,12 @@ export default function Users() {
         password: agentForm.password,
         isAdmin: agentForm.isAdmin,
         isActive: true,
+        level: (agentForm as any).level || 'L1',
         permissions: agentForm.isAdmin ? ['admin.manage', 'access.manage', 'tickets.manage', 'users.manage'] : ['tickets.view'],
       });
       toast.success('Agent created');
       setShowForm(false);
-      setAgentForm({ name: '', email: '', password: '', phone: '', isAdmin: false, department: '' });
+      setAgentForm({ name: '', email: '', password: '', phone: '', isAdmin: false, department: '', level: 'L1' });
       loadAgents();
     } catch { toast.error('Failed to create agent'); } finally { setSaving(false); }
   };
@@ -175,6 +176,15 @@ export default function Users() {
               <label className="block text-sm font-medium text-gray-700">Phone</label>
               <input type="text" value={agentForm.phone} onChange={(e) => setAgentForm({ ...agentForm, phone: e.target.value })}
                 className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Level</label>
+              <select value={(agentForm as any).level || 'L1'} onChange={(e) => setAgentForm({ ...agentForm, level: e.target.value })}
+                className="mt-1 w-full border rounded-lg px-3 py-2 text-sm">
+                <option value="L1">L1 — First line</option>
+                <option value="L2">L2 — Technical</option>
+                <option value="L3">L3 — Senior / escalations</option>
+              </select>
             </div>
             <div className="col-span-2">
               <label className="flex items-center gap-2 cursor-pointer">

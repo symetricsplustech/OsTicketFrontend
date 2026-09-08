@@ -54,6 +54,24 @@ export default function SuperAdminTenantDetail() {
     }
   };
 
+  const handleImpersonate = async () => {
+    const reason = window.prompt('Enter the support reason for impersonating this tenant:')?.trim();
+    if (!reason) return;
+    try {
+      const result = await impersonate({ companyId: d._id, reason, ttlMinutes: 15 }).unwrap();
+      const currentToken = localStorage.getItem('token');
+      const currentUser = localStorage.getItem('user');
+      if (currentToken) localStorage.setItem('platformOriginalToken', currentToken);
+      if (currentUser) localStorage.setItem('platformOriginalUser', currentUser);
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('privilegedSession', JSON.stringify({ ...result.session, reason, tenantName: d.name }));
+      localStorage.setItem('user', JSON.stringify({ user: { ...result.user, role: 'admin' }, tenant: d }));
+      window.location.href = '/';
+    } catch (err: any) {
+      setModal({ open: true, title: 'Impersonation failed', message: err?.data?.message || 'Unable to start the privileged session' });
+    }
+  };
+
   return (
     <>
     <div className="space-y-6">
@@ -64,7 +82,7 @@ export default function SuperAdminTenantDetail() {
           <p className="text-sm text-gray-500">{d.email || d.domain || '-'}</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => impersonate({ companyId: d._id })} className="flex items-center gap-2 px-3 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm hover:bg-purple-200">
+          <button onClick={handleImpersonate} className="flex items-center gap-2 px-3 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm hover:bg-purple-200">
             <LogIn className="h-4 w-4" /> Impersonate
           </button>
           <button onClick={() => setTenantStatus({ id: d._id, status: d.status === 'active' ? 'suspended' : 'active' })}

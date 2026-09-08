@@ -46,7 +46,7 @@ const superadminApi = platformApi.injectEndpoints({
       query: ({ id, modules }) => ({ url: `/superadmin/companies/${id}/modules`, method: 'PUT', body: { modules } }),
       invalidatesTags: ['SaTenant'],
     }),
-    impersonateTenant: b.mutation<any, { companyId: string }>({
+    impersonateTenant: b.mutation<any, { companyId: string; reason: string; ttlMinutes?: number }>({
       query: (body) => ({ url: '/superadmin/impersonate', method: 'POST', body }),
     }),
     getSaPlans: b.query<any[], void>({
