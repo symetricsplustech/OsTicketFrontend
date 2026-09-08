@@ -204,6 +204,9 @@ const Alerts = lazy(() => import('@modules/helpdesk/pages/Alerts'));
 const CMDBImpact = lazy(() => import('@modules/helpdesk/pages/CMDBImpact'));
 const CustomAuth = lazy(() => import('@modules/settings/pages/CustomAuth'));
 const OpsWorkspace = lazy(() => import('@modules/helpdesk/pages/OpsWorkspace'));
+const BotDesigner = lazy(() => import('@modules/settings/pages/BotDesigner'));
+const NeuralSearch = lazy(() => import('@modules/helpdesk/pages/NeuralSearch'));
+const ServiceHealth = lazy(() => import('@modules/cmdb/pages/ServiceHealth'));
 const IncidentCrud = lazy(() => import('@modules/helpdesk/pages/IncidentCrud'));
 const ProblemCrud = lazy(() => import('@modules/helpdesk/pages/ProblemCrud'));
 const ChangeCrud = lazy(() => import('@modules/helpdesk/pages/ChangeCrud'));
@@ -413,6 +416,9 @@ function AppRoutes() {
           <Route path="cmdb-impact" element={<ModuleGuard module="itam"><Suspense fallback={<LoadingSpinner />}><CMDBImpact /></Suspense></ModuleGuard>} />
           <Route path="settings/custom-auth" element={<AdminRoute><ModuleGuard module="settings"><Suspense fallback={<LoadingSpinner />}><CustomAuth /></Suspense></ModuleGuard></AdminRoute>} />
           <Route path="ops-workspace" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><OpsWorkspace /></Suspense></ModuleGuard>} />
+          <Route path="neural-search" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><NeuralSearch /></Suspense></ModuleGuard>} />
+          <Route path="settings/bots" element={<AdminRoute><ModuleGuard module="settings"><Suspense fallback={<LoadingSpinner />}><BotDesigner /></Suspense></ModuleGuard></AdminRoute>} />
+          <Route path="service-health" element={<ModuleGuard module="cmdb"><Suspense fallback={<LoadingSpinner />}><ServiceHealth /></Suspense></ModuleGuard>} />
 
           {/* ITOM ops */}
           <Route path="ops-tools" element={<ModuleGuard module="itom"><Suspense fallback={<LoadingSpinner />}><OpsTools /></Suspense></ModuleGuard>} />

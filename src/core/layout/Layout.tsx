@@ -110,6 +110,7 @@ const allNavItems: NavItem[] = [
   { label: 'Marketplace', path: '/contractor-market', icon: Truck, module: 'field-service' },
   // CMDB
   { label: 'CMDB', path: '/cmdb', icon: Network, module: 'cmdb', section: 'CMDB' },
+  { label: 'Service Health', path: '/service-health', icon: Activity, module: 'cmdb' },
   { label: 'CMDB Impact', path: '/cmdb-impact', icon: Network, module: 'itam' },
   // CSM
   { label: 'Customer Service', path: '/customer-service', icon: MessageSquare, module: 'csm', section: 'Customer Service' },
@@ -152,6 +153,7 @@ const allNavItems: NavItem[] = [
   { label: 'Adv Views', path: '/advanced-views', icon: LineChart, module: 'analytics' },
   // AI
   { label: 'Otto AI', path: '/otto', icon: Zap, module: 'ai', section: 'AI' },
+  { label: 'Neural Search', path: '/neural-search', icon: Search, module: 'helpdesk' },
   // Settings & Admin
   { label: 'Settings', path: '/settings', icon: Settings, module: 'settings', section: 'Admin' },
   { label: 'Modules', path: '/settings/modules', icon: Layers, module: 'settings' },
@@ -163,6 +165,7 @@ const allNavItems: NavItem[] = [
   { label: 'Delegations', path: '/settings/delegations', icon: Users, module: 'settings' },
   { label: 'Access Control', path: '/settings/access', icon: KeyRound, module: 'settings' },
   { label: 'Custom Auth', path: '/settings/custom-auth', icon: KeyRound, module: 'settings' },
+  { label: 'Bot Designer', path: '/settings/bots', icon: MessageSquare, module: 'settings' },
   { label: 'Organisation Structure', path: '/settings/organization', icon: Building2, module: 'settings' },
   { label: 'Import Data', path: '/import-wizard', icon: Upload, module: 'settings' },
   { label: 'Orgs', path: '/org-switcher', icon: Building2 },
