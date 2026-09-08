@@ -162,6 +162,8 @@ const SuperAdminOperations = lazy(() => import('@modules/superadmin/pages/SuperA
 const SuperAdminModules = lazy(() => import('@modules/superadmin/pages/SuperAdminModules'));
 const SuperAdminSecurity = lazy(() => import('@modules/superadmin/pages/SuperAdminSecurity'));
 const SuperAdminSettings = lazy(() => import('@modules/superadmin/pages/SuperAdminSettings'));
+const SuperAdminControlPlane = lazy(() => import('@modules/superadmin/pages/SuperAdminControlPlane'));
+const SuperAdminSla = lazy(() => import('@modules/superadmin/pages/SuperAdminSla'));
 const PriorityMatrixEditor = lazy(() => import('@modules/helpdesk/pages/PriorityMatrixEditor'));
 const LeadCapture = lazy(() => import('@modules/crm/pages/LeadCapture'));
 const SalesPipelines = lazy(() => import('@modules/crm/pages/SalesPipelines'));
@@ -197,6 +199,7 @@ const SupportEmail = lazy(() => import('@modules/helpdesk/pages/SupportEmail'));
 const HelpdeskReports = lazy(() => import('@modules/helpdesk/pages/HelpdeskReports'));
 const HelpdeskAdmin = lazy(() => import('@modules/helpdesk/pages/HelpdeskAdmin'));
 const AuditTrail = lazy(() => import('@modules/helpdesk/pages/AuditTrail'));
+const Otto = lazy(() => import('@modules/helpdesk/pages/Otto'));
 const IncidentCrud = lazy(() => import('@modules/helpdesk/pages/IncidentCrud'));
 const ProblemCrud = lazy(() => import('@modules/helpdesk/pages/ProblemCrud'));
 const ChangeCrud = lazy(() => import('@modules/helpdesk/pages/ChangeCrud'));
@@ -255,11 +258,11 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <Navigate to="/" replace />;
 }
 
-function PlatformRoute({ children }: { children: React.ReactNode }) {
+function PlatformRoute({ children, permission = 'saas.tenant.read' }: { children: React.ReactNode; permission?: string }) {
   const { user, loading, hasPermission } = useAuth();
   if (loading) return <LoadingSpinner />;
   if (!user) return <Navigate to="/login" replace />;
-  if (hasPermission('platform.manage_tenants') || hasPermission('platform.view_tenants')) return <>{children}</>;
+  if (hasPermission(permission)) return <>{children}</>;
   return <Navigate to="/" replace />;
 }
 
@@ -401,6 +404,7 @@ function AppRoutes() {
           <Route path="helpdesk-reports" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><HelpdeskReports /></Suspense></ModuleGuard>} />
           <Route path="helpdesk-admin" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><HelpdeskAdmin /></Suspense></ModuleGuard>} />
           <Route path="audit-trail" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><AuditTrail /></Suspense></ModuleGuard>} />
+          <Route path="otto" element={<ModuleGuard module="ai"><Suspense fallback={<LoadingSpinner />}><Otto /></Suspense></ModuleGuard>} />
 
           {/* ITOM ops */}
           <Route path="ops-tools" element={<ModuleGuard module="itom"><Suspense fallback={<LoadingSpinner />}><OpsTools /></Suspense></ModuleGuard>} />
@@ -451,17 +455,19 @@ function AppRoutes() {
           <Route path="settings/platform" element={<PlatformRoute><Suspense fallback={<LoadingSpinner />}><PlatformAdmin /></Suspense></PlatformRoute>} />
 
           {/* Super Admin - Tenant Management */}
-          <Route path="superadmin" element={<PlatformRoute><Suspense fallback={<LoadingSpinner />}><SuperAdminDashboard /></Suspense></PlatformRoute>} />
+          <Route path="superadmin" element={<PlatformRoute permission="saas.dashboard.read"><Suspense fallback={<LoadingSpinner />}><SuperAdminDashboard /></Suspense></PlatformRoute>} />
           <Route path="superadmin/tenants" element={<PlatformRoute><Suspense fallback={<LoadingSpinner />}><SuperAdminTenantList /></Suspense></PlatformRoute>} />
-          <Route path="superadmin/tenants/new" element={<PlatformRoute><Suspense fallback={<LoadingSpinner />}><SuperAdminTenantCreate /></Suspense></PlatformRoute>} />
+          <Route path="superadmin/tenants/new" element={<PlatformRoute permission="saas.tenant.create"><Suspense fallback={<LoadingSpinner />}><SuperAdminTenantCreate /></Suspense></PlatformRoute>} />
           <Route path="superadmin/tenants/:id" element={<PlatformRoute><Suspense fallback={<LoadingSpinner />}><SuperAdminTenantDetail /></Suspense></PlatformRoute>} />
-          <Route path="superadmin/plans" element={<PlatformRoute><Suspense fallback={<LoadingSpinner />}><SuperAdminPlans /></Suspense></PlatformRoute>} />
-          <Route path="superadmin/audit" element={<PlatformRoute><Suspense fallback={<LoadingSpinner />}><SuperAdminAuditLogs /></Suspense></PlatformRoute>} />
-          <Route path="superadmin/admins" element={<PlatformRoute><Suspense fallback={<LoadingSpinner />}><SuperAdminAdmins /></Suspense></PlatformRoute>} />
-          <Route path="superadmin/operations" element={<PlatformRoute><Suspense fallback={<LoadingSpinner />}><SuperAdminOperations /></Suspense></PlatformRoute>} />
-          <Route path="superadmin/modules" element={<PlatformRoute><Suspense fallback={<LoadingSpinner />}><SuperAdminModules /></Suspense></PlatformRoute>} />
-          <Route path="superadmin/security" element={<PlatformRoute><Suspense fallback={<LoadingSpinner />}><SuperAdminSecurity /></Suspense></PlatformRoute>} />
-          <Route path="superadmin/settings" element={<PlatformRoute><Suspense fallback={<LoadingSpinner />}><SuperAdminSettings /></Suspense></PlatformRoute>} />
+          <Route path="superadmin/plans" element={<PlatformRoute permission="saas.plan.read"><Suspense fallback={<LoadingSpinner />}><SuperAdminPlans /></Suspense></PlatformRoute>} />
+          <Route path="superadmin/audit" element={<PlatformRoute permission="saas.audit.read"><Suspense fallback={<LoadingSpinner />}><SuperAdminAuditLogs /></Suspense></PlatformRoute>} />
+          <Route path="superadmin/admins" element={<PlatformRoute permission="saas.admin.manage"><Suspense fallback={<LoadingSpinner />}><SuperAdminAdmins /></Suspense></PlatformRoute>} />
+          <Route path="superadmin/operations" element={<PlatformRoute permission="saas.operations.health.read"><Suspense fallback={<LoadingSpinner />}><SuperAdminOperations /></Suspense></PlatformRoute>} />
+          <Route path="superadmin/modules" element={<PlatformRoute permission="saas.module.read"><Suspense fallback={<LoadingSpinner />}><SuperAdminModules /></Suspense></PlatformRoute>} />
+          <Route path="superadmin/security" element={<PlatformRoute permission="saas.security.read"><Suspense fallback={<LoadingSpinner />}><SuperAdminSecurity /></Suspense></PlatformRoute>} />
+          <Route path="superadmin/settings" element={<PlatformRoute permission="saas.platform.configure"><Suspense fallback={<LoadingSpinner />}><SuperAdminSettings /></Suspense></PlatformRoute>} />
+          <Route path="superadmin/control" element={<PlatformRoute permission="saas.platform.configure"><Suspense fallback={<LoadingSpinner />}><SuperAdminControlPlane /></Suspense></PlatformRoute>} />
+          <Route path="superadmin/sla" element={<PlatformRoute permission="saas.sla.read"><Suspense fallback={<LoadingSpinner />}><SuperAdminSla /></Suspense></PlatformRoute>} />
           <Route path="priority-matrix" element={<ModuleGuard module="helpdesk"><Suspense fallback={<LoadingSpinner />}><PriorityMatrixEditor /></Suspense></ModuleGuard>} />
           <Route path="lead-capture" element={<ModuleGuard module="crm"><Suspense fallback={<LoadingSpinner />}><LeadCapture /></Suspense></ModuleGuard>} />
           <Route path="sales-pipelines" element={<ModuleGuard module="crm"><Suspense fallback={<LoadingSpinner />}><SalesPipelines /></Suspense></ModuleGuard>} />

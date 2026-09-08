@@ -24,8 +24,28 @@ export default function Changes() {
   const [changes, setChanges] = useState<Change[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: '', description: '', type: 'standard', risk: 'medium', reason: '', plan: '', rollbackPlan: '' });
+  const [form, setForm] = useState({ title: '', description: '', type: 'standard', risk: 'medium', reason: '', plan: '', rollbackPlan: '', windowStart: '', windowEnd: '' });
   const [saving, setSaving] = useState(false);
+  const [conflicts, setConflicts] = useState<any>(null);
+  const [checking, setChecking] = useState(false);
+
+  const checkConflicts = async () => {
+    if (!form.windowStart || !form.windowEnd) {
+      toast.error('Set an implementation window first');
+      return;
+    }
+    setChecking(true);
+    try {
+      const res = await api.get('/enterprise/changes/conflicts', { params: { start: form.windowStart, end: form.windowEnd } });
+      setConflicts(res.data.conflicts);
+      const n = (res.data.conflicts?.overlapping?.length || 0) + (res.data.conflicts?.blackouts?.length || 0);
+      toast(n ? `⚠️ ${n} conflict(s) found` : 'No conflicts in this window', { icon: n ? '⚠️' : '✅' });
+    } catch {
+      toast.error('Conflict check failed');
+    } finally {
+      setChecking(false);
+    }
+  };
 
   const load = async () => {
     try {
@@ -40,10 +60,16 @@ export default function Changes() {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.post('/enterprise/changes', form);
-      toast.success('Change request created');
+      const res = await api.post('/enterprise/changes', {
+        ...form,
+        windowStart: form.windowStart || undefined,
+        windowEnd: form.windowEnd || undefined,
+      });
+      const n = (res.data?.conflicts?.overlapping?.length || 0) + (res.data?.conflicts?.blackouts?.length || 0);
+      toast.success(n ? `Change raised (risk ${res.data?.change?.riskScore ?? '—'}) — ${n} conflict(s)!` : 'Change request created');
       setShowForm(false);
-      setForm({ title: '', description: '', type: 'standard', risk: 'medium', reason: '', plan: '', rollbackPlan: '' });
+      setConflicts(null);
+      setForm({ title: '', description: '', type: 'standard', risk: 'medium', reason: '', plan: '', rollbackPlan: '', windowStart: '', windowEnd: '' });
       load();
     } catch { toast.error('Failed to create change'); } finally { setSaving(false); }
   };
@@ -92,6 +118,37 @@ export default function Changes() {
             <div>
               <label className="block text-sm font-medium text-gray-700">Rollback Plan</label>
               <textarea value={form.rollbackPlan} onChange={(e) => setForm({ ...form, rollbackPlan: e.target.value })} rows={3} className="mt-1 input-field" placeholder="Steps to rollback if change fails..." />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Window start</label>
+                <input type="datetime-local" value={form.windowStart} onChange={(e) => setForm({ ...form, windowStart: e.target.value })} className="mt-1 input-field" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Window end</label>
+                <input type="datetime-local" value={form.windowEnd} onChange={(e) => setForm({ ...form, windowEnd: e.target.value })} className="mt-1 input-field" />
+              </div>
+            </div>
+            <div>
+              <button type="button" onClick={checkConflicts} disabled={checking} className="btn-secondary text-sm disabled:opacity-40">
+                {checking ? 'Checking…' : 'Check calendar conflicts'}
+              </button>
+              {conflicts && (
+                <div className="mt-2 text-xs bg-gray-50 border rounded-lg p-3 space-y-1">
+                  {(conflicts.overlapping || []).map((c: any) => (
+                    <p key={c.id}>⚠️ Overlaps <b>{c.number}</b> — {c.title} ({c.status})</p>
+                  ))}
+                  {(conflicts.blackouts || []).map((b: any) => (
+                    <p key={b.id}>⛔ Blackout <b>{b.name}</b></p>
+                  ))}
+                  {(conflicts.sharedAssets || []).map((s: any, i: number) => (
+                    <p key={i}>🔗 Shared assets with <b>{s.number}</b></p>
+                  ))}
+                  {!conflicts.overlapping?.length && !conflicts.blackouts?.length && !conflicts.sharedAssets?.length && (
+                    <p className="text-green-700">Window is clear.</p>
+                  )}
+                </div>
+              )}
             </div>
             <div className="flex gap-2">
               <button type="submit" disabled={saving} className="btn-primary">{saving ? 'Creating...' : 'Submit Change Request'}</button>

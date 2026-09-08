@@ -28,6 +28,21 @@ export default function WarRoom() {
   const [messages, setMessages] = useState<WarMessage[]>([]);
   const [draft, setDraft] = useState('');
   const [kind, setKind] = useState('chat');
+  const [brief, setBrief] = useState<any>(null);
+  const [briefing, setBriefing] = useState(false);
+
+  const runBrief = async () => {
+    if (!selectedId) return;
+    setBriefing(true);
+    try {
+      const res = await api.post('/agent/assist/summarize', { incidentId: selectedId });
+      setBrief(res.data);
+    } catch {
+      setBrief(null);
+    } finally {
+      setBriefing(false);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -115,6 +130,13 @@ export default function WarRoom() {
         <h1 className="text-2xl font-bold flex items-center gap-2"><MessageSquare className="h-6 w-6" /> Major-Incident War Room</h1>
         <div className="flex items-center gap-2">
           <button
+            onClick={runBrief}
+            disabled={!selectedId || briefing}
+            className="flex items-center gap-2 bg-white border border-gray-300 px-3 py-2 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-sm"
+          >
+            ✨ {briefing ? 'Briefing…' : 'AI brief'}
+          </button>
+          <button
             onClick={postStakeholderUpdate}
             disabled={!selectedId}
             className="flex items-center gap-2 bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50"
@@ -136,7 +158,7 @@ export default function WarRoom() {
           {incidents.map(inc => (
             <button
               key={inc._id}
-              onClick={() => setSelectedId(inc._id)}
+              onClick={() => { setSelectedId(inc._id); setBrief(null); }}
               className={`w-full text-left p-3 rounded-lg border transition ${
                 selectedId === inc._id ? 'border-blue-500 bg-blue-50' : 'bg-white hover:bg-gray-50'
               }`}
@@ -160,6 +182,15 @@ export default function WarRoom() {
             </div>
           ) : (
             <>
+              {brief && (
+                <div className="mx-4 mt-4 bg-purple-50 border border-purple-200 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-xs font-semibold text-purple-700">COMMAND BRIEF ({brief.provider === 'llm' ? 'LLM' : 'on-device'})</p>
+                    <button onClick={() => setBrief(null)} className="ml-auto text-xs text-purple-400 hover:text-purple-600">dismiss</button>
+                  </div>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{brief.summary}</p>
+                </div>
+              )}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {messages.length === 0 && (
                   <p className="text-sm text-gray-400 text-center pt-10">No war room activity yet.</p>

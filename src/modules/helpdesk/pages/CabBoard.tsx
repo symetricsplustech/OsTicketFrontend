@@ -16,6 +16,9 @@ interface Change {
   type?: string;
   risk?: string;
   riskLevel?: string;
+  riskScore?: number;
+  windowStart?: string;
+  windowEnd?: string;
   createdAt: string;
 }
 
@@ -35,6 +38,22 @@ export default function CabBoard() {
   const [blackouts, setBlackouts] = useState<Blackout[]>([]);
   const [loading, setLoading] = useState(true);
   const [decision, setDecision] = useState<Record<string, string>>({});
+  const [conflicts, setConflicts] = useState<Record<string, any>>({});
+
+  const checkRow = async (c: Change) => {
+    if (!c.windowStart || !c.windowEnd) {
+      toast.error('Change has no implementation window');
+      return;
+    }
+    try {
+      const res = await api.get('/enterprise/changes/conflicts', {
+        params: { start: c.windowStart, end: c.windowEnd, excludeId: c._id },
+      });
+      setConflicts((m) => ({ ...m, [c._id]: res.data.conflicts }));
+    } catch {
+      toast.error('Conflict check failed');
+    }
+  };
   const [showBlackout, setShowBlackout] = useState(false);
   const [bForm, setBForm] = useState({ name: '', startsAt: '', endsAt: '', reason: '' });
 
@@ -125,15 +144,16 @@ export default function CabBoard() {
               <th className="px-5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase">Change</th>
               <th className="px-5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
               <th className="px-5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase">Risk</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase">Score</th>
               <th className="px-5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase">Raised</th>
               <th className="px-5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase">Decision</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {loading ? (
-              <tr><td colSpan={5} className="px-5 py-10 text-center text-gray-400">Loading…</td></tr>
+              <tr><td colSpan={6} className="px-5 py-10 text-center text-gray-400">Loading…</td></tr>
             ) : pending.length === 0 ? (
-              <tr><td colSpan={5} className="px-5 py-10 text-center text-gray-400">No changes awaiting approval</td></tr>
+              <tr><td colSpan={6} className="px-5 py-10 text-center text-gray-400">No changes awaiting approval</td></tr>
             ) : pending.map((c) => (
               <tr key={c._id} className="hover:bg-gray-50 align-top">
                 <td className="px-5 py-3">
@@ -142,6 +162,21 @@ export default function CabBoard() {
                 </td>
                 <td className="px-5 py-3"><StatusBadge status={c.type || 'normal'} /></td>
                 <td className="px-5 py-3"><StatusBadge status={c.risk || c.riskLevel || 'medium'} /></td>
+                <td className="px-5 py-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-sm font-bold ${(c.riskScore ?? 0) >= 60 ? 'text-red-600' : (c.riskScore ?? 0) >= 30 ? 'text-orange-600' : 'text-green-600'}`}>
+                      {c.riskScore ?? '—'}
+                    </span>
+                    <button onClick={() => checkRow(c)} title="Check calendar conflicts" className="text-xs text-gray-400 hover:text-brand-600">⚠</button>
+                  </div>
+                  {conflicts[c._id] && (
+                    <div className="text-[11px] text-gray-500 mt-1">
+                      {(conflicts[c._id].overlapping || []).map((o: any) => <p key={o.id}>⚠️ {o.number}</p>)}
+                      {(conflicts[c._id].blackouts || []).map((b: any) => <p key={b.id}>⛔ {b.name}</p>)}
+                      {!conflicts[c._id].overlapping?.length && !conflicts[c._id].blackouts?.length && <p className="text-green-600">clear</p>}
+                    </div>
+                  )}
+                </td>
                 <td className="px-5 py-3 text-sm text-gray-500">{formatDate(c.createdAt)}</td>
                 <td className="px-5 py-3">
                   {canDecide ? (

@@ -150,7 +150,6 @@ const allNavItems: NavItem[] = [
   { label: 'Adv Views', path: '/advanced-views', icon: LineChart, module: 'analytics' },
   // AI
   { label: 'Otto AI', path: '/otto', icon: Zap, module: 'ai', section: 'AI' },
-  { label: 'Agent Studio', path: '/agent-studio', icon: Zap, module: 'ai' },
   // Settings & Admin
   { label: 'Settings', path: '/settings', icon: Settings, module: 'settings', section: 'Admin' },
   { label: 'Modules', path: '/settings/modules', icon: Layers, module: 'settings' },
@@ -173,10 +172,12 @@ const platformNavItems: NavItem[] = [
   { label: 'New Tenant', path: '/superadmin/tenants/new', icon: Plus, permission: 'platform.manage_tenants' },
   { label: 'Module Management', path: '/superadmin/modules', icon: Layers, permission: 'platform.view_modules', section: 'Operations' },
   { label: 'Platform Operations', path: '/superadmin/operations', icon: Activity, permission: 'platform.view_operations' },
+  { label: 'Platform SLA', path: '/superadmin/sla', icon: Clock, permission: 'saas.sla.read' },
   { label: 'Audit Logs', path: '/superadmin/audit', icon: FileText, permission: 'platform.view_audit', section: 'Security & Compliance' },
   { label: 'Security Management', path: '/superadmin/security', icon: ShieldCheck, permission: 'platform.view_security' },
   { label: 'Platform Operators', path: '/superadmin/admins', icon: Users, permission: 'platform.view_superadmins', section: 'Administration' },
   { label: 'Global Settings', path: '/superadmin/settings', icon: Settings, permission: 'platform.view_platform' },
+  { label: 'Control Plane', path: '/superadmin/control', icon: CloudCog, permission: 'platform.view_platform' },
 ];
 
 export default function Layout() {
@@ -195,12 +196,23 @@ export default function Layout() {
   const location = useLocation();
 
   const isPlatformAdmin = user?.role === 'superadmin';
+  const privilegedSession = (() => { try { return JSON.parse(localStorage.getItem('privilegedSession') || 'null'); } catch { return null; } })();
+  const exitPrivilegedSession = () => {
+    const token = localStorage.getItem('platformOriginalToken');
+    const originalUser = localStorage.getItem('platformOriginalUser');
+    if (token) localStorage.setItem('token', token);
+    if (originalUser) localStorage.setItem('user', originalUser);
+    localStorage.removeItem('platformOriginalToken');
+    localStorage.removeItem('platformOriginalUser');
+    localStorage.removeItem('privilegedSession');
+    window.location.href = '/superadmin';
+  };
 
   // Platform items visible to platform admins only
   const canSeePlatformItem = (item: NavItem): boolean => {
     if (!isPlatformAdmin) return false;
     if (item.permission && hasPermission(item.permission)) return true;
-    return true;
+    return !item.permission;
   };
 
   // Module items visible to non-platform-admin users based on module/permission
@@ -385,6 +397,12 @@ export default function Layout() {
       </aside>
 
       <main className="flex-1 overflow-y-auto">
+        {privilegedSession && (
+          <div className="sticky top-0 z-50 flex items-center justify-between bg-amber-500 px-4 py-2 text-sm font-semibold text-amber-950 shadow">
+            <span>Privileged session: acting in {privilegedSession.tenantName} · {privilegedSession.reason} · expires {new Date(privilegedSession.expiresAt).toLocaleTimeString()}</span>
+            <button onClick={exitPrivilegedSession} className="rounded bg-amber-950 px-3 py-1 text-white">Exit session</button>
+          </div>
+        )}
         <div className="p-6">
           <Outlet />
         </div>
