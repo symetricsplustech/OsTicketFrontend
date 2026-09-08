@@ -109,6 +109,7 @@ const allNavItems: NavItem[] = [
   { label: 'Marketplace', path: '/contractor-market', icon: Truck, module: 'field-service' },
   // CMDB
   { label: 'CMDB', path: '/cmdb', icon: Network, module: 'cmdb', section: 'CMDB' },
+  { label: 'CMDB Impact', path: '/cmdb-impact', icon: Network, module: 'itam' },
   // CSM
   { label: 'Customer Service', path: '/customer-service', icon: MessageSquare, module: 'csm', section: 'Customer Service' },
   { label: 'Partner Portal', path: '/partner-portal', icon: Users, module: 'csm' },
@@ -160,6 +161,7 @@ const allNavItems: NavItem[] = [
   { label: 'SSO / LDAP', path: '/settings/integrations-config', icon: Shield, module: 'settings' },
   { label: 'Delegations', path: '/settings/delegations', icon: Users, module: 'settings' },
   { label: 'Access Control', path: '/settings/access', icon: KeyRound, module: 'settings' },
+  { label: 'Custom Auth', path: '/settings/custom-auth', icon: KeyRound, module: 'settings' },
   { label: 'Organisation Structure', path: '/settings/organization', icon: Building2, module: 'settings' },
   { label: 'Import Data', path: '/import-wizard', icon: Upload, module: 'settings' },
   { label: 'Orgs', path: '/org-switcher', icon: Building2 },
