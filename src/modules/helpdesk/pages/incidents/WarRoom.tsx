@@ -1,6 +1,8 @@
 import api from '@shared/lib/api';
 import { useEffect, useState } from 'react';
 import { MessageSquare, Send, Eye, Users } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useAuth } from '@core/auth/useAuth';
 
 interface IncidentRow {
   _id: string;
@@ -23,6 +25,8 @@ interface WarMessage {
 const KINDS = ['chat', 'status', 'decision', 'action_item'];
 
 export default function WarRoom() {
+  const { hasPermission } = useAuth();
+  const canUpdate = hasPermission('records.update');
   const [incidents, setIncidents] = useState<IncidentRow[]>([]);
   const [selectedId, setSelectedId] = useState('');
   const [messages, setMessages] = useState<WarMessage[]>([]);
@@ -94,7 +98,9 @@ export default function WarRoom() {
     if (!message) return;
     try {
       await api.post(`/ops/incidents/${selectedId}/stakeholder-update`, { message });
-    } catch {}
+    } catch (error: any) {
+      toast.error(error?.response?.status === 403 ? 'You do not have permission to post stakeholder updates.' : 'Unable to post stakeholder update.');
+    }
   };
 
   const assignResolutionTeam = async () => {
@@ -103,7 +109,9 @@ export default function WarRoom() {
     if (!ids) return;
     try {
       await api.post(`/ops/incidents/${selectedId}/resolution-team`, { agentIds: ids.split(',').map(s => s.trim()) });
-    } catch {}
+    } catch (error: any) {
+      toast.error(error?.response?.status === 403 ? 'You do not have permission to assign a resolution team.' : 'Unable to assign the resolution team.');
+    }
   };
 
   const severityColor = (severity?: string) => {
@@ -136,20 +144,22 @@ export default function WarRoom() {
           >
             ✨ {briefing ? 'Briefing…' : 'AI brief'}
           </button>
-          <button
-            onClick={postStakeholderUpdate}
-            disabled={!selectedId}
-            className="flex items-center gap-2 bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50"
-          >
-            <Eye className="h-4 w-4" /> Post stakeholder update
-          </button>
-          <button
-            onClick={assignResolutionTeam}
-            disabled={!selectedId}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-          >
-            <Users className="h-4 w-4" /> Assign resolution team
-          </button>
+          {canUpdate && <>
+            <button
+              onClick={postStakeholderUpdate}
+              disabled={!selectedId}
+              className="flex items-center gap-2 bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50"
+            >
+              <Eye className="h-4 w-4" /> Post stakeholder update
+            </button>
+            <button
+              onClick={assignResolutionTeam}
+              disabled={!selectedId}
+              className="flex items-center gap-2 bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+            >
+              <Users className="h-4 w-4" /> Assign resolution team
+            </button>
+          </>}
         </div>
       </div>
 

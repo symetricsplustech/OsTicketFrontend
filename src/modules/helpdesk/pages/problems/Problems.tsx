@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '@shared/lib/api';
 import { formatDate } from '@shared/lib/format';
 import toast from 'react-hot-toast';
+import { useAuth } from '@core/auth/useAuth';
 
 interface Problem {
   _id: string;
@@ -20,23 +21,30 @@ interface Problem {
 const PRIORITIES = ['low', 'medium', 'high', 'critical'];
 
 export default function Problems() {
+  const { hasPermission } = useAuth();
+  const canCreate = hasPermission('records.create');
   const [problems, setProblems] = useState<Problem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', priority: 'medium', rootCause: '', workaround: '' });
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   const load = async () => {
     try {
       const res = await api.get('/enterprise/problems');
       setProblems(res.data.problems || []);
-    } catch { setProblems([]); } finally { setLoading(false); }
+    } catch (error: any) {
+      setProblems([]);
+      setLoadError(error?.response?.status === 403 ? 'You do not have permission to view problems.' : 'Unable to load problems. Please retry.');
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canCreate) return toast.error('You do not have permission to create problems.');
     setSaving(true);
     try {
       await api.post('/enterprise/problems', form);
@@ -51,7 +59,7 @@ export default function Problems() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Problems</h1>
-        <button onClick={() => setShowForm(true)} className="btn-primary">Create Problem</button>
+        {canCreate && <button onClick={() => setShowForm(true)} className="btn-primary">Create Problem</button>}
       </div>
 
       {showForm && (
@@ -87,6 +95,7 @@ export default function Problems() {
           </form>
         </div>
       )}
+      {loadError && <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{loadError}</div>}
 
       <div className="card overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">

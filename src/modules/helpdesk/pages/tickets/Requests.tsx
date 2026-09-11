@@ -4,6 +4,7 @@ import api from '@shared/lib/api';
 import { formatDate } from '@shared/lib/format';
 import { StatusBadge } from '@shared/components/RecordTable';
 import toast from 'react-hot-toast';
+import { useAuth } from '@core/auth/useAuth';
 
 // ITSM-06 + ITSM-07 — Request Management & Service Catalog fulfilment:
 // bundles, cart checkout (creates RITMs), requested items and parallel
@@ -20,31 +21,37 @@ interface Chain {
 }
 
 export default function Requests() {
+  const { hasPermission } = useAuth();
+  const canManageApprovals = hasPermission('approvals.manage');
+  const canDecideApprovals = hasPermission('approvals.decide');
   const [bundles, setBundles] = useState<Bundle[]>([]);
   const [chains, setChains] = useState<Chain[]>([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<Array<{ catalogItemId: string; quantity: number }>>([]);
   const [itemId, setItemId] = useState('');
   const [fulfilFor, setFulfilFor] = useState('');
+  const [loadError, setLoadError] = useState('');
 
   const load = async () => {
     setLoading(true);
+    setLoadError('');
     try {
       const [bRes, cRes] = await Promise.all([
         api.get('/gaps2/catalog/bundles').catch(() => ({ data: [] })),
-        api.get('/gaps2/approval-chains').catch(() => ({ data: [] })),
+        canManageApprovals ? api.get('/gaps2/approval-chains') : Promise.resolve({ data: [] }),
       ]);
       setBundles(Array.isArray(bRes.data) ? bRes.data : bRes.data?.records || []);
       setChains(Array.isArray(cRes.data) ? cRes.data : cRes.data?.records || []);
-    } catch {
+    } catch (error: any) {
       setBundles([]);
       setChains([]);
+      setLoadError(error?.response?.status === 403 ? 'You do not have permission to view these requests.' : 'Unable to load requests.');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [canManageApprovals]);
 
   const addToCart = () => {
     if (!itemId.trim()) return toast.error('Enter a catalog item id');
@@ -55,7 +62,7 @@ export default function Requests() {
   const checkout = async () => {
     if (!cart.length) return toast.error('Cart is empty');
     try {
-      const res = await api.post('/gaps2/catalog/cart', {
+      const res = await api.post('/enterprise/requests/cart', {
         items: cart,
         fulfilledFor: fulfilFor || undefined,
       });
@@ -68,6 +75,7 @@ export default function Requests() {
   };
 
   const decide = async (id: string, verdict: 'approved' | 'rejected') => {
+    if (!canDecideApprovals) return toast.error('You do not have permission to decide approvals.');
     try {
       await api.post(`/gaps2/approval-chains/${id}/decide`, { decision: verdict });
       toast.success(`Step ${verdict}`);
@@ -86,6 +94,7 @@ export default function Requests() {
         </div>
         <Link to="/catalog" className="btn-secondary text-sm">Browse Catalog</Link>
       </div>
+      {loadError && <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-200 rounded p-3">{loadError}</p>}
 
       <div className="grid md:grid-cols-2 gap-4">
         <div className="card p-5">
@@ -131,7 +140,7 @@ export default function Requests() {
         </div>
       </div>
 
-      <div className="card overflow-hidden">
+      {canManageApprovals && <div className="card overflow-hidden">
         <div className="px-5 py-3 border-b"><h2 className="font-semibold text-sm">Approval chains</h2></div>
         {loading ? <p className="p-5 text-sm text-gray-400">Loading…</p> : chains.length === 0 ? (
           <p className="p-5 text-sm text-gray-400">No approval chains.</p>
@@ -159,7 +168,7 @@ export default function Requests() {
                     <td className="px-5 py-3"><StatusBadge status={c.status} /></td>
                     <td className="px-5 py-3 text-sm text-gray-500">{formatDate(c.createdAt)}</td>
                     <td className="px-5 py-3">
-                      {c.status === 'pending' || !['approved', 'rejected'].includes(c.status) ? (
+                      {(c.status === 'pending' || !['approved', 'rejected'].includes(c.status)) && canDecideApprovals ? (
                         <div className="flex gap-1.5">
                           <button onClick={() => decide(c._id, 'approved')} className="px-2 py-1 text-xs bg-green-600 text-white rounded">Approve</button>
                           <button onClick={() => decide(c._id, 'rejected')} className="px-2 py-1 text-xs bg-red-600 text-white rounded">Reject</button>
@@ -172,7 +181,7 @@ export default function Requests() {
             </tbody>
           </table>
         )}
-      </div>
+      </div>}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import api from '@shared/lib/api';
 import { formatDate } from '@shared/lib/format';
 import { StatusBadge } from '@shared/components/RecordTable';
 import toast from 'react-hot-toast';
+import { useAuth } from '@core/auth/useAuth';
 
 // ITSM-03 — Major Incident Management: declaration, commander assignment,
 // child incidents, communication plan/cadence, outage linkage, executive
@@ -22,13 +23,17 @@ interface MajorIncident {
 }
 
 export default function MajorIncidents() {
+  const { hasPermission } = useAuth();
+  const canCreate = hasPermission('records.create');
+  const canUpdate = hasPermission('records.update');
   const [items, setItems] = useState<MajorIncident[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: '', description: '', severity: 'critical' });
+  const [form, setForm] = useState({ title: '', description: '', severity: 'critical', reason: '' });
   const [saving, setSaving] = useState(false);
   const [commPlan, setCommPlan] = useState<Record<string, any>>({});
   const [execReport, setExecReport] = useState('');
+  const [loadError, setLoadError] = useState('');
 
   const load = async () => {
     setLoading(true);
@@ -36,8 +41,9 @@ export default function MajorIncidents() {
       const res = await api.get('/enterprise/incidents');
       const all: MajorIncident[] = res.data.incidents || [];
       setItems(all.filter((i) => i.isMajor || i.severity === 'Sev1'));
-    } catch {
+    } catch (error: any) {
       setItems([]);
+      setLoadError(error?.response?.status === 403 ? 'You do not have permission to view major incidents.' : 'Unable to load major incidents. Please retry.');
     } finally {
       setLoading(false);
     }
@@ -47,17 +53,18 @@ export default function MajorIncidents() {
 
   const declare = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canCreate || !canUpdate) return toast.error('You need create and update permission to declare a major incident.');
     setSaving(true);
     try {
-      await api.post('/enterprise/incidents', {
+      const created = await api.post('/enterprise/incidents', {
         title: form.title,
         description: form.description,
         severity: form.severity, // backend maps critical/high/medium/low -> Sev scale
-        isMajor: true,
       });
+      await api.post(`/enterprise/incidents/${created.data.incident._id}/major`, { reason: form.reason });
       toast.success('Major incident declared');
       setShowForm(false);
-      setForm({ title: '', description: '', severity: 'critical' });
+      setForm({ title: '', description: '', severity: 'critical', reason: '' });
       load();
     } catch {
       toast.error('Failed to declare major incident');
@@ -67,6 +74,7 @@ export default function MajorIncidents() {
   };
 
   const setStatus = async (id: string, status: string) => {
+    if (!canUpdate) return toast.error('You do not have permission to update major incidents.');
     try {
       await api.put(`/enterprise/incidents/${id}`, { status, ...(status === 'resolved' ? { resolvedAt: new Date().toISOString() } : {}) });
       toast.success(`Marked ${status}`);
@@ -77,24 +85,14 @@ export default function MajorIncidents() {
   };
 
   const saveCommPlan = async (id: string) => {
+    if (!canUpdate) return toast.error('You do not have permission to configure major-incident communications.');
     try {
-      const body = commPlan[id] || { cadenceMinutes: 30, audience: ['internal', 'stakeholders'] };
-      const res = await api.post(`/gaps2/incidents/${id}/communication-plan`, body);
-      setCommPlan((p) => ({ ...p, [id]: res.data }));
+      const body = commPlan[id] || { cadenceMinutes: 30, audience: ['internal', 'customer'] };
+      const res = await api.put(`/enterprise/incidents/${id}/communication-plan`, body);
+      setCommPlan((p) => ({ ...p, [id]: res.data.plan }));
       toast.success('Communication plan saved');
     } catch {
       toast.error('Failed to save communication plan');
-    }
-  };
-
-  const checkCommDue = async (id: string) => {
-    try {
-      const res = await api.post(`/gaps2/incidents/${id}/communication-due`, {});
-      toast(res.data?.dueNow ? 'Stakeholder update is DUE now' : 'No update due yet', {
-        icon: res.data?.dueNow ? '🔔' : '✅',
-      });
-    } catch {
-      toast.error('Failed to check cadence');
     }
   };
 
@@ -117,7 +115,7 @@ export default function MajorIncidents() {
         <div className="flex gap-2">
           <Link to="/warroom" className="btn-secondary text-sm">Open War Room</Link>
           <Link to="/outages" className="btn-secondary text-sm">Outage Tracking</Link>
-          <button onClick={() => setShowForm(true)} className="btn-primary text-sm">Declare Major Incident</button>
+          {canCreate && canUpdate && <button onClick={() => setShowForm(true)} className="btn-primary text-sm">Declare Major Incident</button>}
         </div>
       </div>
 
@@ -128,12 +126,15 @@ export default function MajorIncidents() {
             placeholder="Incident title *" className="input-field w-full" />
           <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
             rows={3} placeholder="Service + business impact…" className="input-field w-full" />
+          <textarea required value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })}
+            rows={2} placeholder="Why this meets major-incident criteria *" className="input-field w-full" />
           <div className="flex gap-2">
             <button type="submit" disabled={saving} className="btn-primary text-sm">{saving ? 'Declaring…' : 'Declare'}</button>
             <button type="button" onClick={() => setShowForm(false)} className="btn-secondary text-sm">Cancel</button>
           </div>
         </form>
       )}
+      {loadError && <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{loadError}</div>}
 
       <div className="card overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
@@ -167,19 +168,18 @@ export default function MajorIncidents() {
                 <td className="px-5 py-3 text-sm text-gray-500">{formatDate(m.createdAt)}</td>
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-1">
-                    <input
+                    {canUpdate && <input
                       type="number" min={5} max={480} placeholder="min"
                       value={commPlan[m._id]?.cadenceMinutes ?? ''}
                       onChange={(e) => setCommPlan((p) => ({ ...p, [m._id]: { ...(p[m._id] || {}), cadenceMinutes: Number(e.target.value) } }))}
                       className="input-field text-xs w-16 py-1" title="Update cadence (minutes)"
-                    />
-                    <button onClick={() => saveCommPlan(m._id)} className="text-xs text-brand-600 hover:underline">Save</button>
-                    <button onClick={() => checkCommDue(m._id)} className="text-xs text-gray-500 hover:underline">Due?</button>
+                    />}
+                    {canUpdate && <button onClick={() => saveCommPlan(m._id)} className="text-xs text-brand-600 hover:underline">Save</button>}
                   </div>
                 </td>
                 <td className="px-5 py-3">
                   <div className="flex gap-2 text-xs">
-                    {m.status !== 'resolved' && (
+                    {canUpdate && m.status !== 'resolved' && (
                       <button onClick={() => setStatus(m._id, 'resolved')} className="text-green-600 hover:underline">Resolve</button>
                     )}
                     <Link to="/pir" className="text-brand-600 hover:underline">PIR</Link>

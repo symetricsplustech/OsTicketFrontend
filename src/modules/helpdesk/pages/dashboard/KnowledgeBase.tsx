@@ -13,7 +13,6 @@ interface Faq {
   notHelpful: number;
   viewCount: number;
   lifecycle: string;
-  status?: string;
 }
 
 // Knowledge lifecycle (ITSM-08): draft -> review -> approved -> published,
@@ -40,25 +39,27 @@ export default function KnowledgeBase() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     const load = async () => {
       try {
         const [faqsRes, catsRes] = await Promise.all([
-          api.get('/kb/faqs'),
-          api.get('/kb/categories'),
+          api.get(canManageKb ? '/agent/faqs' : '/kb/faqs'),
+          api.get(canManageKb ? '/agent/faq-categories' : '/kb/categories'),
         ]);
-        setFaqs(faqsRes.data.faqs || []);
-        setCategories(catsRes.data.categories || []);
-      } catch {
+        setFaqs(faqsRes.data.items || faqsRes.data.faqs || []);
+        setCategories(catsRes.data.items || catsRes.data.categories || []);
+      } catch (error: any) {
         setFaqs([]);
         setCategories([]);
+        setLoadError(error?.response?.status === 403 ? 'You do not have permission to view knowledge content.' : 'Unable to load knowledge content. Please retry.');
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, []);
+  }, [canManageKb]);
 
   const filtered = faqs.filter((f) => {
     const matchesSearch = f.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -70,7 +71,7 @@ export default function KnowledgeBase() {
   const transition = async (faqId: string, to: string) => {
     try {
       await api.post(`/agent/faqs/${faqId}/transition`, { to });
-      setFaqs((prev) => prev.map((f) => (f._id === faqId ? { ...f, status: to } : f)));
+      setFaqs((prev) => prev.map((f) => (f._id === faqId ? { ...f, lifecycle: to } : f)));
       toast.success(`Article moved to ${to}`);
     } catch (e: any) {
       toast.error(e?.response?.data?.message || 'Transition rejected');
@@ -103,6 +104,7 @@ export default function KnowledgeBase() {
           ))}
         </select>
       </div>
+      {loadError && <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{loadError}</div>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {loading ? (
@@ -117,11 +119,11 @@ export default function KnowledgeBase() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-semibold text-gray-900">{faq.question}</h3>
-                    <span className="px-1.5 py-0.5 text-[10px] rounded-full bg-gray-100 text-gray-600">{faq.status || 'published'}</span>
+                    <span className="px-1.5 py-0.5 text-[10px] rounded-full bg-gray-100 text-gray-600">{faq.lifecycle || 'published'}</span>
                   </div>
                   {canManageKb && (
                     <div className="mt-1.5 flex gap-1.5 flex-wrap">
-                      {(NEXT_STEPS[faq.status || 'published'] || []).map((step) => (
+                      {(NEXT_STEPS[faq.lifecycle || 'published'] || []).map((step) => (
                         <button key={step} onClick={() => transition(faq._id, step)}
                           className="text-[11px] px-2 py-0.5 border rounded-full text-brand-700 border-brand-200 hover:bg-brand-50">
                           → {step}

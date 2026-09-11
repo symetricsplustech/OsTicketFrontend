@@ -1,106 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '@shared/lib/api';
 import { formatDateTime, formatRelativeTime } from '@shared/lib/format';
 import toast from 'react-hot-toast';
-import { Paperclip, Send, UserCircle, Download, Trash2, ArrowRightLeft, Link2, GitMerge, SplitSquareHorizontal } from 'lucide-react';
-
-interface Ticket {
-  _id: string;
-  number: string;
-  title: string;
-  body?: string;
-  status: string;
-  priority: string;
-  category?: string;
-  source?: string;
-  assignedTo?: { _id: string; name: string; email: string };
-  createdBy: { name: string; email: string };
-  departmentId?: { name: string };
-  slaPlan?: { name: string };
-  firstResponseDue?: string;
-  resolutionDue?: string;
-  thread: Array<{
-    _id: string;
-    type: string;
-    content: string;
-    author?: { name: string; email: string };
-    attachments?: string[];
-    createdAt: string;
-  }>;
-  attachments?: string[];
-  tags?: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Agent { _id: string; name: string; email: string; }
-interface Department { _id: string; name: string; }
-interface TicketStatus { key: string; name: string; isClosed?: boolean; }
-interface AssetOption { _id: string; name: string; serial?: string; hostname?: string; }
-
-const normaliseTicket = (payload: any): Ticket => {
-  const ticket = payload.ticket || payload;
-  const threads = payload.threads || ticket.thread || [];
-  return {
-    ...ticket,
-    title: ticket.subject || ticket.title || '',
-    body: ticket.customData?.details || ticket.body || '',
-    assignedTo: ticket.agent || ticket.assignedTo,
-    createdBy: ticket.user || ticket.createdBy || { name: '', email: '' },
-    departmentId: ticket.dept || ticket.departmentId,
-    slaPlan: ticket.sla || ticket.slaPlan,
-    resolutionDue: ticket.dueDate || ticket.resolutionDue,
-    thread: threads.map((entry: any) => ({
-      ...entry,
-      content: entry.body || entry.content || entry.systemMessage || '',
-      author: entry.agent || entry.user || entry.author,
-      attachments: (entry.attachments || []).map((attachment: any) => attachment.path || attachment.filename || attachment),
-    })),
-  };
-};
-
-function RelatedKnowledge({ subject }: { subject: string }) {
-  const [items, setItems] = useState<Array<{ _id: string; question: string; helpful?: number }>>([]);
-  useEffect(() => {
-    if (!subject || subject.trim().length < 4) return;
-    const t = setTimeout(async () => {
-      try {
-        const res = await api.get('/agent/kb/suggest', { params: { q: subject.slice(0, 200) } });
-        setItems(res.data.items || []);
-      } catch { /* best-effort */ }
-    }, 500);
-    return () => clearTimeout(t);
-  }, [subject]);
-  const vote = async (id: string, helpful: boolean) => {
-    try {
-      await api.post(`/kb/faqs/${id}/vote`, { helpful });
-      setItems((prev) => prev.map((i) => (i._id === id ? { ...i, helpful: (i.helpful || 0) + (helpful ? 1 : 0) } : i)));
-    } catch { /* best-effort */ }
-  };
-  if (!items.length) return null;
-  return (
-    <div className="card p-5">
-      <h3 className="font-semibold text-sm mb-3">Related knowledge</h3>
-      <ul className="space-y-2">
-        {items.map((a) => (
-          <li key={a._id} className="text-sm">
-            <div className="text-gray-800">{a.question}</div>
-            <div className="flex gap-2 mt-1">
-              <button onClick={() => vote(a._id, true)} className="text-xs text-green-600 hover:underline">Helpful{a.helpful ? ` (${a.helpful})` : ''}</button>
-              <button onClick={() => vote(a._id, false)} className="text-xs text-gray-400 hover:underline">Not helpful</button>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+import { Paperclip, Send, Trash2, ArrowRightLeft, Link2, GitMerge, SplitSquareHorizontal } from 'lucide-react';
+import { useAuth } from '@core/auth/useAuth';
+import { LoadingSpinner } from '@shared/components/ui';
+import { RelatedKnowledge } from './detail/RelatedKnowledge';
+import { normaliseTicket } from './detail/normaliseTicket';
+import type { Agent, AssetOption, Department, Ticket, TicketStatus } from './detail/types';
+import { TicketConversation, TicketSummary } from './detail/TicketConversation';
+import { assetApi, presenceApi, ticketApi } from '@modules/helpdesk/services';
 
 export default function TicketDetail() {  const { number } = useParams();
   const navigate = useNavigate();
+  const { hasPermission } = useAuth();
+  const canReply = hasPermission('tickets.reply');
+  const canNote = hasPermission('tickets.note');
+  const canEdit = hasPermission('tickets.edit');
+  const canClose = hasPermission('tickets.close');
+  const canAssign = hasPermission('tickets.assign');
+  const canTransfer = hasPermission('tickets.transfer');
+  const canTasks = hasPermission('tickets.tasks');
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [reply, setReply] = useState('');
   const [note, setNote] = useState('');
   const [replying, setReplying] = useState(false);
@@ -125,7 +48,7 @@ export default function TicketDetail() {  const { number } = useParams();
     if (!ticket) return;
     setSummarizing(true);
     try {
-      const res = await api.post('/agent/assist/summarize', { ticketNumber: ticket.number });
+      const res = await ticketApi.summarize(ticket.number);
       setSummary(res.data);
     } catch {
       toast.error('Summarization failed');
@@ -143,12 +66,16 @@ export default function TicketDetail() {  const { number } = useParams();
   const [actionSaving, setActionSaving] = useState(false);
 
   useEffect(() => {
+    if (!canReply && canNote) setReplyType('note');
+  }, [canReply, canNote]);
+
+  useEffect(() => {
     const load = async () => {
       try {
         const [ticketRes, agentsRes, deptsRes] = await Promise.all([
-          api.get(`/agent/tickets/${number}`),
-          api.get('/admin/agents').catch(() => ({ data: { agents: [] } })),
-          api.get('/admin/departments').catch(() => ({ data: { departments: [] } })),
+          ticketApi.get(number || ''),
+          ticketApi.getAgents().catch(() => ({ data: { agents: [] } })),
+          ticketApi.getDepartments().catch(() => ({ data: { departments: [] } })),
         ]);
         setTicket(normaliseTicket(ticketRes.data));
         setAgents(ticketRes.data.agents || agentsRes.data.items || agentsRes.data.agents || []);
@@ -156,9 +83,12 @@ export default function TicketDetail() {  const { number } = useParams();
         setStatuses(ticketRes.data.statuses || []);
         const t = normaliseTicket(ticketRes.data) as any;
         if (Array.isArray(t.tasks)) setTasks(t.tasks);
-        api.get('/gaps2/closure-codes').then((r) => setClosureCodes(r.data)).catch(() => {});
-        api.get(`/agent/tickets/${number}/sla-history`).then((r) => setSlaHistory(r.data?.data?.events || [])).catch(() => {});
-      } catch { /* fallback */ } finally { setLoading(false); }
+        ticketApi.getClosureCodes().then((r) => setClosureCodes(r.data)).catch(() => {});
+        ticketApi.getSlaHistory(number || '').then((r) => setSlaHistory(r.data?.data?.events || [])).catch(() => {});
+      } catch (error: any) {
+        const status = error?.response?.status;
+        setLoadError(status === 403 ? 'You do not have permission to view this ticket.' : status === 404 ? 'Ticket not found.' : 'Unable to load this ticket. Please try again.');
+      } finally { setLoading(false); }
     };
     load();
   }, [number]);
@@ -174,7 +104,7 @@ export default function TicketDetail() {  const { number } = useParams();
 
       // @mention extraction — creates Mention records + notifications for matched agents
       if (reply.includes('@')) {
-        api.post('/ops/mentions/extract', {
+        presenceApi.extractMentions({
           text: reply,
           entityType: replyType === 'note' ? 'note' : 'ticket',
           entityId: ticket._id || ticket.number,
@@ -182,17 +112,15 @@ export default function TicketDetail() {  const { number } = useParams();
       }
 
       if (replyType === 'note') {
-        await api.post(`/agent/tickets/${ticket.number}/note`, { message: note });
+        await ticketApi.addNote(ticket.number, note);
       } else {
-        await api.post(`/agent/tickets/${ticket.number}/reply`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await ticketApi.reply(ticket.number, formData);
       }
       toast.success(replyType === 'note' ? 'Note added' : 'Reply sent');
       setReply('');
       setNote('');
       setSelectedFiles([]);
-      const res = await api.get(`/agent/tickets/${number}`);
+      const res = await ticketApi.get(number || '');
       setTicket(normaliseTicket(res.data));
     } catch { toast.error('Failed to send'); } finally { setReplying(false); }
   };
@@ -202,8 +130,8 @@ export default function TicketDetail() {  const { number } = useParams();
   useEffect(() => {
     if (!number) return;
     const beat = () => {
-      api.post(`/ops/tickets/${number}/presence`).catch(() => {});
-      api.get(`/ops/tickets/${number}/presence`)
+      presenceApi.heartbeat(number).catch(() => {});
+      presenceApi.viewers(number)
         .then(r => setViewers(r.data.viewers || []))
         .catch(() => {});
     };
@@ -214,6 +142,10 @@ export default function TicketDetail() {  const { number } = useParams();
 
   const handleStatusChange = async (newStatus: string) => {
     if (!ticket) return;
+    if (['resolved', 'closed'].includes(newStatus) ? !canClose : !canEdit) {
+      toast.error('You do not have permission to make this status change');
+      return;
+    }
     try {
       let resolution: Record<string, string> | undefined;
       if (newStatus === 'resolved') {
@@ -223,7 +155,7 @@ export default function TicketDetail() {  const { number } = useParams();
         if (!solution?.trim()) { toast.error('Solution is required to resolve'); return; }
         resolution = { code: code.trim(), solution: solution.trim() };
       }
-      await api.post(`/agent/tickets/${ticket.number}/status`, { status: newStatus, ...(resolution ? { resolution } : {}) });
+      await ticketApi.updateStatus(ticket.number, newStatus, resolution);
       setTicket({ ...ticket, status: newStatus });
       toast.success('Status updated');
     } catch (e: any) { toast.error(e?.response?.data?.message || 'Failed to update status'); }
@@ -232,7 +164,7 @@ export default function TicketDetail() {  const { number } = useParams();
   const handleAssign = async () => {
     if (!ticket || !selectedAgent) return;
     try {
-      await api.post(`/agent/tickets/${ticket.number}/assign`, { agentId: selectedAgent });
+      await ticketApi.assign(ticket.number, selectedAgent);
       const agent = agents.find(a => a._id === selectedAgent);
       setTicket({ ...ticket, assignedTo: agent ? { _id: agent._id, name: agent.name, email: agent.email } : ticket.assignedTo });
       toast.success('Ticket assigned');
@@ -242,7 +174,7 @@ export default function TicketDetail() {  const { number } = useParams();
   const handleTransferDept = async () => {
     if (!ticket || !selectedDept) return;
     try {
-      await api.post(`/agent/tickets/${ticket.number}/transfer`, { deptId: selectedDept });
+      await ticketApi.transfer(ticket.number, selectedDept);
       const dept = departments.find(d => d._id === selectedDept);
       setTicket({ ...ticket, departmentId: dept ? { name: dept.name } : ticket.departmentId });
       setSelectedDept('');
@@ -253,7 +185,7 @@ export default function TicketDetail() {  const { number } = useParams();
   const handleAddTask = async () => {
     if (!ticket || !newTask.trim()) return;
     try {
-      const res = await api.post(`/agent/tickets/${ticket.number}/tasks`, { title: newTask.trim(), status: 'open' });
+      const res = await ticketApi.addTask(ticket.number, newTask.trim());
       setTasks((ts) => [...ts, res.data.task || res.data || { title: newTask.trim(), status: 'open' }]);
       setNewTask('');
       toast.success('Task added');
@@ -265,7 +197,7 @@ export default function TicketDetail() {  const { number } = useParams();
     const id = task._id || task.id;
     const next = task.status === 'done' ? 'open' : 'done';
     try {
-      if (id) await api.put(`/agent/tickets/${ticket.number}/tasks/${id}`, { status: next });
+      if (id) await ticketApi.updateTask(ticket.number, id, next);
       setTasks((ts) => ts.map((t) => (t === task ? { ...t, status: next } : t)));
     } catch { toast.error('Failed to update task'); }
   };
@@ -273,7 +205,7 @@ export default function TicketDetail() {  const { number } = useParams();
   const handleSla = async (action: 'pause' | 'resume') => {
     if (!ticket) return;
     try {
-      await api.post(`/agent/tickets/${ticket.number}/sla/${action}`, {});
+      await ticketApi.updateSla(ticket.number, action);
       setSlaPaused(action === 'pause');
       toast.success(`SLA ${action}d`);
     } catch { toast.error(`Failed to ${action} SLA`); }
@@ -282,7 +214,7 @@ export default function TicketDetail() {  const { number } = useParams();
   const handleClosure = async () => {
     if (!ticket || !resolutionCode || !closureCode) return toast.error('Pick resolution + closure codes');
     try {
-      await api.put(`/gaps2/tickets/${ticket.number}/closure`, { resolutionCode, closureCode });
+      await ticketApi.saveClosure(ticket.number, resolutionCode, closureCode);
       toast.success('Closure codes saved');
     } catch { toast.error('Failed to save closure codes'); }
   };
@@ -291,7 +223,7 @@ export default function TicketDetail() {  const { number } = useParams();
     setActionMode('asset');
     if (assets.length) return;
     try {
-      const res = await api.get('/enterprise/assets');
+      const res = await assetApi.list();
       setAssets(res.data.assets || []);
     } catch { toast.error('Failed to load assets'); }
   };
@@ -300,7 +232,7 @@ export default function TicketDetail() {  const { number } = useParams();
     if (!ticket || !selectedAsset) return;
     setActionSaving(true);
     try {
-      await api.post(`/agent/tickets/${ticket.number}/fields`, { asset: selectedAsset });
+      await ticketApi.linkAsset(ticket.number, selectedAsset);
       toast.success('Asset linked');
       setActionMode(null);
     } catch (e: any) { toast.error(e?.response?.data?.message || 'Failed to link asset'); }
@@ -312,7 +244,7 @@ export default function TicketDetail() {  const { number } = useParams();
     setActionSaving(true);
     try {
       const target = mergeTarget.trim().toUpperCase();
-      await api.post(`/agent/tickets/${ticket.number}/merge`, { targetNumber: target });
+      await ticketApi.merge(ticket.number, target);
       toast.success(`Merged into ${target}`);
       navigate(`/tickets/${target}`);
     } catch (e: any) { toast.error(e?.response?.data?.message || 'Failed to merge tickets'); }
@@ -327,7 +259,7 @@ export default function TicketDetail() {  const { number } = useParams();
     if (!ticket || !splitSubject.trim() || !splitThreadIds.length) return;
     setActionSaving(true);
     try {
-      const res = await api.post(`/agent/tickets/${ticket.number}/split`, { subject: splitSubject.trim(), threadIds: splitThreadIds });
+      const res = await ticketApi.split(ticket.number, splitSubject.trim(), splitThreadIds);
       const created = res.data.ticket;
       toast.success(`Created ${created.number}`);
       navigate(`/tickets/${created.number}`);
@@ -341,8 +273,8 @@ export default function TicketDetail() {  const { number } = useParams();
 
   const removeFile = (idx: number) => setSelectedFiles(files => files.filter((_, i) => i !== idx));
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600" /></div>;
-  if (!ticket) return <div className="text-center py-12 text-gray-500">Ticket not found</div>;
+  if (loading) return <LoadingSpinner />;
+  if (!ticket) return <div role="alert" className="text-center py-12 text-gray-500">{loadError || 'Ticket not found'}</div>;
 
   const thread = ticket.thread || [];
   const availableStatuses = statuses.reduce<TicketStatus[]>(
@@ -376,64 +308,29 @@ export default function TicketDetail() {  const { number } = useParams();
             className="text-xs px-3 py-2 border border-brand-200 text-brand-700 rounded-lg hover:bg-brand-50 disabled:opacity-40">
             {summarizing ? 'Summarizing…' : '✨ Summarize'}
           </button>
-          <select value={ticket.status} onChange={(e) => handleStatusChange(e.target.value)} className="input-field w-40">
-            {availableStatuses.map((status) => <option key={status.key} value={status.key}>{status.name}</option>)}
-          </select>
+          {(canEdit || canClose) ? (
+            <select aria-label="Ticket status" value={ticket.status} onChange={(e) => handleStatusChange(e.target.value)} className="input-field w-40">
+              {availableStatuses.filter((status) => status.key === ticket.status || (['resolved', 'closed'].includes(status.key) ? canClose : canEdit)).map((status) => <option key={status.key} value={status.key}>{status.name}</option>)}
+            </select>
+          ) : <span className="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-600 capitalize">{ticket.status}</span>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {/* Thread */}
-          <div className="space-y-4">
-            {thread.map((entry) => (
-              <div key={entry._id} className={`card p-5 ${entry.type === 'note' ? 'border-l-4 border-yellow-400 bg-yellow-50/30' : ''}`}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    {actionMode === 'split' && entry.type !== 'note' && (
-                      <input aria-label={`Select message from ${entry.author?.name || 'System'}`} type="checkbox" checked={splitThreadIds.includes(entry._id)} onChange={() => toggleSplitThread(entry._id)} />
-                    )}
-                    <UserCircle className="h-5 w-5 text-gray-400" />
-                    <span className="text-sm font-medium">{entry.author?.name || 'System'}</span>
-                    {entry.type === 'note' && <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-700 rounded">Internal Note</span>}
-                  </div>
-                  <span className="text-xs text-gray-500">{formatRelativeTime(entry.createdAt)}</span>
-                </div>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{entry.content}</p>
-                {entry.attachments && entry.attachments.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {entry.attachments.map((att, i) => (
-                      <a key={i} href={att} target="_blank" rel="noreferrer" className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 hover:bg-gray-200">
-                        <Download className="h-3 w-3" /> {att.split('/').pop()}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {summary && (
-            <div className="card p-5 border-brand-200 bg-brand-50/40">
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="font-semibold text-sm">Thread summary</h3>
-                <span className="px-2 py-0.5 text-[10px] rounded-full bg-white border text-gray-500">
-                  {summary.provider === 'llm' ? 'LLM' : 'on-device extractive'}
-                </span>
-                <button onClick={() => setSummary(null)} className="ml-auto text-xs text-gray-400 hover:text-gray-600">dismiss</button>
-              </div>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{summary.summary || 'Nothing substantial yet.'}</p>
-              <p className="text-xs text-gray-400 mt-2">
-                {summary.counts?.messages ?? 0} entries · voices: {(summary.participants || []).join(', ') || '—'}
-              </p>
-            </div>
-          )}
+          <TicketConversation
+            entries={thread}
+            selecting={actionMode === 'split'}
+            selectedIds={splitThreadIds}
+            onToggle={toggleSplitThread}
+          />
+          <TicketSummary summary={summary} onDismiss={() => setSummary(null)} />
 
           {/* Reply Form */}
-          <div className="card p-5">
+          {(canReply || canNote) && <div className="card p-5">
             <div className="flex gap-4 mb-4">
-              <button onClick={() => setReplyType('reply')} className={`text-sm font-medium pb-1 border-b-2 ${replyType === 'reply' ? 'border-brand-600 text-brand-600' : 'border-transparent text-gray-500'}`}>Reply to Customer</button>
-              <button onClick={() => setReplyType('note')} className={`text-sm font-medium pb-1 border-b-2 ${replyType === 'note' ? 'border-yellow-600 text-yellow-600' : 'border-transparent text-gray-500'}`}>Internal Note</button>
+              {canReply && <button onClick={() => setReplyType('reply')} className={`text-sm font-medium pb-1 border-b-2 ${replyType === 'reply' ? 'border-brand-600 text-brand-600' : 'border-transparent text-gray-500'}`}>Reply to Customer</button>}
+              {canNote && <button onClick={() => setReplyType('note')} className={`text-sm font-medium pb-1 border-b-2 ${replyType === 'note' ? 'border-yellow-600 text-yellow-600' : 'border-transparent text-gray-500'}`}>Internal Note</button>}
             </div>
             <form onSubmit={handleReply}>
               <textarea
@@ -466,7 +363,7 @@ export default function TicketDetail() {  const { number } = useParams();
                 </button>
               </div>
             </form>
-          </div>
+          </div>}
         </div>
 
         {/* Sidebar */}
@@ -486,7 +383,7 @@ export default function TicketDetail() {  const { number } = useParams();
             </div>
           </div>
 
-          <div className="card p-5">
+          {canAssign && <div className="card p-5">
             <h3 className="font-semibold text-sm mb-3">Quick Assign</h3>
             <div className="space-y-2">
               <select value={selectedAgent} onChange={(e) => setSelectedAgent(e.target.value)} className="input-field text-sm">
@@ -495,12 +392,12 @@ export default function TicketDetail() {  const { number } = useParams();
               </select>
               <button onClick={handleAssign} disabled={!selectedAgent} className="w-full btn-primary text-sm">Assign</button>
             </div>
-          </div>
+          </div>}
 
-          <div className="card p-5">
+          {(canTransfer || canEdit) && <div className="card p-5">
             <h3 className="font-semibold text-sm mb-3">Actions</h3>
             <div className="space-y-2">
-              <div className="flex gap-2">
+              {canTransfer && <div className="flex gap-2">
                 <select value={selectedDept} onChange={(e) => setSelectedDept(e.target.value)} className="input-field text-sm flex-1">
                   <option value="">Select department...</option>
                   {departments.map(d => <option key={d._id} value={d._id}>{d.name}</option>)}
@@ -508,10 +405,10 @@ export default function TicketDetail() {  const { number } = useParams();
                 <button onClick={handleTransferDept} disabled={!selectedDept} className="btn-secondary text-sm px-3">
                   <ArrowRightLeft className="h-4 w-4" />
                 </button>
-              </div>
-              <button onClick={openAssetAction} className="w-full btn-secondary text-sm flex items-center gap-2 justify-center"><Link2 className="h-4 w-4" /> Link Asset</button>
-              <button onClick={() => setActionMode(actionMode === 'merge' ? null : 'merge')} className="w-full btn-secondary text-sm flex items-center gap-2 justify-center"><GitMerge className="h-4 w-4" /> Merge Tickets</button>
-              <button onClick={() => { setActionMode(actionMode === 'split' ? null : 'split'); setSplitThreadIds([]); }} className="w-full btn-secondary text-sm flex items-center gap-2 justify-center"><SplitSquareHorizontal className="h-4 w-4" /> Split Ticket</button>
+              </div>}
+              {canEdit && <button onClick={openAssetAction} className="w-full btn-secondary text-sm flex items-center gap-2 justify-center"><Link2 className="h-4 w-4" /> Link Asset</button>}
+              {canEdit && <button onClick={() => setActionMode(actionMode === 'merge' ? null : 'merge')} className="w-full btn-secondary text-sm flex items-center gap-2 justify-center"><GitMerge className="h-4 w-4" /> Merge Tickets</button>}
+              {canEdit && <button onClick={() => { setActionMode(actionMode === 'split' ? null : 'split'); setSplitThreadIds([]); }} className="w-full btn-secondary text-sm flex items-center gap-2 justify-center"><SplitSquareHorizontal className="h-4 w-4" /> Split Ticket</button>}
               {actionMode === 'asset' && (
                 <div className="rounded-lg border border-gray-200 p-3 space-y-2">
                   <label className="block text-xs font-medium text-gray-600">Asset</label>
@@ -537,9 +434,9 @@ export default function TicketDetail() {  const { number } = useParams();
                 </div>
               )}
             </div>
-          </div>
+          </div>}
 
-          <div className="card p-5">
+          {canTasks && <div className="card p-5">
             <h3 className="font-semibold text-sm mb-3">Tasks</h3>
             <div className="space-y-1.5 mb-2">
               {tasks.length === 0 && <p className="text-xs text-gray-400">No tasks yet.</p>}
@@ -556,9 +453,9 @@ export default function TicketDetail() {  const { number } = useParams();
                 placeholder="New task…" className="input-field text-sm flex-1" />
               <button onClick={handleAddTask} className="btn-primary text-sm px-3">Add</button>
             </div>
-          </div>
+          </div>}
 
-          <div className="card p-5">
+          {canEdit && <div className="card p-5">
             <h3 className="font-semibold text-sm mb-3">SLA {slaPaused && <span className="text-xs text-orange-600">(paused)</span>}</h3>
             <div className="flex gap-2">
               <button onClick={() => handleSla('pause')} disabled={slaPaused} className="btn-secondary text-sm flex-1 disabled:opacity-40">Pause</button>
@@ -568,9 +465,9 @@ export default function TicketDetail() {  const { number } = useParams();
               {slaHistory.length === 0 && <p className="text-xs text-gray-400">No SLA history recorded yet.</p>}
               {slaHistory.map((event) => <div key={event._id} className="border-l-2 border-purple-200 pl-3 text-xs"><div className="font-medium capitalize">{event.clock?.replace(/_/g, ' ')} {event.event}</div><div className="text-gray-500">{formatDateTime(event.occurredAt)}{event.reason ? ` · ${event.reason}` : ''}</div></div>)}
             </div>
-          </div>
+          </div>}
 
-          <div className="card p-5">
+          {canClose && <div className="card p-5">
             <h3 className="font-semibold text-sm mb-3">Closure</h3>
             <div className="space-y-2">
               <select value={resolutionCode} onChange={(e) => setResolutionCode(e.target.value)} className="input-field text-sm w-full">
@@ -583,7 +480,7 @@ export default function TicketDetail() {  const { number } = useParams();
               </select>
               <button onClick={handleClosure} className="w-full btn-secondary text-sm">Save codes</button>
             </div>
-          </div>
+          </div>}
         </div>
       </div>
     </div>
