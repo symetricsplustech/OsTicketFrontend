@@ -49,6 +49,8 @@ const ChangeDashboard = lazy(() => import('@modules/helpdesk/pages/changes/Chang
 const RequestRecord = lazy(() => import('@modules/helpdesk/pages/requests/RequestRecord'));
 const RequestDashboard = lazy(() => import('@modules/helpdesk/pages/requests/RequestDashboard'));
 const CatalogBrowser = lazy(() => import('@modules/helpdesk/pages/requests/CatalogBrowser'));
+const KnowledgeDashboard = lazy(() => import('@modules/helpdesk/pages/knowledge/KnowledgeDashboard'));
+const ArticleRecord = lazy(() => import('@modules/helpdesk/pages/knowledge/ArticleRecord'));
 const KnowledgeBase = lazy(() => import('@modules/helpdesk/pages/dashboard/KnowledgeBase'));
 const KnowledgeInsights = lazy(() => import('@modules/helpdesk/pages/dashboard/KnowledgeInsights'));
 const NeuralSearch = lazy(() => import('@modules/helpdesk/pages/knowledge/NeuralSearch'));
@@ -166,6 +168,8 @@ export function AppRoutes() {
 
           {/* Helpdesk Knowledge */}
           <Route path="kb" element={<ModuleGuard module="helpdesk"><KnowledgeBase /></ModuleGuard>} />
+          <Route path="kb/:id" element={<ModuleGuard module="helpdesk"><ArticleRecord /></ModuleGuard>} />
+          <Route path="knowledge-dashboard" element={<ModuleGuard module="helpdesk"><KnowledgeDashboard /></ModuleGuard>} />
           <Route path="knowledge-insights" element={<ModuleGuard module="helpdesk"><KnowledgeInsights /></ModuleGuard>} />
           <Route path="neural-search" element={<ModuleGuard module="helpdesk"><NeuralSearch /></ModuleGuard>} />
           <Route path="known-errors" element={<ModuleGuard module="helpdesk"><KnownErrors /></ModuleGuard>} />
