@@ -44,6 +44,8 @@ const ProblemDashboard = lazy(() => import('@modules/helpdesk/pages/problems/Pro
 const Changes = lazy(() => import('@modules/helpdesk/pages/changes/Changes'));
 const ChangeCrud = lazy(() => import('@modules/helpdesk/pages/changes/ChangeCrud'));
 const ChangeCalendarPage = lazy(() => import('@modules/helpdesk/pages/changes/ChangeCalendarPage'));
+const ChangeRecord = lazy(() => import('@modules/helpdesk/pages/changes/ChangeRecord'));
+const ChangeDashboard = lazy(() => import('@modules/helpdesk/pages/changes/ChangeDashboard'));
 const KnowledgeBase = lazy(() => import('@modules/helpdesk/pages/dashboard/KnowledgeBase'));
 const KnowledgeInsights = lazy(() => import('@modules/helpdesk/pages/dashboard/KnowledgeInsights'));
 const NeuralSearch = lazy(() => import('@modules/helpdesk/pages/knowledge/NeuralSearch'));
@@ -147,7 +149,9 @@ export function AppRoutes() {
           {/* Helpdesk Changes */}
           <Route path="changes" element={<ModuleGuard module="helpdesk"><Changes /></ModuleGuard>} />
           <Route path="changes-crud" element={<ModuleGuard module="helpdesk"><ChangeCrud /></ModuleGuard>} />
+          <Route path="changes/:id" element={<ModuleGuard module="helpdesk"><ChangeRecord /></ModuleGuard>} />
           <Route path="change-calendar" element={<ModuleGuard module="helpdesk"><ChangeCalendarPage /></ModuleGuard>} />
+          <Route path="change-dashboard" element={<ModuleGuard module="helpdesk"><ChangeDashboard /></ModuleGuard>} />
           <Route path="cab" element={<ModuleGuard module="helpdesk"><CabBoard /></ModuleGuard>} />
 
           {/* Helpdesk Knowledge */}
