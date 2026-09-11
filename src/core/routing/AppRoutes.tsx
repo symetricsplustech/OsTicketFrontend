@@ -46,6 +46,9 @@ const ChangeCrud = lazy(() => import('@modules/helpdesk/pages/changes/ChangeCrud
 const ChangeCalendarPage = lazy(() => import('@modules/helpdesk/pages/changes/ChangeCalendarPage'));
 const ChangeRecord = lazy(() => import('@modules/helpdesk/pages/changes/ChangeRecord'));
 const ChangeDashboard = lazy(() => import('@modules/helpdesk/pages/changes/ChangeDashboard'));
+const RequestRecord = lazy(() => import('@modules/helpdesk/pages/requests/RequestRecord'));
+const RequestDashboard = lazy(() => import('@modules/helpdesk/pages/requests/RequestDashboard'));
+const CatalogBrowser = lazy(() => import('@modules/helpdesk/pages/requests/CatalogBrowser'));
 const KnowledgeBase = lazy(() => import('@modules/helpdesk/pages/dashboard/KnowledgeBase'));
 const KnowledgeInsights = lazy(() => import('@modules/helpdesk/pages/dashboard/KnowledgeInsights'));
 const NeuralSearch = lazy(() => import('@modules/helpdesk/pages/knowledge/NeuralSearch'));
@@ -153,6 +156,13 @@ export function AppRoutes() {
           <Route path="change-calendar" element={<ModuleGuard module="helpdesk"><ChangeCalendarPage /></ModuleGuard>} />
           <Route path="change-dashboard" element={<ModuleGuard module="helpdesk"><ChangeDashboard /></ModuleGuard>} />
           <Route path="cab" element={<ModuleGuard module="helpdesk"><CabBoard /></ModuleGuard>} />
+
+          {/* Helpdesk Requests & Catalog */}
+          <Route path="catalog" element={<ModuleGuard module="helpdesk"><CatalogBrowser /></ModuleGuard>} />
+          <Route path="catalog/:id" element={<ModuleGuard module="helpdesk"><CatalogBrowser /></ModuleGuard>} />
+          <Route path="requests" element={<ModuleGuard module="helpdesk"><RequestDashboard /></ModuleGuard>} />
+          <Route path="requests/:id" element={<ModuleGuard module="helpdesk"><RequestRecord /></ModuleGuard>} />
+          <Route path="ritms/:id" element={<ModuleGuard module="helpdesk"><RequestRecord /></ModuleGuard>} />
 
           {/* Helpdesk Knowledge */}
           <Route path="kb" element={<ModuleGuard module="helpdesk"><KnowledgeBase /></ModuleGuard>} />
