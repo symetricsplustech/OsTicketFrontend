@@ -54,6 +54,7 @@ const ArticleRecord = lazy(() => import('@modules/helpdesk/pages/knowledge/Artic
 const KnowledgeBase = lazy(() => import('@modules/helpdesk/pages/dashboard/KnowledgeBase'));
 const KnowledgeInsights = lazy(() => import('@modules/helpdesk/pages/dashboard/KnowledgeInsights'));
 const NeuralSearch = lazy(() => import('@modules/helpdesk/pages/knowledge/NeuralSearch'));
+const SlaDashboard = lazy(() => import('@modules/helpdesk/pages/slm/SlaDashboard'));
 const ServiceCatalog = lazy(() => import('@modules/helpdesk/pages/support/ServiceCatalog'));
 const MyWork = lazy(() => import('@modules/helpdesk/pages/support/MyWork'));
 const CabBoard = lazy(() => import('@modules/helpdesk/pages/support/CabBoard'));
@@ -173,6 +174,9 @@ export function AppRoutes() {
           <Route path="knowledge-insights" element={<ModuleGuard module="helpdesk"><KnowledgeInsights /></ModuleGuard>} />
           <Route path="neural-search" element={<ModuleGuard module="helpdesk"><NeuralSearch /></ModuleGuard>} />
           <Route path="known-errors" element={<ModuleGuard module="helpdesk"><KnownErrors /></ModuleGuard>} />
+
+          {/* Helpdesk SLA */}
+          <Route path="sla-dashboard" element={<ModuleGuard module="helpdesk"><SlaDashboard /></ModuleGuard>} />
 
           {/* Helpdesk Support */}
           <Route path="catalog" element={<ModuleGuard module="helpdesk"><ServiceCatalog /></ModuleGuard>} />

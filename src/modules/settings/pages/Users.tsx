@@ -9,6 +9,7 @@ interface Agent {
   email: string;
   isActive: boolean;
   isAdmin: boolean;
+  permissions?: string[];
   role?: { name: string; isAdmin?: boolean };
   departments?: { department?: { name: string } }[];
   teams?: { name: string }[];
@@ -30,6 +31,36 @@ interface Customer {
 
 type Tab = 'agents' | 'customers';
 
+// Matches the backend Agent permission strings (osTicketBackend/src/models/Role.js).
+// Creating a user without granting a capability (e.g. tickets.edit) means that
+// user genuinely cannot perform it — backend enforces the same strings.
+const AGENT_PERMISSION_OPTIONS: { key: string; label: string; group: string }[] = [
+  { key: 'tickets.view', label: 'View tickets', group: 'Tickets' },
+  { key: 'tickets.create', label: 'Create tickets', group: 'Tickets' },
+  { key: 'tickets.edit', label: 'Edit tickets', group: 'Tickets' },
+  { key: 'tickets.assign', label: 'Assign / claim tickets', group: 'Tickets' },
+  { key: 'tickets.transfer', label: 'Transfer tickets', group: 'Tickets' },
+  { key: 'tickets.close', label: 'Close / resolve tickets', group: 'Tickets' },
+  { key: 'tickets.delete', label: 'Delete tickets', group: 'Tickets' },
+  { key: 'tickets.reply', label: 'Reply to customers', group: 'Tickets' },
+  { key: 'tickets.note', label: 'Internal notes', group: 'Tickets' },
+  { key: 'tickets.tasks', label: 'Tasks', group: 'Tickets' },
+  { key: 'users.manage', label: 'Manage users', group: 'Users & orgs' },
+  { key: 'orgs.manage', label: 'Manage organizations', group: 'Users & orgs' },
+  { key: 'organization.manage', label: 'Manage org structure', group: 'Users & orgs' },
+  { key: 'kb.manage', label: 'Knowledge base', group: 'Knowledge' },
+  { key: 'canned.manage', label: 'Canned responses', group: 'Knowledge' },
+  { key: 'escalations.manage', label: 'Escalations', group: 'Knowledge' },
+  { key: 'access.manage', label: 'Settings & access', group: 'Admin' },
+  { key: 'admin.manage', label: 'Admin console', group: 'Admin' },
+  { key: 'roles.manage', label: 'Roles', group: 'Admin' },
+  { key: 'reports.manage', label: 'Reports', group: 'Admin' },
+  { key: 'audit.view', label: 'Audit logs', group: 'Admin' },
+];
+const ADMIN_PERMISSION_KEYS = AGENT_PERMISSION_OPTIONS.map((o) => o.key);
+const DEFAULT_AGENT_PERMISSIONS = ['tickets.view', 'tickets.create', 'tickets.reply', 'tickets.note', 'tickets.close'];
+const permissionGroups = [...new Set(AGENT_PERMISSION_OPTIONS.map((o) => o.group))];
+
 export default function Users() {
   const [tab, setTab] = useState<Tab>('agents');
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -43,6 +74,7 @@ export default function Users() {
   const [agentForm, setAgentForm] = useState({
     name: '', email: '', password: '', phone: '', isAdmin: false, department: '', level: 'L1',
   });
+  const [agentPermissions, setAgentPermissions] = useState<string[]>(DEFAULT_AGENT_PERMISSIONS);
   const [customerForm, setCustomerForm] = useState({
     name: '', email: '', password: '', phone: '', organization: '', userType: 'employee', orgRole: 'member',
   });
@@ -82,11 +114,12 @@ export default function Users() {
         isAdmin: agentForm.isAdmin,
         isActive: true,
         level: (agentForm as any).level || 'L1',
-        permissions: agentForm.isAdmin ? ['admin.manage', 'access.manage', 'tickets.manage', 'users.manage'] : ['tickets.view'],
+        permissions: agentForm.isAdmin ? ADMIN_PERMISSION_KEYS : agentPermissions,
       });
       toast.success('Agent created');
       setShowForm(false);
       setAgentForm({ name: '', email: '', password: '', phone: '', isAdmin: false, department: '', level: 'L1' });
+      setAgentPermissions(DEFAULT_AGENT_PERMISSIONS);
       loadAgents();
     } catch { toast.error('Failed to create agent'); } finally { setSaving(false); }
   };
@@ -188,10 +221,45 @@ export default function Users() {
             </div>
             <div className="col-span-2">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={agentForm.isAdmin} onChange={(e) => setAgentForm({ ...agentForm, isAdmin: e.target.checked })}
+                <input type="checkbox" checked={agentForm.isAdmin} onChange={(e) => {
+                  setAgentForm({ ...agentForm, isAdmin: e.target.checked });
+                  if (e.target.checked) setAgentPermissions(ADMIN_PERMISSION_KEYS);
+                }}
                   className="rounded border-gray-300 text-brand-600" />
-                <span className="text-sm text-gray-700">Admin (can access Settings & manage users)</span>
+                <span className="text-sm text-gray-700">Admin — full access (grants all permissions)</span>
               </label>
+            </div>
+            <div className="col-span-2 border-t pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-gray-700">Permissions</label>
+                <div className="flex items-center gap-2 text-xs">
+                  <button type="button" onClick={() => setAgentPermissions(ADMIN_PERMISSION_KEYS)} className="text-brand-600 hover:underline">Select all</button>
+                  <span className="text-gray-300">|</span>
+                  <button type="button" onClick={() => setAgentPermissions([])} className="text-gray-500 hover:underline">Clear</button>
+                  <span className="ml-2 text-gray-500">({agentPermissions.length} selected)</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-1">
+                {permissionGroups.map((group) => (
+                  <div key={group} className="mb-2">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1">{group}</p>
+                    {AGENT_PERMISSION_OPTIONS.filter((o) => o.group === group).map((opt) => (
+                      <label key={opt.key} className="flex items-center gap-2 py-0.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={agentPermissions.includes(opt.key)}
+                          disabled={agentForm.isAdmin}
+                          onChange={(e) => setAgentPermissions((prev) => (e.target.checked ? [...prev, opt.key] : prev.filter((k) => k !== opt.key)))}
+                          className="rounded border-gray-300 text-brand-600 disabled:opacity-50"
+                        />
+                        <span className="text-sm text-gray-700">{opt.label}</span>
+                        <span className="text-[10px] text-gray-400">{opt.key.replace(/^tickets\./, 'ticket:')}</span>
+                      </label>
+                    ))}
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Users without a permission (e.g. <code className="text-gray-700">tickets.edit</code>) cannot perform that action — enforced on both the API and the UI.</p>
             </div>
             <div className="flex items-end gap-2 col-span-2">
               <button type="submit" disabled={saving} className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700 disabled:opacity-50">
@@ -268,14 +336,15 @@ export default function Users() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Permissions</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Login</th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {loading ? <tr><td colSpan={6} className="px-6 py-12 text-center text-gray-400">Loading...</td></tr> :
-                agents.length === 0 ? <tr><td colSpan={6} className="px-6 py-12 text-center text-gray-400">No agents found. Create your first agent to get started.</td></tr> :
+              {loading ? <tr><td colSpan={7} className="px-6 py-12 text-center text-gray-400">Loading...</td></tr> :
+                agents.length === 0 ? <tr><td colSpan={7} className="px-6 py-12 text-center text-gray-400">No agents found. Create your first agent to get started.</td></tr> :
                 agents.map((a) => (
                   <tr key={a._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm font-medium">{a.name}</td>
@@ -288,6 +357,9 @@ export default function Users() {
                       ) : (
                         <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">Agent</span>
                       )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span title={(a.permissions || []).join(', ')} className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700">{a.permissions?.length || 0} perms</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 text-xs rounded-full ${a.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
