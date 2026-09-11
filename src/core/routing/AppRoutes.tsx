@@ -39,6 +39,8 @@ const SlaTimeline = lazy(() => import('@modules/helpdesk/pages/incidents/SlaTime
 const IncidentDashboard = lazy(() => import('@modules/helpdesk/pages/incidents/IncidentDashboard'));
 const Problems = lazy(() => import('@modules/helpdesk/pages/problems/Problems'));
 const ProblemCrud = lazy(() => import('@modules/helpdesk/pages/problems/ProblemCrud'));
+const ProblemRecord = lazy(() => import('@modules/helpdesk/pages/problems/ProblemRecord'));
+const ProblemDashboard = lazy(() => import('@modules/helpdesk/pages/problems/ProblemDashboard'));
 const Changes = lazy(() => import('@modules/helpdesk/pages/changes/Changes'));
 const ChangeCrud = lazy(() => import('@modules/helpdesk/pages/changes/ChangeCrud'));
 const ChangeCalendarPage = lazy(() => import('@modules/helpdesk/pages/changes/ChangeCalendarPage'));
@@ -139,6 +141,8 @@ export function AppRoutes() {
           {/* Helpdesk Problems */}
           <Route path="problems" element={<ModuleGuard module="helpdesk"><Problems /></ModuleGuard>} />
           <Route path="problems-crud" element={<ModuleGuard module="helpdesk"><ProblemCrud /></ModuleGuard>} />
+          <Route path="problems/:id" element={<ModuleGuard module="helpdesk"><ProblemRecord /></ModuleGuard>} />
+          <Route path="problem-dashboard" element={<ModuleGuard module="helpdesk"><ProblemDashboard /></ModuleGuard>} />
 
           {/* Helpdesk Changes */}
           <Route path="changes" element={<ModuleGuard module="helpdesk"><Changes /></ModuleGuard>} />
