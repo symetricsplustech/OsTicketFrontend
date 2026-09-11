@@ -31,6 +31,12 @@ const PostImplReviews = lazy(() => import('@modules/helpdesk/pages/incidents/Pos
 const PriorityMatrixEditor = lazy(() => import('@modules/helpdesk/pages/incidents/PriorityMatrixEditor'));
 const AuditTrail = lazy(() => import('@modules/helpdesk/pages/incidents/AuditTrail'));
 const Alerts = lazy(() => import('@modules/helpdesk/pages/incidents/Alerts'));
+const IncidentRecord = lazy(() => import('@modules/helpdesk/pages/incidents/IncidentRecord'));
+const IncidentTriage = lazy(() => import('@modules/helpdesk/pages/incidents/IncidentTriage'));
+const IncidentCIRelated = lazy(() => import('@modules/helpdesk/pages/incidents/IncidentCIRelated'));
+const IncidentRelatedIncidents = lazy(() => import('@modules/helpdesk/pages/incidents/IncidentRelatedIncidents'));
+const SlaTimeline = lazy(() => import('@modules/helpdesk/pages/incidents/SlaTimeline'));
+const IncidentDashboard = lazy(() => import('@modules/helpdesk/pages/incidents/IncidentDashboard'));
 const Problems = lazy(() => import('@modules/helpdesk/pages/problems/Problems'));
 const ProblemCrud = lazy(() => import('@modules/helpdesk/pages/problems/ProblemCrud'));
 const Changes = lazy(() => import('@modules/helpdesk/pages/changes/Changes'));
@@ -123,6 +129,12 @@ export function AppRoutes() {
           <Route path="priority-matrix" element={<ModuleGuard module="helpdesk"><PriorityMatrixEditor /></ModuleGuard>} />
           <Route path="audit-trail" element={<ModuleGuard module="helpdesk"><AuditTrail /></ModuleGuard>} />
           <Route path="alert-manager" element={<ModuleGuard module="helpdesk"><Alerts /></ModuleGuard>} />
+          <Route path="incidents/:id" element={<ModuleGuard module="helpdesk"><IncidentRecord /></ModuleGuard>} />
+          <Route path="incidents/triage" element={<ModuleGuard module="helpdesk"><IncidentTriage /></ModuleGuard>} />
+          <Route path="incidents/:id/cis" element={<ModuleGuard module="helpdesk"><IncidentCIRelated /></ModuleGuard>} />
+          <Route path="incidents/:id/related" element={<ModuleGuard module="helpdesk"><IncidentRelatedIncidents /></ModuleGuard>} />
+          <Route path="incidents/:id/sla" element={<ModuleGuard module="helpdesk"><SlaTimeline /></ModuleGuard>} />
+          <Route path="incident-dashboard" element={<ModuleGuard module="helpdesk"><IncidentDashboard /></ModuleGuard>} />
 
           {/* Helpdesk Problems */}
           <Route path="problems" element={<ModuleGuard module="helpdesk"><Problems /></ModuleGuard>} />
