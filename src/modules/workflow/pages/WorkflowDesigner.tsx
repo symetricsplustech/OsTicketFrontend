@@ -1,6 +1,8 @@
 import api from '@shared/lib/api';
 import { useEffect, useState } from 'react';
 import { Workflow, GripVertical, Trash2, Save } from 'lucide-react';
+import { useAuth } from '@core/auth/useAuth';
+import toast from 'react-hot-toast';
 
 interface BranchCondition {
   field: string;
@@ -30,23 +32,32 @@ const BRANCHES = ['thenActions', 'elseActions'] as const;
 const newStep = (type: string): Step => ({ name: type, type, delayMinutes: 0 });
 
 export default function WorkflowDesigner() {
+  const { hasPermission } = useAuth();
+  const canManage = hasPermission('workflow.manage');
   const [workflows, setWorkflows] = useState<WorkflowRow[]>([]);
   const [workflowId, setWorkflowId] = useState('');
   const [steps, setSteps] = useState<Step[]>([]);
   const [openBranches, setOpenBranches] = useState<Record<string, boolean>>({});
   const [saved, setSaved] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     (async () => {
+      if (!canManage) {
+        setLoadError('You do not have permission to manage workflows.');
+        return;
+      }
+      setLoadError('');
       try {
         const res = await api.get('/enterprise/workflows');
         const rows = Array.isArray(res.data) ? res.data : (res.data.workflows || res.data.data || []);
         setWorkflows(rows);
-      } catch {}
+      } catch (error: any) { setLoadError(error?.response?.data?.error || 'Unable to load workflows.'); }
     })();
-  }, []);
+  }, [canManage]);
 
   const pickWorkflow = async (id: string) => {
+    if (!canManage) return;
     setWorkflowId(id);
     setSaved(false);
     if (!id) {
@@ -56,9 +67,10 @@ export default function WorkflowDesigner() {
     try {
       const res = await api.get('/enterprise/workflows/' + id);
       setSteps(Array.isArray(res.data?.actions) ? res.data.actions : []);
-    } catch {
+    } catch (error: any) {
       const row = workflows.find(w => w._id === id) || null;
       setSteps(row && Array.isArray(row.actions) ? row.actions : []);
+      toast.error(error?.response?.data?.error || 'Unable to load workflow details.');
     }
   };
 
@@ -91,11 +103,11 @@ export default function WorkflowDesigner() {
   const toggleBranch = (key: string) => setOpenBranches(prev => ({ ...prev, [key]: !prev[key] }));
 
   const save = async () => {
-    if (!workflowId) return;
+    if (!workflowId || !canManage) return;
     try {
       await api.put('/enterprise/workflows/' + workflowId, { actions: steps });
       setSaved(true);
-    } catch {}
+    } catch (error: any) { toast.error(error?.response?.data?.error || 'Unable to save workflow.'); }
   };
 
   return (
@@ -115,7 +127,7 @@ export default function WorkflowDesigner() {
           </select>
           <button
             onClick={save}
-            disabled={!workflowId}
+            disabled={!workflowId || !canManage}
             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
           >
             <Save className="h-4 w-4" /> Save
@@ -124,15 +136,17 @@ export default function WorkflowDesigner() {
         </div>
       </div>
 
+      {loadError && <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-200 rounded p-3">{loadError}</p>}
+
       <div className="flex gap-4">
         <aside className="w-48 shrink-0 space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Action types</p>
           {ACTION_TYPES.map(t => (
             <div
               key={t}
-              draggable={true}
+              draggable={canManage}
               onDragStart={e => e.dataTransfer.setData('type', t)}
-              className="cursor-grab active:cursor-grabbing bg-white border rounded-lg px-3 py-2 text-sm shadow-sm hover:border-blue-400 select-none"
+              className="cursor-grab active:cursor-grabbing bg-white border rounded-lg px-3 py-2 text-sm shadow-sm hover:border-blue-400 select-none disabled:opacity-50"
             >
               {t}
             </div>
@@ -141,13 +155,13 @@ export default function WorkflowDesigner() {
 
         <div
           className="flex-1 min-h-[34rem] bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 space-y-3"
-          onDragOver={e => e.preventDefault()}
+          onDragOver={e => canManage && e.preventDefault()}
           onDrop={e => {
             e.preventDefault();
             const idx = e.dataTransfer.getData('idx');
             const type = e.dataTransfer.getData('type');
             if (idx !== '') return;
-            if (type) addStep(type);
+            if (canManage && type) addStep(type);
           }}
         >
           {steps.length === 0 && (
@@ -156,12 +170,12 @@ export default function WorkflowDesigner() {
           {steps.map((step, index) => (
             <div
               key={index}
-              draggable={true}
+              draggable={canManage}
               onDragStart={e => {
                 e.dataTransfer.setData('type', step.type);
                 e.dataTransfer.setData('idx', String(index));
               }}
-              onDragOver={e => e.preventDefault()}
+              onDragOver={e => canManage && e.preventDefault()}
               onDrop={e => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -169,10 +183,10 @@ export default function WorkflowDesigner() {
                 const type = e.dataTransfer.getData('type');
                 if (from !== '') {
                   const parsed = parseInt(from, 10);
-                  if (!isNaN(parsed)) moveStep(parsed, index);
+                  if (canManage && !isNaN(parsed)) moveStep(parsed, index);
                   return;
                 }
-                if (type) addStep(type);
+                if (canManage && type) addStep(type);
               }}
               className="bg-white border rounded-lg p-3 shadow-sm cursor-grab active:cursor-grabbing"
             >
@@ -180,6 +194,7 @@ export default function WorkflowDesigner() {
                 <GripVertical className="h-4 w-4 text-gray-400 shrink-0" />
                 <input
                   value={step.name}
+                  disabled={!canManage}
                   onChange={e => updateStep(index, { name: e.target.value })}
                   className="border rounded px-2 py-1 text-sm w-44"
                 />
@@ -188,10 +203,11 @@ export default function WorkflowDesigner() {
                 <input
                   type="number"
                   value={step.delayMinutes}
+                  disabled={!canManage}
                   onChange={e => updateStep(index, { delayMinutes: Number(e.target.value) || 0 })}
                   className="border rounded px-2 py-1 text-sm w-20"
                 />
-                <button onClick={() => removeStep(index)} className="text-red-500 hover:text-red-700">
+                <button disabled={!canManage} onClick={() => removeStep(index)} className="text-red-500 hover:text-red-700 disabled:opacity-40">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>

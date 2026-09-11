@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '@shared/lib/api';
 import toast from 'react-hot-toast';
+import { useAuth } from '@core/auth/useAuth';
 
 interface Workflow {
   _id: string;
   name: string;
   description?: string;
   event: string;
-  status: string;
+  isActive?: boolean;
   conditions: unknown[];
   actions: unknown[];
 }
@@ -19,6 +20,8 @@ const EVENTS = [
 ];
 
 export default function WorkflowList() {
+  const { hasPermission } = useAuth();
+  const canManage = hasPermission('workflow.manage');
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -27,18 +30,31 @@ export default function WorkflowList() {
   const [actionType, setActionType] = useState('assign');
   const [actionConfig, setActionConfig] = useState('');
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   const load = async () => {
+    if (!canManage) {
+      setWorkflows([]);
+      setLoadError('You do not have permission to view workflows.');
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setLoadError('');
     try {
       const res = await api.get('/enterprise/workflows');
       setWorkflows(res.data.workflows || []);
-    } catch { setWorkflows([]); } finally { setLoading(false); }
+    } catch (error: any) {
+      setWorkflows([]);
+      setLoadError(error?.response?.data?.error || 'Unable to load workflows.');
+    } finally { setLoading(false); }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [canManage]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canManage) return toast.error('You do not have permission to manage workflows.');
     setSaving(true);
     try {
       await api.post('/enterprise/workflows', {
@@ -53,31 +69,35 @@ export default function WorkflowList() {
       setActionType('assign');
       setActionConfig('');
       load();
-    } catch { toast.error('Failed to create workflow'); } finally { setSaving(false); }
+    } catch (error: any) { toast.error(error?.response?.data?.error || 'Failed to create workflow'); } finally { setSaving(false); }
   };
 
   const toggleStatus = async (wf: Workflow) => {
+    if (!canManage) return toast.error('You do not have permission to manage workflows.');
     try {
-      await api.put(`/enterprise/workflows/${wf._id}`, { status: wf.status === 'active' ? 'inactive' : 'active' });
+      await api.put(`/enterprise/workflows/${wf._id}`, { isActive: !wf.isActive });
       load();
-    } catch { toast.error('Failed to update'); }
+    } catch (error: any) { toast.error(error?.response?.data?.error || 'Failed to update workflow'); }
   };
 
   const handleDelete = async (id: string) => {
+    if (!canManage) return toast.error('You do not have permission to manage workflows.');
     if (!confirm('Delete this workflow?')) return;
     try {
       await api.delete(`/enterprise/workflows/${id}`);
       toast.success('Workflow deleted');
       load();
-    } catch { toast.error('Failed to delete'); }
+    } catch (error: any) { toast.error(error?.response?.data?.error || 'Failed to delete workflow'); }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Workflows</h1>
-        <button onClick={() => setShowForm(true)} className="btn-primary">Create Workflow</button>
+        {canManage && <button onClick={() => setShowForm(true)} className="btn-primary">Create Workflow</button>}
       </div>
+
+      {loadError && <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-200 rounded p-3">{loadError}</p>}
 
       {showForm && (
         <div className="card p-6">
@@ -145,8 +165,8 @@ export default function WorkflowList() {
               <div className="flex items-center justify-between mb-3">
                 <Link to={`/workflows/${wf._id}`} className="font-semibold text-gray-900 hover:text-brand-600">{wf.name}</Link>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => toggleStatus(wf)} className={`px-2 py-1 text-xs rounded-full ${wf.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>{wf.status}</button>
-                  <button onClick={() => handleDelete(wf._id)} className="text-gray-400 hover:text-red-500 text-xs">Delete</button>
+                  {canManage && <button onClick={() => toggleStatus(wf)} className={`px-2 py-1 text-xs rounded-full ${wf.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>{wf.isActive ? 'active' : 'inactive'}</button>}
+                  {canManage && <button onClick={() => handleDelete(wf._id)} className="text-gray-400 hover:text-red-500 text-xs">Delete</button>}
                 </div>
               </div>
               {wf.description && <p className="text-sm text-gray-500 line-clamp-2 mb-3">{wf.description}</p>}

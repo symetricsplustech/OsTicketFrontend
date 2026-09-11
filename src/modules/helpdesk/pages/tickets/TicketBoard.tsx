@@ -2,6 +2,7 @@ import api from '@shared/lib/api';
 import React, { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Ticket as TicketIcon } from 'lucide-react';
+import { useAuth } from '@core/auth/useAuth';
 
 interface Ticket {
   _id: string;
@@ -43,6 +44,9 @@ function nearestColumn(status: string): (typeof COLUMNS)[number] {
 }
 
 export default function TicketBoard() {
+  const { hasPermission } = useAuth();
+  const canEdit = hasPermission('tickets.edit');
+  const canClose = hasPermission('tickets.close');
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [dragOver, setDragOver] = useState<string | null>(null);
@@ -51,9 +55,9 @@ export default function TicketBoard() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get('/tickets');
+      const res = await api.get('/agent/tickets');
       const data = res.data;
-      setTickets(Array.isArray(data) ? data : data.tickets || []);
+      setTickets(Array.isArray(data) ? data : data.items || data.tickets || []);
     } catch {
       setTickets([]);
     } finally {
@@ -70,6 +74,10 @@ export default function TicketBoard() {
     setDragOver(null);
     const id = event.dataTransfer.getData('text/plain');
     if (!id) return;
+    if (['resolved', 'closed'].includes(column) ? !canClose : !canEdit) {
+      toast.error('You do not have permission to move tickets to this status');
+      return;
+    }
     let resolution: Record<string, string> | undefined;
     if (column === 'resolved') {
       const code = window.prompt('Resolution code (e.g. fixed / workaround / wont-fix):', 'fixed');
@@ -130,7 +138,7 @@ export default function TicketBoard() {
                 {columns[col].map((ticket) => (
                   <div
                     key={ticket._id}
-                    draggable
+                    draggable={canEdit || canClose}
                     onDragStart={(e) => e.dataTransfer.setData('text/plain', ticket._id)}
                     className={`bg-white rounded-lg border border-gray-200 shadow-sm p-3 cursor-grab active:cursor-grabbing hover:shadow-md ${
                       movingId === ticket._id ? 'opacity-50' : ''

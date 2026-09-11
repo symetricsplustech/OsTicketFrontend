@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { RecordTable, StatusBadge } from '@shared/components/RecordTable';
 import { RecordDrawer } from '@shared/components/RecordDrawer';
+import { PageHeader } from '@shared/components/ui';
 
 // Generic entity page — pass entity key + column config, get full CRUD + drawer detail
 export function EntityPage({ entity, columns, extraFilters, title }: {
@@ -13,7 +14,7 @@ export function EntityPage({ entity, columns, extraFilters, title }: {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+      <PageHeader title={title} />
       <RecordTable
         entity={entity}
         columns={columns}

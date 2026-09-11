@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '@shared/lib/api';
 import { formatDateTime } from '@shared/lib/format';
+import { useAuth } from '@core/auth/useAuth';
 
 interface Workflow {
   _id: string;
   name: string;
   description?: string;
   event: string;
-  status: string;
+  isActive?: boolean;
   conditions: Array<{ field: string; operator: string; value: string }>;
   actions: Array<{ type: string; config: Record<string, unknown> }>;
   createdBy?: { name: string };
@@ -18,21 +19,29 @@ interface Workflow {
 
 export default function WorkflowDetail() {
   const { id } = useParams();
+  const { hasPermission } = useAuth();
+  const canManage = hasPermission('workflow.manage');
   const [workflow, setWorkflow] = useState<Workflow | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     const load = async () => {
+      if (!canManage) {
+        setLoadError('You do not have permission to view workflows.');
+        setLoading(false);
+        return;
+      }
       try {
         const res = await api.get(`/enterprise/workflows/${id}`);
         setWorkflow(res.data.workflow || res.data);
-      } catch {} finally { setLoading(false); }
+      } catch (error: any) { setLoadError(error?.response?.data?.error || 'Unable to load workflow.'); } finally { setLoading(false); }
     };
     load();
-  }, [id]);
+  }, [id, canManage]);
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600" /></div>;
-  if (!workflow) return <div className="text-center py-12 text-gray-500">Workflow not found</div>;
+  if (!workflow) return <div className="text-center py-12 text-gray-500">{loadError || 'Workflow not found'}</div>;
 
   return (
     <div className="space-y-6">
@@ -40,7 +49,7 @@ export default function WorkflowDetail() {
         <Link to="/workflows" className="text-sm text-gray-500 hover:text-gray-700">&larr; Back to Workflows</Link>
         <div className="flex items-center justify-between mt-1">
           <h1 className="text-2xl font-bold text-gray-900">{workflow.name}</h1>
-          <span className={`px-3 py-1 text-sm rounded-full ${workflow.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>{workflow.status}</span>
+          <span className={`px-3 py-1 text-sm rounded-full ${workflow.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>{workflow.isActive ? 'active' : 'inactive'}</span>
         </div>
         {workflow.description && <p className="text-gray-500 mt-1">{workflow.description}</p>}
       </div>

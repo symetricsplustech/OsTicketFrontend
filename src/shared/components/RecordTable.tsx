@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGetRecordsQuery, useCreateRecordMutation, useDeleteRecordMutation, useUpdateRecordMutation } from '@shared/store/crudApi';
 import { RefSelect } from './RefSelect';
+import { Button, Card } from './ui';
 
 // ---- Sortable / Filterable / Paginated / Bulk-Enabled Record Table ----
 export function RecordTable({ entity, columns, onRowClick, extraFilters }: {
@@ -49,7 +50,7 @@ export function RecordTable({ entity, columns, onRowClick, extraFilters }: {
       <div className="flex items-center gap-3">
         <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
           placeholder={`Search ${entity}…`} className="input-field max-w-xs" />
-        <button onClick={() => setShowCreate(!showCreate)} className="btn-primary text-sm">+ New</button>
+        <Button onClick={() => setShowCreate(!showCreate)}>+ New</Button>
       </div>
 
       {/* Bulk action bar */}
@@ -60,14 +61,14 @@ export function RecordTable({ entity, columns, onRowClick, extraFilters }: {
             <option value="">Set status…</option>
             {['open', 'assigned', 'in_progress', 'pending', 'resolved', 'closed'].map(s2 => <option key={s2} value={s2}>{s2}</option>)}
           </select>
-          <button onClick={applyBulk} disabled={!bulkStatus} className="btn-primary text-xs py-1 disabled:opacity-40">Apply</button>
-          <button onClick={() => setSelected(new Set())} className="text-gray-400 hover:text-gray-600 text-xs ml-auto">Clear selection</button>
+          <Button onClick={applyBulk} disabled={!bulkStatus} size="sm">Apply</Button>
+          <Button onClick={() => setSelected(new Set())} variant="ghost" size="sm" className="ml-auto">Clear selection</Button>
         </div>
       )}
 
       {showCreate && <RecordFormInline entity={entity} editable={data?.editable} refs={data?.refs} onDone={() => { setShowCreate(false); refetch(); }} />}
 
-      <div className="bg-white rounded-lg border overflow-x-auto">
+      <Card className="overflow-x-auto rounded-lg shadow-none">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -104,14 +105,14 @@ export function RecordTable({ entity, columns, onRowClick, extraFilters }: {
             )}
           </tbody>
         </table>
-      </div>
+      </Card>
 
       {data?.totalPages > 1 && (
         <div className="flex items-center justify-between text-sm text-gray-500">
           <span>Page {data.page} of {data.totalPages} ({data.total} total)</span>
           <div className="flex gap-1">
-            <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1} className="btn-secondary px-2 py-1 disabled:opacity-30">‹</button>
-            <button onClick={() => setPage(Math.min(data.totalPages, page + 1))} disabled={page >= data.totalPages} className="btn-secondary px-2 py-1 disabled:opacity-30">›</button>
+            <Button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1} variant="secondary" size="sm">‹</Button>
+            <Button onClick={() => setPage(Math.min(data.totalPages, page + 1))} disabled={page >= data.totalPages} variant="secondary" size="sm">›</Button>
           </div>
         </div>
       )}
@@ -169,8 +170,8 @@ export function RecordFormInline({ entity, editable, refs, onDone }: {
       </div>
       {error && <p className="text-red-600 text-sm">{error}</p>}
       <div className="flex gap-2">
-        <button type="submit" className="btn-primary">Save</button>
-        <button type="button" onClick={onDone} className="btn-secondary">Cancel</button>
+        <Button type="submit">Save</Button>
+        <Button type="button" onClick={onDone} variant="secondary">Cancel</Button>
       </div>
     </form>
   );

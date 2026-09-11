@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '@shared/lib/api';
 import toast from 'react-hot-toast';
+import { useAuth } from '@core/auth/useAuth';
 
 // ITSM-10 — Assignment & Routing: agent workload/capacity, skills-based /
 // round-robin / least-loaded suggestion engine, routing caps and per-ticket
@@ -16,6 +17,8 @@ interface WorkloadRow {
 }
 
 export default function AssignmentRouting() {
+  const { hasPermission } = useAuth();
+  const canRoute = hasPermission('tickets.assign');
   const [workload, setWorkload] = useState<WorkloadRow[]>([]);
   const [teams, setTeams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,9 +26,11 @@ export default function AssignmentRouting() {
   const [suggestion, setSuggestion] = useState<any>(null);
   const [historyTicket, setHistoryTicket] = useState('');
   const [history, setHistory] = useState<any[]>([]);
+  const [loadError, setLoadError] = useState('');
 
   const load = async () => {
     setLoading(true);
+    setLoadError('');
     try {
       const [wRes, tRes] = await Promise.all([
         api.get('/agent/workload').catch(() => ({ data: { workload: [] } })),
@@ -33,8 +38,9 @@ export default function AssignmentRouting() {
       ]);
       setWorkload(wRes.data.workload || wRes.data.agents || wRes.data || []);
       setTeams(tRes.data.teams || []);
-    } catch {
+    } catch (error: any) {
       setWorkload([]);
+      setLoadError(error?.response?.status === 403 ? 'You do not have permission to view routing workload.' : 'Unable to load routing workload.');
     } finally {
       setLoading(false);
     }
@@ -43,6 +49,7 @@ export default function AssignmentRouting() {
   useEffect(() => { load(); }, []);
 
   const runSuggestion = async () => {
+    if (!canRoute) return toast.error('You do not have permission to route tickets.');
     try {
       const res = await api.post('/gaps2/routing/next-agent', {
         strategy: suggest.strategy,
@@ -53,18 +60,19 @@ export default function AssignmentRouting() {
       setSuggestion(res.data);
       if (res.data?.overflowQueue) toast('All agents at capacity — overflow queue', { icon: '⚠️' });
       else toast.success(`Suggested: ${res.data?.agent?.name || '—'}`);
-    } catch {
-      toast.error('Suggestion failed');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Suggestion failed');
     }
   };
 
   const fetchHistory = async () => {
+    if (!canRoute) return toast.error('You do not have permission to view assignment history.');
     if (!historyTicket.trim()) return toast.error('Enter a ticket number');
     try {
       const res = await api.get(`/gaps2/assignments/history/${historyTicket.trim()}`);
       setHistory(Array.isArray(res.data) ? res.data : res.data?.history || []);
-    } catch {
-      toast.error('Failed to load assignment history');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Failed to load assignment history');
     }
   };
 
@@ -74,6 +82,7 @@ export default function AssignmentRouting() {
         <h1 className="text-2xl font-bold text-gray-900">Assignment &amp; Routing</h1>
         <p className="text-sm text-gray-500">Groups, workload, auto-assignment &amp; history</p>
       </div>
+      {loadError && <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-200 rounded p-3">{loadError}</p>}
 
       <div className="grid md:grid-cols-2 gap-4">
         <div className="card p-5">
@@ -91,7 +100,7 @@ export default function AssignmentRouting() {
             <input value={suggest.ticketNumber} onChange={(e) => setSuggest({ ...suggest, ticketNumber: e.target.value })}
               placeholder="Ticket # (logs history)" className="input-field text-sm" />
           </div>
-          <button onClick={runSuggestion} className="btn-primary text-sm">Suggest agent</button>
+          {canRoute ? <button onClick={runSuggestion} className="btn-primary text-sm">Suggest agent</button> : <p className="text-xs text-gray-500">Routing suggestions require ticket-assignment permission.</p>}
           {suggestion && (
             <div className="mt-3 text-sm bg-gray-50 border rounded-lg p-3">
               {suggestion.overflowQueue ? (
@@ -108,7 +117,7 @@ export default function AssignmentRouting() {
           <div className="flex gap-2 mb-3">
             <input value={historyTicket} onChange={(e) => setHistoryTicket(e.target.value)}
               placeholder="Ticket number" className="input-field text-sm flex-1" />
-            <button onClick={fetchHistory} className="btn-secondary text-sm">Lookup</button>
+            <button onClick={fetchHistory} disabled={!canRoute} className="btn-secondary text-sm disabled:opacity-40">Lookup</button>
           </div>
           {history.length === 0 ? (
             <p className="text-xs text-gray-400">Every automated assignment is recorded with strategy + reasoning.</p>

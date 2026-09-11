@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Save } from 'lucide-react';
 import { useGetRecordQuery, useUpdateRecordMutation, useGetRelatedQuery } from '@shared/store/crudApi';
 import { StatusBadge } from './RecordTable';
+import { Button } from './ui';
 
 // ---- Slide-in Record Detail Drawer ----
 export function RecordDrawer({ entity, id, onClose }: {
@@ -114,8 +115,8 @@ function EditableFields({ entity, record, editable, update }: any) {
             </div>
           ))}
           <div className="flex gap-2">
-            <button onClick={save} className="btn-primary text-sm"><Save /> Save</button>
-            <button onClick={() => setEditing(false)} className="btn-secondary text-sm">Cancel</button>
+            <Button onClick={save}><Save /> Save</Button>
+            <Button onClick={() => setEditing(false)} variant="secondary">Cancel</Button>
           </div>
         </div>
       )}

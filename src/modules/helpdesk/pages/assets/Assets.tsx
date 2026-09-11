@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '@shared/lib/api';
+import { assetApi } from '@modules/helpdesk/services';
 import { formatDate } from '@shared/lib/format';
 import toast from 'react-hot-toast';
 import { Server } from 'lucide-react';
@@ -35,7 +35,7 @@ export default function Assets() {
       const params: Record<string, string> = {};
       if (search) params.search = search;
       if (typeFilter) params.type = typeFilter;
-      const res = await api.get('/enterprise/assets', { params });
+      const res = await assetApi.list(params);
       setAssets(res.data.assets || []);
     } catch { setAssets([]); } finally { setLoading(false); }
   };
@@ -46,7 +46,7 @@ export default function Assets() {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.post('/enterprise/assets', form);
+      await assetApi.create(form);
       toast.success('Asset created');
       setShowForm(false);
       setForm({ name: '', serial: '', type: 'server', status: 'active', ip: '', location: '', environment: 'production' });

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '@shared/lib/api';
 import { formatDate } from '@shared/lib/format';
 import toast from 'react-hot-toast';
+import { useAuth } from '@core/auth/useAuth';
 
 interface Change {
   _id: string;
@@ -21,6 +22,9 @@ const TYPES = ['standard', 'normal', 'emergency'];
 const RISKS = ['low', 'medium', 'high', 'critical'];
 
 export default function Changes() {
+  const { hasPermission } = useAuth();
+  const canCreate = hasPermission('records.create');
+  const canView = hasPermission('records.view');
   const [changes, setChanges] = useState<Change[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -28,8 +32,10 @@ export default function Changes() {
   const [saving, setSaving] = useState(false);
   const [conflicts, setConflicts] = useState<any>(null);
   const [checking, setChecking] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   const checkConflicts = async () => {
+    if (!canView) return toast.error('You do not have permission to view change conflicts.');
     if (!form.windowStart || !form.windowEnd) {
       toast.error('Set an implementation window first');
       return;
@@ -51,13 +57,17 @@ export default function Changes() {
     try {
       const res = await api.get('/enterprise/changes');
       setChanges(res.data.changes || []);
-    } catch { setChanges([]); } finally { setLoading(false); }
+    } catch (error: any) {
+      setChanges([]);
+      setLoadError(error?.response?.status === 403 ? 'You do not have permission to view changes.' : 'Unable to load changes. Please retry.');
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canCreate) return toast.error('You do not have permission to create changes.');
     setSaving(true);
     try {
       const res = await api.post('/enterprise/changes', {
@@ -78,7 +88,7 @@ export default function Changes() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Change Requests</h1>
-        <button onClick={() => setShowForm(true)} className="btn-primary">Request Change</button>
+        {canCreate && <button onClick={() => setShowForm(true)} className="btn-primary">Request Change</button>}
       </div>
 
       {showForm && (
@@ -157,6 +167,7 @@ export default function Changes() {
           </form>
         </div>
       )}
+      {loadError && <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{loadError}</div>}
 
       <div className="card overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">

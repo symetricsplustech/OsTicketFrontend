@@ -18,7 +18,6 @@ export default function CsatDashboard() {
   const [ticketNumber, setTicketNumber] = useState('');
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(false);
-  const [sweepResult, setSweepResult] = useState<any>(null);
 
   const lookup = async () => {
     if (!ticketNumber.trim()) return toast.error('Enter a ticket number');
@@ -34,27 +33,16 @@ export default function CsatDashboard() {
     }
   };
 
-  const runSweep = async () => {
-    try {
-      const res = await api.post('/gaps2/csat-negative-recovery-sweep', {});
-      setSweepResult(res.data);
-      toast.success(`Recovery sweep: ${res.data?.created ?? 0} follow-up task(s)`);
-    } catch {
-      toast.error('Sweep failed');
-    }
-  };
-
   const scores = surveys.map((s) => s.score ?? s.rating ?? 0).filter(Boolean);
   const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : '—';
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Satisfaction (CSAT)</h1>
           <p className="text-sm text-gray-500">Surveys, negative-feedback recovery &amp; scores</p>
         </div>
-        <button onClick={runSweep} className="btn-secondary text-sm">Run recovery sweep</button>
       </div>
 
       <div className="grid md:grid-cols-3 gap-4">
@@ -67,8 +55,8 @@ export default function CsatDashboard() {
           <p className="text-sm text-gray-500">Responses found</p>
         </div>
         <div className="bg-white rounded-xl border p-5">
-          <p className="text-3xl font-bold">{sweepResult?.created ?? '—'}</p>
-          <p className="text-sm text-gray-500">Recovery tasks created (last sweep)</p>
+          <p className="text-sm font-medium text-gray-700">Recovery workflow pending</p>
+          <p className="text-sm text-gray-500 mt-1">Negative-feedback follow-up will use the shared task workflow.</p>
         </div>
       </div>
 

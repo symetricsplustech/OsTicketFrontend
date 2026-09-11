@@ -4,6 +4,7 @@ import api from '@shared/lib/api';
 import { formatDate } from '@shared/lib/format';
 import { StatusBadge } from '@shared/components/RecordTable';
 import toast from 'react-hot-toast';
+import { useAuth } from '@core/auth/useAuth';
 
 // ITSM-04 + ITSM-08 — Problem RCA, known errors & workarounds: publish a
 // problem's workaround to the knowledge base, or raise a permanent-fix
@@ -21,6 +22,8 @@ interface Problem {
 }
 
 export default function KnownErrors() {
+  const { hasPermission } = useAuth();
+  const canPublishKnowledge = hasPermission('kb.manage');
   const [problems, setProblems] = useState<Problem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'with-workaround' | 'no-rca'>('all');
@@ -45,8 +48,8 @@ export default function KnownErrors() {
     try {
       await api.post(`/ops/problems/${id}/publish-kb`, {});
       toast.success('Workaround published to knowledge base');
-    } catch {
-      toast.error('Publish failed');
+    } catch (error: any) {
+      toast.error(error?.response?.status === 403 ? 'You do not have permission to publish knowledge.' : (error?.response?.data?.error || 'Publish failed'));
     } finally {
       setBusy('');
     }
@@ -125,14 +128,14 @@ export default function KnownErrors() {
                 </p>
               </div>
               <div className="flex flex-col gap-2 shrink-0">
-                <button
+                {canPublishKnowledge && <button
                   onClick={() => publishKb(p._id)}
                   disabled={busy === p._id || !p.workaround}
                   title={!p.workaround ? 'Add a workaround before publishing' : 'Publish workaround to KB'}
                   className="btn-secondary text-xs disabled:opacity-40"
                 >
                   {busy === p._id ? 'Working…' : 'Publish to KB'}
-                </button>
+                </button>}
                 <button
                   onClick={() => generateChange(p._id)}
                   disabled={busy === p._id}

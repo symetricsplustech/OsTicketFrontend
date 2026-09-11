@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import api from '@shared/lib/api';
+import { incidentApi } from '@modules/helpdesk/services';
 import { formatDate } from '@shared/lib/format';
 import toast from 'react-hot-toast';
+import { useAuth } from '@core/auth/useAuth';
 
 interface Incident {
   _id: string;
@@ -20,26 +21,34 @@ const PRIORITIES = ['low', 'medium', 'high', 'critical'];
 const IMPACTS = ['low', 'medium', 'high', 'enterprise'];
 
 export default function Incidents() {
+  const { hasPermission } = useAuth();
+  const canCreate = hasPermission('records.create');
+  const canUpdate = hasPermission('records.update');
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', priority: 'medium', impact: 'medium' });
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   const load = async () => {
     try {
-      const res = await api.get('/enterprise/incidents');
+      const res = await incidentApi.list();
       setIncidents(res.data.incidents || []);
-    } catch { setIncidents([]); } finally { setLoading(false); }
+    } catch (error: any) {
+      setIncidents([]);
+      setLoadError(error?.response?.status === 403 ? 'You do not have permission to view incidents.' : 'Unable to load incidents. Please retry.');
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canCreate) return toast.error('You do not have permission to create incidents.');
     setSaving(true);
     try {
-      await api.post('/enterprise/incidents', form);
+      await incidentApi.create(form);
       toast.success('Incident created');
       setShowForm(false);
       setForm({ title: '', description: '', priority: 'medium', impact: 'medium' });
@@ -48,8 +57,9 @@ export default function Incidents() {
   };
 
   const handleResolve = async (id: string) => {
+    if (!canUpdate) return toast.error('You do not have permission to update incidents.');
     try {
-      await api.put(`/enterprise/incidents/${id}`, { status: 'resolved', resolvedAt: new Date().toISOString() });
+      await incidentApi.update(id, { status: 'resolved', resolvedAt: new Date().toISOString() });
       toast.success('Incident resolved');
       load();
     } catch { toast.error('Failed to resolve'); }
@@ -59,7 +69,7 @@ export default function Incidents() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Incidents</h1>
-        <button onClick={() => setShowForm(true)} className="btn-primary">Report Incident</button>
+        {canCreate && <button onClick={() => setShowForm(true)} className="btn-primary">Report Incident</button>}
       </div>
 
       {showForm && (
@@ -95,6 +105,7 @@ export default function Incidents() {
           </form>
         </div>
       )}
+      {loadError && <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{loadError}</div>}
 
       <div className="card overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
@@ -130,7 +141,7 @@ export default function Incidents() {
                   <td className="px-6 py-4 text-sm text-gray-500">{inc.commander?.name || '—'}</td>
                   <td className="px-6 py-4 text-sm text-gray-500">{formatDate(inc.createdAt)}</td>
                   <td className="px-6 py-4">
-                    {inc.status !== 'resolved' && (
+                    {canUpdate && inc.status !== 'resolved' && (
                       <button onClick={() => handleResolve(inc._id)} className="text-xs text-green-600 hover:text-green-700">Resolve</button>
                     )}
                   </td>
