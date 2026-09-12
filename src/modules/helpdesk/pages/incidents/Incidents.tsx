@@ -31,13 +31,17 @@ export default function Incidents() {
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState('');
 
-  const load = async () => {
+const load = async () => {
     try {
       const res = await incidentApi.list();
       setIncidents(res.data.incidents || []);
     } catch (error: any) {
+      if (error?.response?.status === 403) {
+        setLoadError('You do not have permission to view incidents.');
+      } else {
+        setLoadError('Unable to load incidents. Please retry.');
+      }
       setIncidents([]);
-      setLoadError(error?.response?.status === 403 ? 'You do not have permission to view incidents.' : 'Unable to load incidents. Please retry.');
     } finally { setLoading(false); }
   };
 

@@ -1,4 +1,4 @@
-import api from '@/core/api';
+import api from '@shared/lib/api';
 
 // ─── Types ──────────────────────────────────────────────────────────────
 

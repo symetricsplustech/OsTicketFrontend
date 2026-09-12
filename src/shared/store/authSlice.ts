@@ -3,7 +3,7 @@ import api from '@shared/lib/api';
 import type { User, Tenant } from '@shared/types';
 import { platformApi } from './platformApi';
 import type { RootState } from './store';
-import { PLATFORM_PERMISSION_ALIASES } from '@shared/permissions';
+import { PLATFORM_PERMISSION_ALIASES, can } from '@shared/permissions';
 
 interface AuthState {
   user: User | null;
@@ -156,6 +156,7 @@ export function hasPermission(user: User | null, permission: string): boolean {
   const resolvedPermission = PLATFORM_PERMISSION_ALIASES[permission] || permission;
   if (user.permissions?.includes(resolvedPermission)) return true;
   if (user.permissions?.includes(permission)) return true;
+  if (can(resolvedPermission, user.permissions || [])) return true;
   if (user.permissions?.some(p => {
     const parts = resolvedPermission.split('.');
     for (let i = parts.length - 1; i > 0; i--) {

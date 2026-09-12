@@ -1,4 +1,4 @@
-import api from '@/core/api';
+import api from '@shared/lib/api';
 
 export interface SLAPlan {
   _id: string; company: string; name: string; gracePeriod: number;

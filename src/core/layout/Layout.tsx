@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@core/auth/useAuth';
 import { useGetNotificationsQuery, useMarkReadMutation, useMarkAllReadMutation, useGlobalSearchQuery, useMyApprovalsQuery } from '@shared/store/apiEndpoints';
 import { LayoutDashboard, Ticket, AlertTriangle, Search, BookOpen, ShoppingCart, Server, Users, UserPlus, Phone, BarChart3, Briefcase, FolderKanban, Heart, Wrench, Zap, Settings, Shield, ShieldCheck, Clock, Calendar, MessageSquare, DollarSign, FileText, Flag, Mail, Play, RotateCcw, Package, BoxesIcon, Network, ShieldAlert, Scale, Building2, Gavel, Calculator, Leaf, Layers, CloudCog, Megaphone, Target, Package2, CreditCard, Bell, Inbox, Repeat, MapPin, Store, ScanBarcode, Users2, KeyRound, Grid3x3, Radio, GitBranch, FileStack, MapPinned, ScrollText, HeartPulse, LineChart, Truck, Send, Database, Upload, CheckCircle, Table2, Plus, PanelLeftClose, PanelLeftOpen, Activity } from 'lucide-react';
+import { getItsmRouteAccess } from '@shared/itsmAccess';
 
 interface NavItem {
   label: string;
@@ -10,18 +11,23 @@ interface NavItem {
   icon: typeof LayoutDashboard;
   module?: string;
   permission?: string;
+  permissions?: string[];
   section?: string;
 }
 
 const allNavItems: NavItem[] = [
   { label: 'Dashboard', path: '/', icon: LayoutDashboard },
   // Helpdesk
-  { label: 'Tickets', path: '/tickets', icon: Ticket, module: 'helpdesk', section: 'Helpdesk' },
-  { label: 'Incidents', path: '/incidents', icon: AlertTriangle, module: 'helpdesk' },
-  { label: 'Problems', path: '/problems', icon: Search, module: 'helpdesk' },
-  { label: 'Changes', path: '/changes', icon: Zap, module: 'helpdesk' },
-  { label: 'Knowledge Base', path: '/kb', icon: BookOpen, module: 'helpdesk' },
-  { label: 'Service Catalog', path: '/catalog', icon: ShoppingCart, module: 'helpdesk' },
+  { label: 'Tasks', path: '/tasks', icon: Ticket, module: 'helpdesk', section: 'ITSM', permissions: ['itsm.core.task.read', 'itsm.core.ui.task_list.access'] },
+  { label: 'Incidents', path: '/incidents', icon: AlertTriangle, module: 'helpdesk', permissions: ['itsm.incident.incident.read', 'itsm.incident.ui.incident_list.access'] },
+  { label: 'Problems', path: '/problems', icon: Search, module: 'helpdesk', permissions: ['itsm.problem.problem.read', 'itsm.problem.ui.problem_list.access'] },
+  { label: 'Changes', path: '/changes', icon: Zap, module: 'helpdesk', permissions: ['itsm.change.change_request.read', 'itsm.change.ui.change_list.access'] },
+  { label: 'Requests & Catalog', path: '/catalog', icon: ShoppingCart, module: 'helpdesk', permissions: ['itsm.request_catalog.catalog_item.read', 'itsm.request_catalog.ui.catalog_browser.access'] },
+  { label: 'Knowledge', path: '/kb', icon: BookOpen, module: 'helpdesk', permissions: ['itsm.knowledge.knowledge_article.read', 'itsm.knowledge.ui.knowledge_search.access'] },
+  { label: 'Service Levels', path: '/sla-dashboard', icon: Clock, module: 'helpdesk', permissions: ['itsm.sla.definition_read', 'itsm.sla.ui.sla_dashboard.access'] },
+  { label: 'Assignment', path: '/assignment-dashboard', icon: GitBranch, module: 'helpdesk', permissions: ['itsm.assignment.routing_rule.read', 'itsm.assignment.ui.assignment_admin.access'] },
+  { label: 'Approvals', path: '/approval-dashboard', icon: CheckCircle, module: 'helpdesk', permissions: ['itsm.approval.approval_read', 'itsm.approval.ui.my_approvals.access'] },
+  { label: 'Major Incidents', path: '/major-incidents', icon: ShieldAlert, module: 'helpdesk', permissions: ['itsm.major_incident.major_incident.read', 'itsm.major_incident.ui.mi_dashboard.access'] },
   { label: 'Playbooks', path: '/playbooks', icon: Play, module: 'helpdesk' },
   { label: 'On-Call', path: '/oncall', icon: Calendar, module: 'helpdesk' },
   { label: 'Templates', path: '/templates', icon: FileText, module: 'helpdesk' },
@@ -35,13 +41,10 @@ const allNavItems: NavItem[] = [
   { label: 'KB Insights', path: '/knowledge-insights', icon: FileText, module: 'helpdesk' },
   { label: 'Priority Matrix', path: '/priority-matrix', icon: Grid3x3, module: 'helpdesk' },
   { label: 'My Work', path: '/my-work', icon: Inbox, module: 'helpdesk' },
-  { label: 'Major Incidents', path: '/major-incidents', icon: ShieldAlert, module: 'helpdesk' },
   { label: 'CAB Board', path: '/cab', icon: Gavel, module: 'helpdesk' },
-  { label: 'Requests', path: '/requests', icon: Package, module: 'helpdesk' },
   { label: 'Known Errors', path: '/known-errors', icon: FileStack, module: 'helpdesk' },
   { label: 'Escalations', path: '/escalations', icon: Flag, module: 'helpdesk' },
   { label: 'SLA Monitor', path: '/sla-monitor', icon: Clock, module: 'helpdesk' },
-  { label: 'Assignment', path: '/assignment', icon: GitBranch, module: 'helpdesk' },
   { label: 'CSAT', path: '/csat', icon: Heart, module: 'helpdesk' },
   { label: 'Support Email', path: '/support-email', icon: Mail, module: 'helpdesk' },
   { label: 'HD Reports', path: '/helpdesk-reports', icon: LineChart, module: 'helpdesk' },
@@ -187,7 +190,7 @@ const platformNavItems: NavItem[] = [
 ];
 
 export default function Layout() {
-  const { user, logout, hasModule, hasPermission } = useAuth();
+  const { user, logout, hasModule, hasPermission, hasAnyPermission } = useAuth();
   const { data: notifData } = useGetNotificationsQuery();
   const [markRead] = useMarkReadMutation();
   const [markAllRead] = useMarkAllReadMutation();
@@ -225,9 +228,12 @@ export default function Layout() {
   const canSeeModuleItem = (item: NavItem): boolean => {
     if (isPlatformAdmin) return false;
     if (!item.module && !item.permission) return true;
-    if (item.module && hasModule(item.module)) return true;
-    if (item.permission && hasPermission(item.permission)) return true;
-    return false;
+    const moduleAllowed = !item.module || hasModule(item.module);
+    const requiredPermissions = item.permissions || getItsmRouteAccess(item.path)?.permissions;
+    const permissionAllowed = requiredPermissions?.length
+      ? hasAnyPermission([...requiredPermissions])
+      : !item.permission || hasPermission(item.permission);
+    return moduleAllowed && permissionAllowed;
   };
 
   const visibleItems = allNavItems.filter(canSeeModuleItem);

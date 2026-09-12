@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import api from '@shared/lib/api';
 import toast from 'react-hot-toast';
 import { Users as UsersIcon, UserCheck, Building2, Plus, Trash2, Edit } from 'lucide-react';
+import ItsmPermissionPicker from '@modules/settings/components/ItsmPermissionPicker';
+import { ITSM_PERMISSION_KEYS } from '@shared/permissions';
 
 interface Agent {
   _id: string;
@@ -57,9 +59,8 @@ const AGENT_PERMISSION_OPTIONS: { key: string; label: string; group: string }[] 
   { key: 'reports.manage', label: 'Reports', group: 'Admin' },
   { key: 'audit.view', label: 'Audit logs', group: 'Admin' },
 ];
-const ADMIN_PERMISSION_KEYS = AGENT_PERMISSION_OPTIONS.map((o) => o.key);
-const DEFAULT_AGENT_PERMISSIONS = ['tickets.view', 'tickets.create', 'tickets.reply', 'tickets.note', 'tickets.close'];
-const permissionGroups = [...new Set(AGENT_PERMISSION_OPTIONS.map((o) => o.group))];
+const ADMIN_PERMISSION_KEYS = [...AGENT_PERMISSION_OPTIONS.map((o) => o.key), ...ITSM_PERMISSION_KEYS];
+const DEFAULT_AGENT_PERMISSIONS = ['itsm.core.task.read', 'itsm.core.task.create', 'itsm.incident.incident.read', 'itsm.incident.incident.create'];
 
 export default function Users() {
   const [tab, setTab] = useState<Tab>('agents');
@@ -70,6 +71,7 @@ export default function Users() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [showForm, setShowForm] = useState(false);
+  const [editingAgentId, setEditingAgentId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [agentForm, setAgentForm] = useState({
     name: '', email: '', password: '', phone: '', isAdmin: false, department: '', level: 'L1',
@@ -107,21 +109,32 @@ export default function Users() {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.post('/admin/agents', {
+      const payload = {
         name: agentForm.name,
         email: agentForm.email,
-        password: agentForm.password,
+        ...(agentForm.password ? { password: agentForm.password } : {}),
         isAdmin: agentForm.isAdmin,
         isActive: true,
         level: (agentForm as any).level || 'L1',
         permissions: agentForm.isAdmin ? ADMIN_PERMISSION_KEYS : agentPermissions,
-      });
-      toast.success('Agent created');
+      };
+      if (editingAgentId) await api.put(`/admin/agents/${editingAgentId}`, payload);
+      else await api.post('/admin/agents', payload);
+      toast.success(editingAgentId ? 'Agent permissions updated' : 'Agent created');
       setShowForm(false);
+      setEditingAgentId(null);
       setAgentForm({ name: '', email: '', password: '', phone: '', isAdmin: false, department: '', level: 'L1' });
       setAgentPermissions(DEFAULT_AGENT_PERMISSIONS);
       loadAgents();
     } catch { toast.error('Failed to create agent'); } finally { setSaving(false); }
+  };
+
+  const handleEditAgent = (agent: Agent) => {
+    setEditingAgentId(agent._id);
+    setAgentForm({ name: agent.name, email: agent.email, password: '', phone: '', isAdmin: agent.isAdmin, department: '', level: 'L1' });
+    setAgentPermissions(agent.permissions || []);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCreateCustomer = async (e: React.FormEvent) => {
@@ -188,7 +201,7 @@ export default function Users() {
       {/* Create Agent Form */}
       {showForm && tab === 'agents' && (
         <div className="bg-white rounded-xl border p-6">
-          <h2 className="font-semibold mb-4">New Agent</h2>
+          <h2 className="font-semibold mb-4">{editingAgentId ? 'Edit Agent Permissions' : 'New Agent'}</h2>
           <form onSubmit={handleCreateAgent} className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Name *</label>
@@ -202,7 +215,7 @@ export default function Users() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Password *</label>
-              <input type="password" required value={agentForm.password} onChange={(e) => setAgentForm({ ...agentForm, password: e.target.value })}
+              <input type="password" required={!editingAgentId} value={agentForm.password} onChange={(e) => setAgentForm({ ...agentForm, password: e.target.value })}
                 className="mt-1 w-full border rounded-lg px-3 py-2 text-sm" minLength={8} />
             </div>
             <div>
@@ -239,33 +252,14 @@ export default function Users() {
                   <span className="ml-2 text-gray-500">({agentPermissions.length} selected)</span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-1">
-                {permissionGroups.map((group) => (
-                  <div key={group} className="mb-2">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1">{group}</p>
-                    {AGENT_PERMISSION_OPTIONS.filter((o) => o.group === group).map((opt) => (
-                      <label key={opt.key} className="flex items-center gap-2 py-0.5 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={agentPermissions.includes(opt.key)}
-                          disabled={agentForm.isAdmin}
-                          onChange={(e) => setAgentPermissions((prev) => (e.target.checked ? [...prev, opt.key] : prev.filter((k) => k !== opt.key)))}
-                          className="rounded border-gray-300 text-brand-600 disabled:opacity-50"
-                        />
-                        <span className="text-sm text-gray-700">{opt.label}</span>
-                        <span className="text-[10px] text-gray-400">{opt.key.replace(/^tickets\./, 'ticket:')}</span>
-                      </label>
-                    ))}
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Users without a permission (e.g. <code className="text-gray-700">tickets.edit</code>) cannot perform that action — enforced on both the API and the UI.</p>
+              <ItsmPermissionPicker value={agentPermissions} onChange={setAgentPermissions} disabled={agentForm.isAdmin} />
+              <p className="text-xs text-gray-500 mt-2">The catalog contains every granular permission from ITSM modules 1–10. High-risk actions are marked with a warning icon.</p>
             </div>
             <div className="flex items-end gap-2 col-span-2">
               <button type="submit" disabled={saving} className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700 disabled:opacity-50">
-                {saving ? 'Creating...' : 'Create Agent'}
+                {saving ? 'Saving...' : editingAgentId ? 'Save Permissions' : 'Create Agent'}
               </button>
-              <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">Cancel</button>
+              <button type="button" onClick={() => { setShowForm(false); setEditingAgentId(null); }} className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">Cancel</button>
             </div>
           </form>
         </div>
@@ -368,6 +362,7 @@ export default function Users() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">{a.lastLogin ? new Date(a.lastLogin).toLocaleDateString() : 'Never'}</td>
                     <td className="px-6 py-4 text-right">
+                      <button onClick={() => handleEditAgent(a)} className="mr-3 text-brand-600 hover:text-brand-800 text-sm"><Edit className="inline h-4 w-4" /> Edit</button>
                       <button onClick={() => handleDeleteAgent(a._id)} className="text-red-500 hover:text-red-700 text-sm">Delete</button>
                     </td>
                   </tr>

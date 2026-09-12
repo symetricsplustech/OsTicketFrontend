@@ -1,3 +1,5 @@
+import { ITSM_PERMISSION_MODULES, ITSM_PERMISSION_KEYS } from './itsmPermissions.generated';
+
 /**
  * Permission Constants - Enums for type-safe permission matching.
  *
@@ -179,6 +181,119 @@ export const ALL_PERMISSIONS = {
 } as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[keyof typeof ALL_PERMISSIONS];
+
+// ─── ITSM Modules 1–10 (generated from the technical master) ───────────
+export const ITSM_MODULES = ITSM_PERMISSION_MODULES;
+export { ITSM_PERMISSION_KEYS };
+
+export type ITSMModule = (typeof ITSM_MODULES)[number];
+
+// Quick detection of canonical ITSM keys
+export const ITSM_KEY_PREFIXES = (
+  ITSM_MODULES.map((m) => m.namespace.replace('*', ''))
+);
+
+// Helper: test whether a permission key is a canonical ITSM key
+export const isItsmKey = (key: string): key is `${string}.${string}.${string}` => {
+  return ITSM_KEY_PREFIXES.some((prefix) => key.startsWith(prefix));
+};
+
+// Parse a canonical ITSM key into [module, resource, ...actionParts]
+export const extractModule = (key: string): string | null => {
+  const match = key.match(/^itsm\.([a-z_]+)\./);
+  return match ? match[1] : null;
+};
+
+export const extractResource = (key: string): string | null => {
+  const module = extractModule(key);
+  if (!module) return null;
+  const after = key.slice(`itsm.${module}.`.length);
+  // If the key has the form itsm.<module>.<resource>.<action>...
+  const parts = after.split('.');
+  return parts[0] || null;
+};
+
+export const extractAction = (key: string): string | null => {
+  const module = extractModule(key);
+  if (!module) return null;
+  const after = key.slice(`itsm.${module}.`.length);
+  const parts = after.split('.');
+  return parts[parts.length - 1] || null;
+};
+
+// Legacy alias map (subset of backend ALIAS entries) – used by can()
+// to recognise legacy keys that map to the given canonical key.
+const LEGACY_ALIAS_MAP: Record<string, string[]> = {
+  'itsm.incident.incident.read': ['tickets.view', 'incident.view'],
+  'itsm.incident.incident.create': ['tickets.create', 'incident.create'],
+  'itsm.incident.incident.update': ['tickets.edit', 'incident.update'],
+  'itsm.incident.incident.assign': ['tickets.assign', 'incident.assign'],
+  'itsm.incident.resolve': ['incident.resolve'],
+  'itsm.incident.close': ['incident.close'],
+  'itsm.incident.reopen': ['incident.reopen'],
+  'itsm.incident.cancel': ['incident.cancel'],
+  'itsm.problem.problem.read': ['problem.view'],
+  'itsm.problem.problem.create': ['problem.create'],
+  'itsm.problem.problem.update': ['problem.update'],
+  'itsm.problem.assign': ['problem.assign'],
+  'itsm.change.change_request.read': ['change.view'],
+  'itsm.change.change_request.create': ['change.create'],
+  'itsm.change.change_request.update': ['change.update'],
+  'itsm.change.approve': ['change.approve'],
+  'itsm.core.task.read': ['task.view'],
+  'itsm.core.task.create': ['task.create'],
+  'itsm.core.task.update': ['task.update'],
+  'itsm.core.task_assign': ['task.assign'],
+  'itsm.request_catalog.request.read': ['request.view'],
+  'itsm.request_catalog.request.create': ['request.create'],
+  'itsm.request_catalog.request.update': ['request.update'],
+  'itsm.knowledge.knowledge_article.read': ['knowledge.view', 'kb.read'],
+  'itsm.knowledge.article_manage_access': ['kb.manage'],
+  'itsm.sla.definition_read': ['sla.view'],
+  'itsm.sla.definition_update': ['sla.manage'],
+  'itsm.assignment.routing_rule.read': ['assignment.view'],
+  'itsm.assignment.routing_rule.create': ['assignment.manage'],
+  'tenant.user.read': ['users.view'],
+};
+
+// --- Permission Evaluation ---
+
+/**
+ * Check whether a user (identified by their raw permission array) can perform
+ * the given key.  The function:
+ *   1. Returns true if the key appears literally in userPermissions.
+ *   2. If the key is a canonical itsm.* key, also returns true when the user
+ *    holds any legacy key that the backend transcoder maps to it (via the
+ *    LEGACY_ALIAS_MAP).
+ *   3. Performs a simple prefix match for `itsm.*` keys that are not in the
+ *    alias map – this provides basic coverage without a backend call.
+ *
+ * @param key          The permission key to check (e.g. 'itsm.incident.incident.read')
+ * @param userPermissions The raw permission array from the user/agent doc
+ * @returns true when the user is authorised for this action
+ */
+export const can = (
+  key: string,
+  userPermissions: string[] = [],
+): boolean => {
+  if (userPermissions.includes('*') || userPermissions.includes(key)) return true;
+
+  // Explicit namespace grants are supported at any segment boundary.
+  if (userPermissions.some((grant) => {
+    if (!grant.endsWith('.*')) return false;
+    return key.startsWith(grant.slice(0, -1));
+  })) return true;
+
+  // 2. canonical itsm.* key – try legacy alias map
+  if (isItsmKey(key)) {
+    const aliases = LEGACY_ALIAS_MAP[key];
+    if (aliases && aliases.some((leg) => userPermissions.includes(leg))) return true;
+
+    return false;
+  }
+
+  return false;
+};
 
 // ─── Platform Permission Aliases ──────────────────────────────────────
 export const PLATFORM_PERMISSION_ALIASES: Record<string, string> = {
