@@ -160,6 +160,9 @@ const ReleaseDashboard = lazy(
 const ImprovementDashboard = lazy(
   () => import("@modules/helpdesk/pages/improvement/ImprovementDashboard"),
 );
+const OutageDashboard = lazy(
+  () => import("@modules/helpdesk/pages/outage/OutageDashboard"),
+);
 const ServiceCatalog = lazy(
   () => import("@modules/helpdesk/pages/support/ServiceCatalog"),
 );
@@ -674,6 +677,15 @@ export function AppRoutes() {
           />
 
           {/* Helpdesk Walk-Up Experience */}
+          <Route path="walkup" element={<Navigate to="/walkup-dashboard" replace />} />
+          <Route
+            path="walkup/checkin"
+            element={<Navigate to="/walkup-dashboard" replace />}
+          />
+          <Route
+            path="walkup/queue"
+            element={<Navigate to="/walkup-dashboard" replace />}
+          />
           <Route
             path="walkup-dashboard"
             element={
@@ -709,6 +721,16 @@ export function AppRoutes() {
             element={
               <ModuleGuard module="helpdesk">
                 <ImprovementDashboard />
+              </ModuleGuard>
+            }
+          />
+
+          {/* Helpdesk Outage / Service Availability */}
+          <Route
+            path="outage-dashboard"
+            element={
+              <ModuleGuard module="helpdesk">
+                <OutageDashboard />
               </ModuleGuard>
             }
           />
@@ -949,6 +971,10 @@ export function AppRoutes() {
                 </ModuleGuard>
               </AdminRoute>
             }
+          />
+          <Route
+            path="settings/*"
+            element={<Navigate to="/settings" replace />}
           />
         </Route>
 

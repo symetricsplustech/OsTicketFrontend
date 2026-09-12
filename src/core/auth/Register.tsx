@@ -16,13 +16,22 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post("/auth/register", { name, email, password });
+      const res = await api.post("/auth/register", { name, email, password });
       await login(email, password);
       toast.success("Account created. Welcome to Helpdesk.");
       navigate("/");
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      toast.error(error.response?.data?.message || "Registration failed");
+      const error = err as {
+        response?: {
+          data?: {
+            message?: string;
+          };
+        };
+      };
+      const message =
+        error.response?.data?.message ||
+        (error instanceof Error ? error.message : "Registration failed");
+      toast.error(message);
     } finally {
       setLoading(false);
     }

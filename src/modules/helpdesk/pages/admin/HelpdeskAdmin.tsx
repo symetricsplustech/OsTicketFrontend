@@ -23,24 +23,33 @@ export default function HelpdeskAdmin() {
     name: "",
   });
 
+  const asArray = (v: any): any[] =>
+    Array.isArray(v)
+      ? v
+      : Array.isArray(v?.items)
+        ? v.items
+        : Array.isArray(v?.topics)
+          ? v.topics
+          : Array.isArray(v?.data)
+            ? v.data
+            : [];
+
   const load = async (t: Tab) => {
     setLoading(true);
     try {
       if (t === "topics") {
         const r = await api
           .get("/admin/help-topics")
-          .catch(() => ({ data: { topics: [] } }));
-        setTopics(r.data.topics || r.data || []);
+          .catch(() => ({ data: [] }));
+        setTopics(asArray(r.data));
       } else if (t === "canned") {
-        const r = await api
-          .get("/agent/canned")
-          .catch(() => ({ data: { canned: [] } }));
-        setCanned(r.data.items || r.data.canned || []);
+        const r = await api.get("/agent/canned").catch(() => ({ data: [] }));
+        setCanned(asArray(r.data));
       } else if (t === "announcements") {
         const r = await api
           .get("/agent/announcements")
-          .catch(() => ({ data: { announcements: [] } }));
-        setAnnouncements(r.data.items || r.data.announcements || []);
+          .catch(() => ({ data: [] }));
+        setAnnouncements(asArray(r.data));
       } else if (t === "closure") {
         const r = await api
           .get("/gaps2/closure-codes")
@@ -50,7 +59,7 @@ export default function HelpdeskAdmin() {
         const r = await api
           .get("/gaps2/tickets-trash")
           .catch(() => ({ data: [] }));
-        setTrash(Array.isArray(r.data) ? r.data : []);
+        setTrash(asArray(r.data));
       }
     } finally {
       setLoading(false);
