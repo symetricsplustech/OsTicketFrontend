@@ -18,8 +18,8 @@ export default function Register() {
     try {
       await api.post("/auth/register", { name, email, password });
       await login(email, password);
-      toast.success("Account created. Welcome to Unified Platform.");
-      navigate("/platform");
+      toast.success("Account created. Welcome to Helpdesk.");
+      navigate("/");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
       toast.error(error.response?.data?.message || "Registration failed");
@@ -33,10 +33,10 @@ export default function Register() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h1 className="text-center text-3xl font-bold text-gray-900">
-            Create Platform Account
+            Create Your Account
           </h1>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Your personal account to access the platform
+            Your account to access helpdesk and settings
           </p>
         </div>
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
@@ -99,7 +99,7 @@ export default function Register() {
             </Link>
           </p>
           <p className="text-center text-xs text-gray-500">
-            After registration, you can create an Instance or accept an invitation from Platform Home.
+            Your organization's admin can grant granular access in Settings.
           </p>
         </form>
       </div>

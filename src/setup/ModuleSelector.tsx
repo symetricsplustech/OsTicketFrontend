@@ -10,28 +10,6 @@ const ALL_MODULES = [
     label: "Help Desk",
     desc: "Ticketing, SLA, knowledge base",
   },
-  { key: "crm", label: "CRM", desc: "Leads, accounts, pipeline" },
-  { key: "csm", label: "Customer Success", desc: "Health scores, playbooks" },
-  { key: "itam", label: "IT Asset Mgmt", desc: "Hardware/software inventory" },
-  {
-    key: "itom",
-    label: "IT Operations",
-    desc: "Incidents, monitoring, status pages",
-  },
-  {
-    key: "projects",
-    label: "Projects",
-    desc: "Tasks, milestones, resource tracking",
-  },
-  { key: "hr", label: "HR", desc: "Leave, claims, employees" },
-  {
-    key: "field-service",
-    label: "Field Service",
-    desc: "Dispatch, checklists, mobile",
-  },
-  { key: "workflow", label: "Workflow", desc: "Automation rules" },
-  { key: "analytics", label: "Analytics", desc: "Reports and dashboards" },
-  { key: "ai", label: "AI", desc: "Suggest replies, sentiment, triage" },
   { key: "settings", label: "Settings", desc: "System configuration" },
 ];
 

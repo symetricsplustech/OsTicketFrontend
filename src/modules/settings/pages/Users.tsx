@@ -10,7 +10,10 @@ import {
   Edit,
 } from "lucide-react";
 import ItsmPermissionPicker from "@modules/settings/components/ItsmPermissionPicker";
-import { ITSM_PERMISSION_KEYS } from "@shared/permissions";
+import {
+  ITSM_PERMISSION_KEYS,
+  DEFAULT_HELPDESK_PERMISSIONS,
+} from "@shared/permissions";
 
 interface Agent {
   _id: string;
@@ -35,6 +38,7 @@ interface Customer {
   userType?: string;
   orgRole?: string;
   role?: string;
+  permissions?: string[];
   createdAt: string;
 }
 
@@ -95,6 +99,9 @@ export default function Users() {
   const [total, setTotal] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [editingAgentId, setEditingAgentId] = useState<string | null>(null);
+  const [editingCustomerId, setEditingCustomerId] = useState<string | null>(
+    null,
+  );
   const [saving, setSaving] = useState(false);
   const [agentForm, setAgentForm] = useState({
     name: "",
@@ -117,6 +124,9 @@ export default function Users() {
     userType: "employee",
     orgRole: "member",
   });
+  const [customerPermissions, setCustomerPermissions] = useState<string[]>([
+    ...DEFAULT_HELPDESK_PERMISSIONS,
+  ]);
 
   const loadAgents = async () => {
     try {
@@ -211,17 +221,29 @@ export default function Users() {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.post("/admin/users", {
-        name: customerForm.name,
-        email: customerForm.email,
-        password: customerForm.password,
-        phone: customerForm.phone,
-        status: "active",
-        userType: customerForm.userType,
-        orgRole: customerForm.orgRole,
-      });
-      toast.success("Customer created");
+      if (editingCustomerId) {
+        await api.put(`/admin/users/${editingCustomerId}`, {
+          name: customerForm.name,
+          email: customerForm.email,
+          phone: customerForm.phone,
+          permissions: customerPermissions,
+        });
+        toast.success("Customer access updated");
+      } else {
+        await api.post("/admin/users", {
+          name: customerForm.name,
+          email: customerForm.email,
+          password: customerForm.password,
+          phone: customerForm.phone,
+          status: "active",
+          userType: customerForm.userType,
+          orgRole: customerForm.orgRole,
+          permissions: customerPermissions,
+        });
+        toast.success("Customer created");
+      }
       setShowForm(false);
+      setEditingCustomerId(null);
       setCustomerForm({
         name: "",
         email: "",
@@ -231,12 +253,35 @@ export default function Users() {
         userType: "employee",
         orgRole: "member",
       });
+      setCustomerPermissions([...DEFAULT_HELPDESK_PERMISSIONS]);
       loadCustomers();
     } catch {
-      toast.error("Failed to create customer");
+      toast.error(
+        editingCustomerId ? "Failed to update customer access" : "Failed to create customer",
+      );
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleEditCustomer = (u: Customer) => {
+    setEditingCustomerId(u._id);
+    setCustomerForm({
+      name: u.name,
+      email: u.email,
+      password: "",
+      phone: u.phone || "",
+      organization: "",
+      userType: u.userType || "employee",
+      orgRole: u.orgRole || "member",
+    });
+    setCustomerPermissions(
+      u.permissions?.length
+        ? u.permissions
+        : [...DEFAULT_HELPDESK_PERMISSIONS],
+    );
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDeleteAgent = async (id: string) => {
@@ -266,7 +311,10 @@ export default function Users() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setShowForm(true);
+            setEditingCustomerId(null);
+          }}
           className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700"
         >
           <Plus className="h-4 w-4" /> Add{" "}
@@ -294,6 +342,7 @@ export default function Users() {
           onClick={() => {
             setTab("customers");
             setShowForm(false);
+            setEditingCustomerId(null);
             setSearch("");
             setPage(1);
           }}
@@ -467,10 +516,12 @@ export default function Users() {
         </div>
       )}
 
-      {/* Create Customer Form */}
+      {/* Create/Edit Customer Form */}
       {showForm && tab === "customers" && (
         <div className="bg-white rounded-xl border p-6">
-          <h2 className="font-semibold mb-4">New Customer</h2>
+          <h2 className="font-semibold mb-4">
+            {editingCustomerId ? "Edit Customer Access" : "New Customer"}
+          </h2>
           <form
             onSubmit={handleCreateCustomer}
             className="grid grid-cols-2 gap-4"
@@ -509,10 +560,13 @@ export default function Users() {
               </label>
               <input
                 type="password"
-                required
+                required={!editingCustomerId}
                 value={customerForm.password}
                 onChange={(e) =>
-                  setCustomerForm({ ...customerForm, password: e.target.value })
+                  setCustomerForm({
+                    ...customerForm,
+                    password: e.target.value,
+                  })
                 }
                 className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
                 minLength={6}
@@ -531,48 +585,93 @@ export default function Users() {
                 className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Type
-              </label>
-              <select
-                value={customerForm.userType}
-                onChange={(e) =>
-                  setCustomerForm({
-                    ...customerForm,
-                    userType: e.target.value,
-                    orgRole:
-                      e.target.value === "external"
-                        ? customerForm.orgRole
-                        : "member",
-                  })
-                }
-                className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
-              >
-                <option value="employee">Company employee</option>
-                <option value="external">External customer</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Org role
-              </label>
-              <select
-                value={customerForm.orgRole}
-                onChange={(e) =>
-                  setCustomerForm({ ...customerForm, orgRole: e.target.value })
-                }
-                disabled={customerForm.userType !== "external"}
-                title={
-                  customerForm.userType !== "external"
-                    ? "Only external customers can be org managers"
-                    : "Org managers approve their org requests"
-                }
-                className="mt-1 w-full border rounded-lg px-3 py-2 text-sm disabled:opacity-40"
-              >
-                <option value="member">End user</option>
-                <option value="manager">Organization manager</option>
-              </select>
+            {!editingCustomerId && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Type
+                  </label>
+                  <select
+                    value={customerForm.userType}
+                    onChange={(e) =>
+                      setCustomerForm({
+                        ...customerForm,
+                        userType: e.target.value,
+                        orgRole:
+                          e.target.value === "external"
+                            ? customerForm.orgRole
+                            : "member",
+                      })
+                    }
+                    className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="employee">Company employee</option>
+                    <option value="external">External customer</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Org role
+                  </label>
+                  <select
+                    value={customerForm.orgRole}
+                    onChange={(e) =>
+                      setCustomerForm({
+                        ...customerForm,
+                        orgRole: e.target.value,
+                      })
+                    }
+                    disabled={customerForm.userType !== "external"}
+                    title={
+                      customerForm.userType !== "external"
+                        ? "Only external customers can be org managers"
+                        : "Org managers approve their org requests"
+                    }
+                    className="mt-1 w-full border rounded-lg px-3 py-2 text-sm disabled:opacity-40"
+                  >
+                    <option value="member">End user</option>
+                    <option value="manager">Organization manager</option>
+                  </select>
+                </div>
+              </>
+            )}
+            <div className="col-span-2 border-t pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-gray-700">
+                  HelpDesk access (granular permissions)
+                </label>
+                <div className="flex items-center gap-2 text-xs">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCustomerPermissions([...DEFAULT_HELPDESK_PERMISSIONS])
+                    }
+                    className="text-brand-600 hover:underline"
+                  >
+                    Restore defaults
+                  </button>
+                  <span className="text-gray-300">|</span>
+                  <button
+                    type="button"
+                    onClick={() => setCustomerPermissions([])}
+                    className="text-gray-500 hover:underline"
+                  >
+                    Clear all
+                  </button>
+                  <span className="ml-2 text-gray-500">
+                    ({customerPermissions.length} selected)
+                  </span>
+                </div>
+              </div>
+              <ItsmPermissionPicker
+                value={customerPermissions}
+                onChange={setCustomerPermissions}
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                Every created user gets the default HelpDesk access. Remove
+                permission keys to restrict what this user can see and do; add
+                keys to widen access. Changes take effect on their next login.
+              </p>
             </div>
             <div className="flex items-end gap-2 col-span-2">
               <button
@@ -580,11 +679,18 @@ export default function Users() {
                 disabled={saving}
                 className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700 disabled:opacity-50"
               >
-                {saving ? "Creating..." : "Create Customer"}
+                {saving
+                  ? "Saving..."
+                  : editingCustomerId
+                    ? "Save Access"
+                    : "Create Customer"}
               </button>
               <button
                 type="button"
-                onClick={() => setShowForm(false)}
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingCustomerId(null);
+                }}
                 className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50"
               >
                 Cancel
@@ -736,6 +842,9 @@ export default function Users() {
                   Type
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  HelpDesk Access
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Status
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
@@ -747,7 +856,7 @@ export default function Users() {
               {loading ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="px-6 py-12 text-center text-gray-400"
                   >
                     Loading...
@@ -756,7 +865,7 @@ export default function Users() {
               ) : customers.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="px-6 py-12 text-center text-gray-400"
                   >
                     No customers found. Customers can submit tickets through the
@@ -786,12 +895,26 @@ export default function Users() {
                     </td>
                     <td className="px-6 py-4">
                       <span
+                        title={(u.permissions || []).join(", ")}
+                        className={`px-2 py-1 text-xs rounded-full ${u.permissions?.length ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"}`}
+                      >
+                        {u.permissions?.length || 0} perms
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
                         className={`px-2 py-1 text-xs rounded-full ${u.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}
                       >
                         {u.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleEditCustomer(u)}
+                        className="mr-3 text-brand-600 hover:text-brand-800 text-sm"
+                      >
+                        <Edit className="inline h-4 w-4" /> Edit Access
+                      </button>
                       <button
                         onClick={() => handleDeleteCustomer(u._id)}
                         className="text-red-500 hover:text-red-700 text-sm"

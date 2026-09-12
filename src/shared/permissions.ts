@@ -347,6 +347,33 @@ export const MODULE_KEYS = ["helpdesk", "settings", "ai"] as const;
 
 export type ModuleKey = (typeof MODULE_KEYS)[number];
 
+// ─── Default HelpDesk Access ───────────────────────────────────────────
+// Grant list applied to every newly created user (backend
+// osTicketBackend/src/config/defaultHelpdeskPermissions.js mirrors this).
+// Read/UI keys for the HelpDesk console (modules 1-9); walk-up / on-call /
+// major-incident modules are excluded so the owner can grant them selectively.
+export const DEFAULT_HELPDESK_PERMISSIONS: readonly string[] = [
+  "itsm.core.task.read",
+  "itsm.core.ui.task_record_shell.access",
+  "itsm.core.ui.my_work.access",
+  "itsm.incident.incident.read",
+  "itsm.incident.ui.incident_list.access",
+  "itsm.incident.ui.incident_record.access",
+  "itsm.problem.problem.read",
+  "itsm.problem.ui.problem_list.access",
+  "itsm.change.change_request.read",
+  "itsm.change.ui.change_list.access",
+  "itsm.request_catalog.catalog_item.read",
+  "itsm.request_catalog.ui.catalog_home.access",
+  "itsm.request_catalog.request.read",
+  "itsm.request_catalog.ui.req_detail.access",
+  "itsm.knowledge.knowledge_article.read",
+  "itsm.knowledge.ui.knowledge_search.access",
+  "itsm.sla.definition_read",
+  "itsm.approval.approval_read",
+  "itsm.approval.ui.my_approvals.access",
+];
+
 // ─── Super Admin Role Presets ──────────────────────────────────────────
 export const SAAS_ROLE_PRESETS: Record<string, Permission[]> = {
   super_admin: Object.values(SAAS_PERMISSIONS) as Permission[],

@@ -4,13 +4,12 @@ import Layout from "@core/layout/Layout";
 import { ModuleGuard } from "@core/permissions/ModuleGuard";
 import {
   AdminRoute,
-  PlatformRoute,
   ProtectedRoute,
 } from "@core/routing/RouteGuards";
 import { LoadingSpinner } from "@shared/components/ui";
 
-const Login = lazy(() => import("@core/auth/Login"));
-const Register = lazy(() => import("@core/auth/Register"));
+const Login = lazy(() => import("@core/auth/Login").then(m => ({ default: m.default })));
+const Register = lazy(() => import("@core/auth/Register").then(m => ({ default: m.default })));
 
 // Helpdesk
 const Dashboard = lazy(
@@ -158,6 +157,9 @@ const CmdbDashboard = lazy(
 const ReleaseDashboard = lazy(
   () => import("@modules/helpdesk/pages/release/ReleaseDashboard"),
 );
+const ImprovementDashboard = lazy(
+  () => import("@modules/helpdesk/pages/improvement/ImprovementDashboard"),
+);
 const ServiceCatalog = lazy(
   () => import("@modules/helpdesk/pages/support/ServiceCatalog"),
 );
@@ -209,47 +211,8 @@ const SlaPlans = lazy(() => import("@modules/settings/pages/SlaPlans"));
 const EmailSettings = lazy(
   () => import("@modules/settings/pages/EmailSettings"),
 );
-const AuditLogs = lazy(() => import("@modules/settings/pages/AuditLogs"));
-
-// Super Admin (SaaS platform)
-const SuperAdminDashboard = lazy(
-  () => import("@modules/superadmin/pages/SuperAdminDashboard"),
-);
-const SuperAdminTenantList = lazy(
-  () => import("@modules/superadmin/pages/SuperAdminTenantList"),
-);
-const SuperAdminTenantDetail = lazy(
-  () => import("@modules/superadmin/pages/SuperAdminTenantDetail"),
-);
-const SuperAdminTenantCreate = lazy(
-  () => import("@modules/superadmin/pages/SuperAdminTenantCreate"),
-);
-const SuperAdminPlans = lazy(
-  () => import("@modules/superadmin/pages/SuperAdminPlans"),
-);
-const SuperAdminAuditLogs = lazy(
-  () => import("@modules/superadmin/pages/SuperAdminAuditLogs"),
-);
-const SuperAdminAdmins = lazy(
-  () => import("@modules/superadmin/pages/SuperAdminAdmins"),
-);
-const SuperAdminOperations = lazy(
-  () => import("@modules/superadmin/pages/SuperAdminOperations"),
-);
-const SuperAdminModules = lazy(
-  () => import("@modules/superadmin/pages/SuperAdminModules"),
-);
-const SuperAdminSecurity = lazy(
-  () => import("@modules/superadmin/pages/SuperAdminSecurity"),
-);
-const SuperAdminSettings = lazy(
-  () => import("@modules/superadmin/pages/SuperAdminSettings"),
-);
-const SuperAdminControlPlane = lazy(
-  () => import("@modules/superadmin/pages/SuperAdminControlPlane"),
-);
-const SuperAdminSla = lazy(
-  () => import("@modules/superadmin/pages/SuperAdminSla"),
+const AuditLogs = lazy(
+  () => import("@modules/settings/pages/AuditLogs"),
 );
 
 // Core Task Engine
@@ -740,6 +703,16 @@ export function AppRoutes() {
             }
           />
 
+          {/* Helpdesk Continual Improvement */}
+          <Route
+            path="improvement-dashboard"
+            element={
+              <ModuleGuard module="helpdesk">
+                <ImprovementDashboard />
+              </ModuleGuard>
+            }
+          />
+
           {/* Helpdesk Support */}
           <Route
             path="catalog"
@@ -975,112 +948,6 @@ export function AppRoutes() {
                   <AuditLogs />
                 </ModuleGuard>
               </AdminRoute>
-            }
-          />
-
-          {/* Super Admin (SaaS platform) */}
-          <Route
-            path="superadmin"
-            element={
-              <PlatformRoute permission="saas.dashboard.read">
-                <SuperAdminDashboard />
-              </PlatformRoute>
-            }
-          />
-          <Route
-            path="superadmin/tenants"
-            element={
-              <PlatformRoute>
-                <SuperAdminTenantList />
-              </PlatformRoute>
-            }
-          />
-          <Route
-            path="superadmin/tenants/new"
-            element={
-              <PlatformRoute permission="saas.tenant.create">
-                <SuperAdminTenantCreate />
-              </PlatformRoute>
-            }
-          />
-          <Route
-            path="superadmin/tenants/:id"
-            element={
-              <PlatformRoute>
-                <SuperAdminTenantDetail />
-              </PlatformRoute>
-            }
-          />
-          <Route
-            path="superadmin/plans"
-            element={
-              <PlatformRoute permission="saas.plan.read">
-                <SuperAdminPlans />
-              </PlatformRoute>
-            }
-          />
-          <Route
-            path="superadmin/audit"
-            element={
-              <PlatformRoute permission="saas.audit.read">
-                <SuperAdminAuditLogs />
-              </PlatformRoute>
-            }
-          />
-          <Route
-            path="superadmin/admins"
-            element={
-              <PlatformRoute permission="saas.admin.manage">
-                <SuperAdminAdmins />
-              </PlatformRoute>
-            }
-          />
-          <Route
-            path="superadmin/operations"
-            element={
-              <PlatformRoute permission="saas.operations.health.read">
-                <SuperAdminOperations />
-              </PlatformRoute>
-            }
-          />
-          <Route
-            path="superadmin/modules"
-            element={
-              <PlatformRoute permission="saas.module.read">
-                <SuperAdminModules />
-              </PlatformRoute>
-            }
-          />
-          <Route
-            path="superadmin/security"
-            element={
-              <PlatformRoute permission="saas.security.read">
-                <SuperAdminSecurity />
-              </PlatformRoute>
-            }
-          />
-          <Route
-            path="superadmin/settings"
-            element={
-              <PlatformRoute permission="saas.platform.configure">
-                <SuperAdminSettings />
-              </PlatformRoute>
-            }
-          />
-          <Route
-            path="superadmin/control"
-            element={
-              <PlatformRoute permission="saas.platform.configure">
-                <SuperAdminControlPlane />
-              </PlatformRoute>
-            }
-          />
-          <Route
-            path="superadmin/sla"
-            element={
-              <PlatformRoute permission="saas.sla.read">
-                <SuperAdminSla />
-              </PlatformRoute>
             }
           />
         </Route>

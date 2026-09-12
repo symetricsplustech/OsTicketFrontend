@@ -22,20 +22,6 @@ export function AdminRoute({ children }: GuardProps) {
   );
 }
 
-export function PlatformRoute({
-  children,
-  permission = "saas.tenant.read",
-}: GuardProps & { permission?: string }) {
-  const { user, loading, hasPermission } = useAuth();
-  if (loading) return <LoadingSpinner />;
-  if (!user) return <Navigate to="/login" replace />;
-  return hasPermission(permission) ? (
-    <>{children}</>
-  ) : (
-    <Navigate to="/" replace />
-  );
-}
-
 export function PermissionRoute({
   permission,
   module,

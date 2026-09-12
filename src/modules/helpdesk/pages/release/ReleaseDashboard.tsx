@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { releaseApi, ReleaseDashboard } from '../../services/release/releaseApi';
+import { releaseApi } from '../../services/release/releaseApi';
+import type { ReleaseDashboard } from '../../services/release/releaseApi';
 
 const ReleaseDashboard: React.FC = () => {
   const [data, setData] = useState<ReleaseDashboard | null>(null);
