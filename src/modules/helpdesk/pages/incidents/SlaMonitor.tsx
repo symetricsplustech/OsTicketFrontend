@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import api from '@shared/lib/api';
-import { formatDate } from '@shared/lib/format';
-import { StatusBadge } from '@shared/components/RecordTable';
-import toast from 'react-hot-toast';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import api from "@shared/lib/api";
+import { formatDate } from "@shared/lib/format";
+import { StatusBadge } from "@shared/components/RecordTable";
+import toast from "react-hot-toast";
 
 // ITSM-09 — Service Level Management: SLA plans, OLA breach radar and
 // per-ticket pause/resume controls.
@@ -29,21 +29,29 @@ export default function SlaMonitor() {
   const [breachCount, setBreachCount] = useState(0);
   const [summary, setSummary] = useState<any>({});
   const [loading, setLoading] = useState(true);
-  const [ticketNumber, setTicketNumber] = useState('');
+  const [ticketNumber, setTicketNumber] = useState("");
   const [showPlan, setShowPlan] = useState(false);
-  const [pForm, setPForm] = useState({ name: '', responseMinutes: 30, resolutionMinutes: 240 });
+  const [pForm, setPForm] = useState({
+    name: "",
+    responseMinutes: 30,
+    resolutionMinutes: 240,
+  });
 
   const load = async () => {
     setLoading(true);
     try {
       const [pRes, oRes, dRes] = await Promise.all([
-        api.get('/admin/sla-plans').catch(() => ({ data: { plans: [] } })),
-        api.get('/gaps2/ola-breaches').catch(() => ({ data: { breaches: [], breachCount: 0 } })),
-        api.get('/admin/sla-dashboard').catch(() => ({ data: { data: {} } })),
+        api.get("/admin/sla-plans").catch(() => ({ data: { plans: [] } })),
+        api
+          .get("/gaps2/ola-breaches")
+          .catch(() => ({ data: { breaches: [], breachCount: 0 } })),
+        api.get("/admin/sla-dashboard").catch(() => ({ data: { data: {} } })),
       ]);
       setPlans(pRes.data.plans || pRes.data || []);
       setBreaches(oRes.data.breaches || []);
-      setBreachCount(oRes.data.breachCount ?? (oRes.data.breaches || []).length);
+      setBreachCount(
+        oRes.data.breachCount ?? (oRes.data.breaches || []).length,
+      );
       setSummary(dRes.data?.data || {});
     } catch {
       setPlans([]);
@@ -52,23 +60,25 @@ export default function SlaMonitor() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const createPlan = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/admin/sla-plans', pForm);
-      toast.success('SLA plan created');
+      await api.post("/admin/sla-plans", pForm);
+      toast.success("SLA plan created");
       setShowPlan(false);
-      setPForm({ name: '', responseMinutes: 30, resolutionMinutes: 240 });
+      setPForm({ name: "", responseMinutes: 30, resolutionMinutes: 240 });
       load();
     } catch {
-      toast.error('Failed to create plan');
+      toast.error("Failed to create plan");
     }
   };
 
-  const pauseResume = async (action: 'pause' | 'resume') => {
-    if (!ticketNumber.trim()) return toast.error('Enter a ticket number');
+  const pauseResume = async (action: "pause" | "resume") => {
+    if (!ticketNumber.trim()) return toast.error("Enter a ticket number");
     try {
       await api.post(`/agent/tickets/${ticketNumber.trim()}/sla/${action}`, {});
       toast.success(`SLA ${action}d for #${ticketNumber.trim()}`);
@@ -82,9 +92,16 @@ export default function SlaMonitor() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">SLA Monitor</h1>
-          <p className="text-sm text-gray-500">Plans, breach radar &amp; pause/resume controls</p>
+          <p className="text-sm text-gray-500">
+            Plans, breach radar &amp; pause/resume controls
+          </p>
         </div>
-        <button onClick={() => setShowPlan(!showPlan)} className="btn-primary text-sm">+ SLA Plan</button>
+        <button
+          onClick={() => setShowPlan(!showPlan)}
+          className="btn-primary text-sm"
+        >
+          + SLA Plan
+        </button>
       </div>
 
       <div className="grid md:grid-cols-3 gap-4">
@@ -97,48 +114,116 @@ export default function SlaMonitor() {
           <p className="text-sm text-gray-500">SLA plans defined</p>
         </div>
         <div className="bg-white rounded-xl border p-5">
-          <p className="text-sm font-semibold mb-2">Pause / resume ticket SLA</p>
+          <p className="text-sm font-semibold mb-2">
+            Pause / resume ticket SLA
+          </p>
           <div className="flex gap-2">
-            <input value={ticketNumber} onChange={(e) => setTicketNumber(e.target.value)}
-              placeholder="Ticket #" className="input-field text-sm flex-1" />
-            <button onClick={() => pauseResume('pause')} className="btn-secondary text-xs">Pause</button>
-            <button onClick={() => pauseResume('resume')} className="btn-secondary text-xs">Resume</button>
+            <input
+              value={ticketNumber}
+              onChange={(e) => setTicketNumber(e.target.value)}
+              placeholder="Ticket #"
+              className="input-field text-sm flex-1"
+            />
+            <button
+              onClick={() => pauseResume("pause")}
+              className="btn-secondary text-xs"
+            >
+              Pause
+            </button>
+            <button
+              onClick={() => pauseResume("resume")}
+              className="btn-secondary text-xs"
+            >
+              Resume
+            </button>
           </div>
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-4">
-        <div className="card p-4"><p className="text-2xl font-bold">{summary.withinSla || 0}</p><p className="text-sm text-gray-500">Within SLA</p></div>
-        <div className="card p-4"><p className="text-2xl font-bold text-amber-600">{summary.atRisk || 0}</p><p className="text-sm text-gray-500">At risk</p></div>
-        <div className="card p-4"><p className="text-2xl font-bold">{Number(summary.response?.compliance ?? 100).toFixed(1)}%</p><p className="text-sm text-gray-500">Response compliance</p></div>
-        <div className="card p-4"><p className="text-2xl font-bold">{Number(summary.resolution?.compliance ?? 100).toFixed(1)}%</p><p className="text-sm text-gray-500">Resolution compliance</p></div>
+        <div className="card p-4">
+          <p className="text-2xl font-bold">{summary.withinSla || 0}</p>
+          <p className="text-sm text-gray-500">Within SLA</p>
+        </div>
+        <div className="card p-4">
+          <p className="text-2xl font-bold text-amber-600">
+            {summary.atRisk || 0}
+          </p>
+          <p className="text-sm text-gray-500">At risk</p>
+        </div>
+        <div className="card p-4">
+          <p className="text-2xl font-bold">
+            {Number(summary.response?.compliance ?? 100).toFixed(1)}%
+          </p>
+          <p className="text-sm text-gray-500">Response compliance</p>
+        </div>
+        <div className="card p-4">
+          <p className="text-2xl font-bold">
+            {Number(summary.resolution?.compliance ?? 100).toFixed(1)}%
+          </p>
+          <p className="text-sm text-gray-500">Resolution compliance</p>
+        </div>
       </div>
 
       {showPlan && (
-        <form onSubmit={createPlan} className="card p-5 grid md:grid-cols-4 gap-3">
-          <input required value={pForm.name} onChange={(e) => setPForm({ ...pForm, name: e.target.value })}
-            placeholder="Plan name *" className="input-field text-sm md:col-span-2" />
-          <input type="number" min={1} value={pForm.responseMinutes}
-            onChange={(e) => setPForm({ ...pForm, responseMinutes: Number(e.target.value) })}
-            title="Response target (minutes)" className="input-field text-sm" />
-          <input type="number" min={1} value={pForm.resolutionMinutes}
-            onChange={(e) => setPForm({ ...pForm, resolutionMinutes: Number(e.target.value) })}
-            title="Resolution target (minutes)" className="input-field text-sm" />
-          <div className="md:col-span-4"><button type="submit" className="btn-primary text-sm">Create plan</button></div>
+        <form
+          onSubmit={createPlan}
+          className="card p-5 grid md:grid-cols-4 gap-3"
+        >
+          <input
+            required
+            value={pForm.name}
+            onChange={(e) => setPForm({ ...pForm, name: e.target.value })}
+            placeholder="Plan name *"
+            className="input-field text-sm md:col-span-2"
+          />
+          <input
+            type="number"
+            min={1}
+            value={pForm.responseMinutes}
+            onChange={(e) =>
+              setPForm({ ...pForm, responseMinutes: Number(e.target.value) })
+            }
+            title="Response target (minutes)"
+            className="input-field text-sm"
+          />
+          <input
+            type="number"
+            min={1}
+            value={pForm.resolutionMinutes}
+            onChange={(e) =>
+              setPForm({ ...pForm, resolutionMinutes: Number(e.target.value) })
+            }
+            title="Resolution target (minutes)"
+            className="input-field text-sm"
+          />
+          <div className="md:col-span-4">
+            <button type="submit" className="btn-primary text-sm">
+              Create plan
+            </button>
+          </div>
         </form>
       )}
 
       <div className="grid md:grid-cols-2 gap-4">
         <div className="card overflow-hidden">
-          <div className="px-5 py-3 border-b"><h2 className="font-semibold text-sm">SLA plans</h2></div>
-          {loading ? <p className="p-5 text-sm text-gray-400">Loading…</p> : plans.length === 0 ? (
+          <div className="px-5 py-3 border-b">
+            <h2 className="font-semibold text-sm">SLA plans</h2>
+          </div>
+          {loading ? (
+            <p className="p-5 text-sm text-gray-400">Loading…</p>
+          ) : plans.length === 0 ? (
             <p className="p-5 text-sm text-gray-400">No plans yet.</p>
           ) : (
             <ul className="divide-y">
               {plans.map((p) => (
-                <li key={p._id} className="px-5 py-3 flex items-center justify-between text-sm">
+                <li
+                  key={p._id}
+                  className="px-5 py-3 flex items-center justify-between text-sm"
+                >
                   <span className="font-medium">{p.name}</span>
                   <span className="text-xs text-gray-500">
-                    resp {p.responseMinutes ?? '—'}m · reso {p.resolutionMinutes ?? '—'}m
+                    resp {p.responseMinutes ?? "—"}m · reso{" "}
+                    {p.resolutionMinutes ?? "—"}m
                   </span>
                 </li>
               ))}
@@ -146,17 +231,31 @@ export default function SlaMonitor() {
           )}
         </div>
         <div className="card overflow-hidden">
-          <div className="px-5 py-3 border-b"><h2 className="font-semibold text-sm">OLA breach radar</h2></div>
+          <div className="px-5 py-3 border-b">
+            <h2 className="font-semibold text-sm">OLA breach radar</h2>
+          </div>
           {breaches.length === 0 ? (
-            <p className="p-5 text-sm text-gray-400">No breaches — all open tickets within OLA.</p>
+            <p className="p-5 text-sm text-gray-400">
+              No breaches — all open tickets within OLA.
+            </p>
           ) : (
             <ul className="divide-y">
               {breaches.map((b, i) => (
-                <li key={`${b.ticket}-${i}`} className="px-5 py-3 flex items-center justify-between text-sm">
-                  <Link to={`/tickets/${b.ticket}`} className="font-medium text-brand-700 hover:underline">#{b.ticket}</Link>
+                <li
+                  key={`${b.ticket}-${i}`}
+                  className="px-5 py-3 flex items-center justify-between text-sm"
+                >
+                  <Link
+                    to={`/tickets/${b.ticket}`}
+                    className="font-medium text-brand-700 hover:underline"
+                  >
+                    #{b.ticket}
+                  </Link>
                   <span className="flex items-center gap-2">
                     <StatusBadge status={b.ola} />
-                    <span className="text-xs text-red-600 font-medium">{b.ageMinutes}m / {b.allowed}m</span>
+                    <span className="text-xs text-red-600 font-medium">
+                      {b.ageMinutes}m / {b.allowed}m
+                    </span>
                   </span>
                 </li>
               ))}
@@ -166,7 +265,11 @@ export default function SlaMonitor() {
       </div>
 
       <p className="text-xs text-gray-400">
-        Business hours, holidays and timezone calendars live under <Link to="/settings/sla" className="text-brand-600 hover:underline">Settings → SLA</Link>.
+        Business hours, holidays and timezone calendars live under{" "}
+        <Link to="/settings/sla" className="text-brand-600 hover:underline">
+          Settings → SLA
+        </Link>
+        .
       </p>
     </div>
   );

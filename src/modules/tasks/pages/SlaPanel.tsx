@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Clock, AlertTriangle, CheckCircle, Pause } from 'lucide-react';
-import api from '@shared/lib/api';
+import React, { useState, useEffect } from "react";
+import { Clock, AlertTriangle, CheckCircle, Pause } from "lucide-react";
+import api from "@shared/lib/api";
 
 interface SlaItem {
   _id: string;
@@ -28,19 +28,19 @@ const STATUS_ICONS: Record<string, React.ReactNode> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  active: 'bg-blue-50 text-blue-700',
-  paused: 'bg-yellow-50 text-yellow-700',
-  achieved: 'bg-green-50 text-green-700',
-  breached: 'bg-red-50 text-red-700',
-  cancelled: 'bg-gray-50 text-gray-500',
-  pending: 'bg-gray-50 text-gray-500',
+  active: "bg-blue-50 text-blue-700",
+  paused: "bg-yellow-50 text-yellow-700",
+  achieved: "bg-green-50 text-green-700",
+  breached: "bg-red-50 text-red-700",
+  cancelled: "bg-gray-50 text-gray-500",
+  pending: "bg-gray-50 text-gray-500",
 };
 
 function getTimeRemaining(dueAt: string): string {
   const now = new Date();
   const due = new Date(dueAt);
   const diff = due.getTime() - now.getTime();
-  if (diff <= 0) return 'Breached';
+  if (diff <= 0) return "Breached";
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   if (hours > 24) return `${Math.floor(hours / 24)}d ${hours % 24}h`;
@@ -76,25 +76,44 @@ export default function SlaPanel({ taskId }: Props) {
       ) : (
         <div className="space-y-3">
           {slas.map((sla) => (
-            <div key={sla._id} className="p-3 rounded-lg border border-gray-100">
+            <div
+              key={sla._id}
+              className="p-3 rounded-lg border border-gray-100"
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {STATUS_ICONS[sla.status]}
-                  <span className="text-sm font-medium text-gray-900">{sla.name}</span>
-                  <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[sla.status]}`}>
+                  <span className="text-sm font-medium text-gray-900">
+                    {sla.name}
+                  </span>
+                  <span
+                    className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[sla.status]}`}
+                  >
                     {sla.status}
                   </span>
                 </div>
-                <span className="text-xs text-gray-500 capitalize">{sla.type}</span>
+                <span className="text-xs text-gray-500 capitalize">
+                  {sla.type}
+                </span>
               </div>
               <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
                 <span>Due: {new Date(sla.dueAt).toLocaleString()}</span>
-                <span className={sla.status === 'breached' ? 'text-red-600 font-medium' : ''}>
-                  {sla.status === 'active' ? getTimeRemaining(sla.dueAt) : sla.status === 'breached' ? 'Breached' : sla.status}
+                <span
+                  className={
+                    sla.status === "breached" ? "text-red-600 font-medium" : ""
+                  }
+                >
+                  {sla.status === "active"
+                    ? getTimeRemaining(sla.dueAt)
+                    : sla.status === "breached"
+                      ? "Breached"
+                      : sla.status}
                 </span>
               </div>
               {sla.pauseCount > 0 && (
-                <div className="mt-1 text-xs text-gray-400">Paused {sla.pauseCount} time{sla.pauseCount !== 1 ? 's' : ''}</div>
+                <div className="mt-1 text-xs text-gray-400">
+                  Paused {sla.pauseCount} time{sla.pauseCount !== 1 ? "s" : ""}
+                </div>
               )}
             </div>
           ))}

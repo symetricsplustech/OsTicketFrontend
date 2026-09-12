@@ -1,9 +1,9 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import api from '@shared/lib/api';
-import type { User, Tenant } from '@shared/types';
-import { platformApi } from './platformApi';
-import type { RootState } from './store';
-import { PLATFORM_PERMISSION_ALIASES, can } from '@shared/permissions';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import api from "@shared/lib/api";
+import type { User, Tenant } from "@shared/types";
+import { platformApi } from "./platformApi";
+import type { RootState } from "./store";
+import { PLATFORM_PERMISSION_ALIASES, can } from "@shared/permissions";
 
 interface AuthState {
   user: User | null;
@@ -28,74 +28,107 @@ export const loginThunk = createAsyncThunk<
   { user: User; tenant: Tenant | null; modules: string[] },
   { email: string; password: string; totpCode?: string },
   { rejectValue: LoginRejection }
->('auth/login', async ({ email, password, totpCode }, { dispatch, rejectWithValue }) => {
-  try {
-    const res = await api.post('/auth/portal-login', { email, password, ...(totpCode ? { totpCode } : {}) });
-    const { token, user: u, tenant: t, role, permissions, moduleKeys } = res.data;
-
-    const resolvedUser: User = {
-      ...u,
-      role: role || u.role,
-      permissions: permissions || u.permissions || [],
-      modules: normalizeModuleKeys(moduleKeys || u.moduleKeys || u.modules || []),
-    };
-
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify({ user: resolvedUser, tenant: t }));
-
-    // Fetch modules (backend may return string keys or { moduleKey } docs)
-    let modules: string[] = [];
+>(
+  "auth/login",
+  async ({ email, password, totpCode }, { dispatch, rejectWithValue }) => {
     try {
-      const modRes = await api.get('/auth/modules');
-      modules = normalizeModuleKeys(modRes.data.modules);
-    } catch {}
+      const res = await api.post("/auth/portal-login", {
+        email,
+        password,
+        ...(totpCode ? { totpCode } : {}),
+      });
+      const {
+        token,
+        user: u,
+        tenant: t,
+        role,
+        permissions,
+        moduleKeys,
+      } = res.data;
 
-    return { user: resolvedUser, tenant: t, modules };
-  } catch (err: any) {
-    if (!err.response) {
-      return rejectWithValue({ message: `Backend unreachable at ${api.defaults.baseURL} — is the API server running?` });
-    }
-    return rejectWithValue({
-      message: err.response?.data?.message || err.response?.data?.error || 'Login failed',
-      twoFactorRequired: !!err.response?.data?.details?.twoFactorRequired,
-    });
-  }
-});
+      const resolvedUser: User = {
+        ...u,
+        role: role || u.role,
+        permissions: permissions || u.permissions || [],
+        modules: normalizeModuleKeys(
+          moduleKeys || u.moduleKeys || u.modules || [],
+        ),
+      };
 
-export const logoutThunk = createAsyncThunk('auth/logout', async (_, { dispatch }) => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  dispatch(platformApi.util.resetApiState());
-  window.location.href = '/login';
-});
-
-export const hydrateThunk = createAsyncThunk('auth/hydrate', async (_, { dispatch }) => {
-  const token = localStorage.getItem('token');
-  const storedUser = localStorage.getItem('user');
-  if (token && storedUser) {
-    try {
-      const parsed = JSON.parse(storedUser);
-      dispatch(setCredentials({ user: parsed.user, tenant: parsed.tenant }));
+      localStorage.setItem("token", token);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ user: resolvedUser, tenant: t }),
+      );
 
       // Fetch modules (backend may return string keys or { moduleKey } docs)
+      let modules: string[] = [];
       try {
-        const modRes = await api.get('/auth/modules');
-        dispatch(setModules(normalizeModuleKeys(modRes.data.modules)));
+        const modRes = await api.get("/auth/modules");
+        modules = normalizeModuleKeys(modRes.data.modules);
       } catch {}
-    } catch {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-    }
-  }
-  dispatch(setLoading(false));
-});
 
-export const refreshModulesThunk = createAsyncThunk('auth/refreshModules', async (_, { dispatch }) => {
-  try {
-    const modRes = await api.get('/auth/modules');
-    dispatch(setModules(normalizeModuleKeys(modRes.data.modules)));
-  } catch {}
-});
+      return { user: resolvedUser, tenant: t, modules };
+    } catch (err: any) {
+      if (!err.response) {
+        return rejectWithValue({
+          message: `Backend unreachable at ${api.defaults.baseURL} — is the API server running?`,
+        });
+      }
+      return rejectWithValue({
+        message:
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Login failed",
+        twoFactorRequired: !!err.response?.data?.details?.twoFactorRequired,
+      });
+    }
+  },
+);
+
+export const logoutThunk = createAsyncThunk(
+  "auth/logout",
+  async (_, { dispatch }) => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    dispatch(platformApi.util.resetApiState());
+    window.location.href = "/login";
+  },
+);
+
+export const hydrateThunk = createAsyncThunk(
+  "auth/hydrate",
+  async (_, { dispatch }) => {
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+    if (token && storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        dispatch(setCredentials({ user: parsed.user, tenant: parsed.tenant }));
+
+        // Fetch modules (backend may return string keys or { moduleKey } docs)
+        try {
+          const modRes = await api.get("/auth/modules");
+          dispatch(setModules(normalizeModuleKeys(modRes.data.modules)));
+        } catch {}
+      } catch {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
+    }
+    dispatch(setLoading(false));
+  },
+);
+
+export const refreshModulesThunk = createAsyncThunk(
+  "auth/refreshModules",
+  async (_, { dispatch }) => {
+    try {
+      const modRes = await api.get("/auth/modules");
+      dispatch(setModules(normalizeModuleKeys(modRes.data.modules)));
+    } catch {}
+  },
+);
 
 // Backend returns either string keys (superadmin branch) or
 // tenant_modules docs ({ moduleKey, ... }). Normalize to string keys.
@@ -103,17 +136,20 @@ export function normalizeModuleKeys(raw: any): string[] {
   if (!Array.isArray(raw)) return [];
   const out: string[] = [];
   for (const m of raw) {
-    const key = typeof m === 'string' ? m : m?.moduleKey || m?.key;
+    const key = typeof m === "string" ? m : m?.moduleKey || m?.key;
     if (key && !out.includes(key)) out.push(key);
   }
   return out;
 }
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
-    setCredentials(state, action: PayloadAction<{ user: User; tenant: Tenant | null }>) {
+    setCredentials(
+      state,
+      action: PayloadAction<{ user: User; tenant: Tenant | null }>,
+    ) {
       state.user = action.payload.user;
       state.tenant = action.payload.tenant;
     },
@@ -145,31 +181,41 @@ export const selectCurrentUser = (state: RootState) => state.auth.user;
 export const selectCurrentTenant = (state: RootState) => state.auth.tenant;
 export const selectModules = (state: RootState) => state.auth.modules;
 export const selectAuthLoading = (state: RootState) => state.auth.loading;
-export const selectIsSuperAdmin = (state: RootState) => state.auth.user?.role === 'superadmin';
+export const selectIsSuperAdmin = (state: RootState) =>
+  state.auth.user?.role === "superadmin";
 
 // Permission helpers (pure functions)
 export function hasPermission(user: User | null, permission: string): boolean {
   if (!user) return false;
   const platformRole = (user as any).platformRole;
-  if (user.role === 'superadmin' && platformRole === 'platform_owner') return true;
-  if (user.permissions?.includes('*')) return true;
-  const resolvedPermission = PLATFORM_PERMISSION_ALIASES[permission] || permission;
+  if (user.role === "superadmin" && platformRole === "platform_owner")
+    return true;
+  if (user.permissions?.includes("*")) return true;
+  const resolvedPermission =
+    PLATFORM_PERMISSION_ALIASES[permission] || permission;
   if (user.permissions?.includes(resolvedPermission)) return true;
   if (user.permissions?.includes(permission)) return true;
   if (can(resolvedPermission, user.permissions || [])) return true;
-  if (user.permissions?.some(p => {
-    const parts = resolvedPermission.split('.');
-    for (let i = parts.length - 1; i > 0; i--) {
-      const parent = parts.slice(0, i).join('.manage');
-      if (p === parent) return true;
-    }
-    return false;
-  })) return true;
+  if (
+    user.permissions?.some((p) => {
+      const parts = resolvedPermission.split(".");
+      for (let i = parts.length - 1; i > 0; i--) {
+        const parent = parts.slice(0, i).join(".manage");
+        if (p === parent) return true;
+      }
+      return false;
+    })
+  )
+    return true;
   return false;
 }
 
-export function hasModule(user: User | null, modules: string[], moduleKey: string): boolean {
-  if (user?.role === 'superadmin') return false;
+export function hasModule(
+  user: User | null,
+  modules: string[],
+  moduleKey: string,
+): boolean {
+  if (user?.role === "superadmin") return false;
   if (user?.modules?.includes(moduleKey)) return true;
   return modules.includes(moduleKey);
 }

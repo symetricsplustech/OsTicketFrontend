@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Upload, File, Trash2, Download } from 'lucide-react';
-import { taskApi } from '@modules/tasks/services/taskApi';
+import React, { useState, useEffect, useRef } from "react";
+import { Upload, File, Trash2, Download } from "lucide-react";
+import { taskApi } from "@modules/tasks/services/taskApi";
 
 interface Attachment {
   _id: string;
@@ -29,7 +29,7 @@ export default function AttachmentPanel({ taskId, isTerminal }: Props) {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [isPublic, setIsPublic] = useState(true);
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadAttachments = async () => {
@@ -43,7 +43,9 @@ export default function AttachmentPanel({ taskId, isTerminal }: Props) {
     }
   };
 
-  useEffect(() => { loadAttachments(); }, [taskId]);
+  useEffect(() => {
+    loadAttachments();
+  }, [taskId]);
 
   const handleUpload = async () => {
     const file = fileInputRef.current?.files?.[0];
@@ -51,8 +53,8 @@ export default function AttachmentPanel({ taskId, isTerminal }: Props) {
     setUploading(true);
     try {
       await taskApi.uploadAttachment(taskId, file, isPublic, description);
-      setDescription('');
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      setDescription("");
+      if (fileInputRef.current) fileInputRef.current.value = "";
       loadAttachments();
     } catch {
       // error
@@ -62,7 +64,7 @@ export default function AttachmentPanel({ taskId, isTerminal }: Props) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this attachment?')) return;
+    if (!confirm("Delete this attachment?")) return;
     await taskApi.removeAttachment(id);
     loadAttachments();
   };
@@ -70,7 +72,7 @@ export default function AttachmentPanel({ taskId, isTerminal }: Props) {
   const handleDownload = async (id: string, name: string) => {
     const res = await taskApi.downloadAttachment(id);
     const url = window.URL.createObjectURL(new Blob([res.data]));
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = name;
     a.click();
@@ -79,21 +81,46 @@ export default function AttachmentPanel({ taskId, isTerminal }: Props) {
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <h2 className="font-semibold text-gray-900 mb-4">Attachments ({attachments.length})</h2>
+      <h2 className="font-semibold text-gray-900 mb-4">
+        Attachments ({attachments.length})
+      </h2>
 
       {!isTerminal && (
         <div className="mb-4 space-y-2">
-          <input type="file" ref={fileInputRef} className="hidden" onChange={() => {}} />
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={() => {}}
+          />
           <div className="flex gap-2">
-            <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+            >
               <Upload className="h-4 w-4" /> Select File
             </button>
-            <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description (optional)" className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm" />
+            <input
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Description (optional)"
+              className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
+            />
             <label className="flex items-center gap-1 text-sm text-gray-600">
-              <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} className="rounded" /> Public
+              <input
+                type="checkbox"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+                className="rounded"
+              />{" "}
+              Public
             </label>
-            <button onClick={handleUpload} disabled={uploading} className="px-3 py-1.5 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700 disabled:opacity-50">
-              {uploading ? 'Uploading...' : 'Upload'}
+            <button
+              onClick={handleUpload}
+              disabled={uploading}
+              className="px-3 py-1.5 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700 disabled:opacity-50"
+            >
+              {uploading ? "Uploading..." : "Upload"}
             </button>
           </div>
         </div>
@@ -106,23 +133,42 @@ export default function AttachmentPanel({ taskId, isTerminal }: Props) {
       ) : (
         <div className="space-y-2">
           {attachments.map((att) => (
-            <div key={att._id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+            <div
+              key={att._id}
+              className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50"
+            >
               <div className="flex items-center gap-3">
                 <File className="h-5 w-5 text-gray-400" />
                 <div>
-                  <div className="text-sm font-medium text-gray-900">{att.originalName}</div>
-                  <div className="text-xs text-gray-500">
-                    {formatFileSize(att.size)} | {att.uploadedBy?.name || 'Unknown'} | {new Date(att.createdAt).toLocaleDateString()}
+                  <div className="text-sm font-medium text-gray-900">
+                    {att.originalName}
                   </div>
-                  {att.description && <div className="text-xs text-gray-500 italic">{att.description}</div>}
+                  <div className="text-xs text-gray-500">
+                    {formatFileSize(att.size)} |{" "}
+                    {att.uploadedBy?.name || "Unknown"} |{" "}
+                    {new Date(att.createdAt).toLocaleDateString()}
+                  </div>
+                  {att.description && (
+                    <div className="text-xs text-gray-500 italic">
+                      {att.description}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <button onClick={() => handleDownload(att._id, att.originalName)} className="p-1 hover:bg-gray-100 rounded" title="Download">
+                <button
+                  onClick={() => handleDownload(att._id, att.originalName)}
+                  className="p-1 hover:bg-gray-100 rounded"
+                  title="Download"
+                >
                   <Download className="h-4 w-4 text-gray-500" />
                 </button>
                 {!isTerminal && (
-                  <button onClick={() => handleDelete(att._id)} className="p-1 hover:bg-red-50 rounded" title="Delete">
+                  <button
+                    onClick={() => handleDelete(att._id)}
+                    className="p-1 hover:bg-red-50 rounded"
+                    title="Delete"
+                  >
                     <Trash2 className="h-4 w-4 text-red-500" />
                   </button>
                 )}

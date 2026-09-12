@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '@shared/lib/api';
-import { ModuleGuard } from '@core/permissions/ModuleGuard';
-import { Search, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "@shared/lib/api";
+import { ModuleGuard } from "@core/permissions/ModuleGuard";
+import { Search, Loader2 } from "lucide-react";
 
 interface SemanticResult {
   entity: string;
@@ -16,15 +16,15 @@ interface SemanticResult {
 }
 
 const ENTITY_LABELS: Record<string, string> = {
-  ticket: 'Ticket',
-  incident: 'Incident',
-  faq: 'Knowledge Base',
-  ci: 'CMDB CI',
-  asset: 'Asset',
-  change: 'Change',
+  ticket: "Ticket",
+  incident: "Incident",
+  faq: "Knowledge Base",
+  ci: "CMDB CI",
+  asset: "Asset",
+  change: "Change",
 };
 
-const ENTITY_ORDER = ['ticket', 'incident', 'faq', 'ci', 'asset', 'change'];
+const ENTITY_ORDER = ["ticket", "incident", "faq", "ci", "asset", "change"];
 
 function routeFor(entity: string, id: string): string | null {
   const map: Record<string, string> = {
@@ -45,7 +45,7 @@ function scorePercent(score: number): string {
 
 function SearchPage() {
   const navigate = useNavigate();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<SemanticResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -60,7 +60,7 @@ function SearchPage() {
     }
     setLoading(true);
     try {
-      const res = await api.get('/agent/search/semantic', {
+      const res = await api.get("/agent/search/semantic", {
         params: { q: trimmed, limit: 30 },
       });
       setResults(res.data.results || []);
@@ -96,19 +96,20 @@ function SearchPage() {
     if (route) navigate(route);
   };
 
-  const grouped = ENTITY_ORDER
-    .map((entity) => ({
-      entity,
-      label: ENTITY_LABELS[entity] || entity,
-      items: results.filter((r) => r.entity === entity),
-    }))
-    .filter((g) => g.items.length > 0);
+  const grouped = ENTITY_ORDER.map((entity) => ({
+    entity,
+    label: ENTITY_LABELS[entity] || entity,
+    items: results.filter((r) => r.entity === entity),
+  })).filter((g) => g.items.length > 0);
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-1">Neural Search</h1>
+      <h1 className="text-2xl font-semibold text-gray-900 mb-1">
+        Neural Search
+      </h1>
       <p className="text-sm text-gray-500 mb-6">
-        Cross-entity semantic search across tickets, incidents, knowledge, CIs, assets, and changes.
+        Cross-entity semantic search across tickets, incidents, knowledge, CIs,
+        assets, and changes.
       </p>
 
       <form onSubmit={handleSubmit} className="flex gap-2 mb-6">
@@ -137,7 +138,9 @@ function SearchPage() {
           Searching…
         </div>
       ) : hasSearched && grouped.length === 0 ? (
-        <div className="py-10 text-center text-sm text-gray-500">No results</div>
+        <div className="py-10 text-center text-sm text-gray-500">
+          No results
+        </div>
       ) : (
         <div className="space-y-6">
           {grouped.map((group) => (

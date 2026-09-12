@@ -2,7 +2,7 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  role: 'user' | 'customer' | 'agent' | 'admin' | 'superadmin';
+  role: "user" | "customer" | "agent" | "admin" | "superadmin";
   permissions: string[];
   modules: string[];
   status?: string;
@@ -21,7 +21,7 @@ export interface TenantModule {
   _id: string;
   tenantId: string;
   moduleKey: string;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   activatedAt: string;
   updatedAt: string;
 }

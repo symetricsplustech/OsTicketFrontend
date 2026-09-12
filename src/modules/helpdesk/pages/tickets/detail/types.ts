@@ -29,7 +29,23 @@ export interface Ticket {
   updatedAt: string;
 }
 
-export interface Agent { _id: string; name: string; email: string }
-export interface Department { _id: string; name: string }
-export interface TicketStatus { key: string; name: string; isClosed?: boolean }
-export interface AssetOption { _id: string; name: string; serial?: string; hostname?: string }
+export interface Agent {
+  _id: string;
+  name: string;
+  email: string;
+}
+export interface Department {
+  _id: string;
+  name: string;
+}
+export interface TicketStatus {
+  key: string;
+  name: string;
+  isClosed?: boolean;
+}
+export interface AssetOption {
+  _id: string;
+  name: string;
+  serial?: string;
+  hostname?: string;
+}

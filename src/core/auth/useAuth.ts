@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { useAppDispatch, useAppSelector } from '@shared/store/hooks';
+import { useCallback } from "react";
+import { useAppDispatch, useAppSelector } from "@shared/store/hooks";
 import {
   selectCurrentUser,
   selectCurrentTenant,
@@ -10,7 +10,7 @@ import {
   loginThunk,
   logoutThunk,
   refreshModulesThunk,
-} from '@shared/store/authSlice';
+} from "@shared/store/authSlice";
 
 export function useAuth() {
   const dispatch = useAppDispatch();
@@ -23,7 +23,7 @@ export function useAuth() {
     async (email: string, password: string, totpCode?: string) => {
       const result = await dispatch(loginThunk({ email, password, totpCode }));
       if (loginThunk.rejected.match(result)) {
-        const err: any = new Error(result.payload?.message || 'Login failed');
+        const err: any = new Error(result.payload?.message || "Login failed");
         err.twoFactorRequired = result.payload?.twoFactorRequired;
         throw err;
       }
@@ -54,5 +54,16 @@ export function useAuth() {
     await dispatch(refreshModulesThunk());
   }, [dispatch]);
 
-  return { user, tenant, modules, loading, login, logout, hasModule, hasPermission, hasAnyPermission, refreshModules };
+  return {
+    user,
+    tenant,
+    modules,
+    loading,
+    login,
+    logout,
+    hasModule,
+    hasPermission,
+    hasAnyPermission,
+    refreshModules,
+  };
 }

@@ -1,8 +1,8 @@
-import api from '@shared/lib/api';
-import React, { useCallback, useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
-import { Ticket as TicketIcon } from 'lucide-react';
-import { useAuth } from '@core/auth/useAuth';
+import api from "@shared/lib/api";
+import React, { useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { Ticket as TicketIcon } from "lucide-react";
+import { useAuth } from "@core/auth/useAuth";
 
 interface Ticket {
   _id: string;
@@ -13,40 +13,40 @@ interface Ticket {
   priority: string;
 }
 
-const COLUMNS = ['new', 'open', 'pending', 'resolved', 'closed'] as const;
+const COLUMNS = ["new", "open", "pending", "resolved", "closed"] as const;
 
 const STATUS_TO_COLUMN: Record<string, (typeof COLUMNS)[number]> = {
-  new: 'new',
-  open: 'open',
-  triaged: 'open',
-  assigned: 'open',
-  active: 'open',
-  in_progress: 'open',
-  escalated: 'open',
-  pending: 'pending',
-  pending_customer: 'pending',
-  pending_vendor: 'pending',
-  pending_approval: 'pending',
-  on_hold: 'pending',
-  waiting: 'pending',
-  resolved: 'resolved',
-  verification: 'resolved',
-  closed: 'closed',
-  cancelled: 'closed',
-  rejected: 'closed',
-  duplicate: 'closed',
-  spam: 'closed',
-  archived: 'closed',
+  new: "new",
+  open: "open",
+  triaged: "open",
+  assigned: "open",
+  active: "open",
+  in_progress: "open",
+  escalated: "open",
+  pending: "pending",
+  pending_customer: "pending",
+  pending_vendor: "pending",
+  pending_approval: "pending",
+  on_hold: "pending",
+  waiting: "pending",
+  resolved: "resolved",
+  verification: "resolved",
+  closed: "closed",
+  cancelled: "closed",
+  rejected: "closed",
+  duplicate: "closed",
+  spam: "closed",
+  archived: "closed",
 };
 
 function nearestColumn(status: string): (typeof COLUMNS)[number] {
-  return STATUS_TO_COLUMN[status?.toLowerCase?.() ?? ''] ?? 'open';
+  return STATUS_TO_COLUMN[status?.toLowerCase?.() ?? ""] ?? "open";
 }
 
 export default function TicketBoard() {
   const { hasPermission } = useAuth();
-  const canEdit = hasPermission('tickets.edit');
-  const canClose = hasPermission('tickets.close');
+  const canEdit = hasPermission("tickets.edit");
+  const canClose = hasPermission("tickets.close");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [dragOver, setDragOver] = useState<string | null>(null);
@@ -55,7 +55,7 @@ export default function TicketBoard() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get('/agent/tickets');
+      const res = await api.get("/agent/tickets");
       const data = res.data;
       setTickets(Array.isArray(data) ? data : data.items || data.tickets || []);
     } catch {
@@ -69,29 +69,39 @@ export default function TicketBoard() {
     load();
   }, [load]);
 
-  const handleDrop = async (column: string, event: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = async (
+    column: string,
+    event: React.DragEvent<HTMLDivElement>,
+  ) => {
     event.preventDefault();
     setDragOver(null);
-    const id = event.dataTransfer.getData('text/plain');
+    const id = event.dataTransfer.getData("text/plain");
     if (!id) return;
-    if (['resolved', 'closed'].includes(column) ? !canClose : !canEdit) {
-      toast.error('You do not have permission to move tickets to this status');
+    if (["resolved", "closed"].includes(column) ? !canClose : !canEdit) {
+      toast.error("You do not have permission to move tickets to this status");
       return;
     }
     let resolution: Record<string, string> | undefined;
-    if (column === 'resolved') {
-      const code = window.prompt('Resolution code (e.g. fixed / workaround / wont-fix):', 'fixed');
+    if (column === "resolved") {
+      const code = window.prompt(
+        "Resolution code (e.g. fixed / workaround / wont-fix):",
+        "fixed",
+      );
       if (!code) return;
-      const solution = window.prompt('Solution summary (required):', '');
+      const solution = window.prompt("Solution summary (required):", "");
       if (!solution?.trim()) return;
       resolution = { code: code.trim(), solution: solution.trim() };
     }
     setMovingId(id);
     try {
-      await api.post('/bulk/status', { ticketIds: [id], status: column, ...(resolution ? { resolution } : {}) });
+      await api.post("/bulk/status", {
+        ticketIds: [id],
+        status: column,
+        ...(resolution ? { resolution } : {}),
+      });
       await load();
     } catch (e: any) {
-      toast.error(e?.response?.data?.message || 'Status change failed');
+      toast.error(e?.response?.data?.message || "Status change failed");
       await load();
     } finally {
       setMovingId(null);
@@ -99,8 +109,12 @@ export default function TicketBoard() {
   };
 
   const columns: Record<string, Ticket[]> = {};
-  COLUMNS.forEach((col) => { columns[col] = []; });
-  tickets.forEach((t) => { columns[nearestColumn(t.status)].push(t); });
+  COLUMNS.forEach((col) => {
+    columns[col] = [];
+  });
+  tickets.forEach((t) => {
+    columns[nearestColumn(t.status)].push(t);
+  });
 
   return (
     <div className="space-y-6">
@@ -121,15 +135,22 @@ export default function TicketBoard() {
           {COLUMNS.map((col) => (
             <div
               key={col}
-              onDragOver={(e) => { e.preventDefault(); setDragOver(col); }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragOver(col);
+              }}
               onDragLeave={() => setDragOver(null)}
               onDrop={(e) => handleDrop(col, e)}
               className={`rounded-xl border p-3 min-h-[300px] transition-colors ${
-                dragOver === col ? 'border-brand-400 bg-brand-50' : 'border-gray-200 bg-gray-50'
+                dragOver === col
+                  ? "border-brand-400 bg-brand-50"
+                  : "border-gray-200 bg-gray-50"
               }`}
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-semibold text-gray-700 capitalize">{col}</span>
+                <span className="text-sm font-semibold text-gray-700 capitalize">
+                  {col}
+                </span>
                 <span className="px-2 py-0.5 text-xs font-medium bg-white border border-gray-200 rounded-full text-gray-600">
                   {columns[col].length}
                 </span>
@@ -139,31 +160,44 @@ export default function TicketBoard() {
                   <div
                     key={ticket._id}
                     draggable={canEdit || canClose}
-                    onDragStart={(e) => e.dataTransfer.setData('text/plain', ticket._id)}
+                    onDragStart={(e) =>
+                      e.dataTransfer.setData("text/plain", ticket._id)
+                    }
                     className={`bg-white rounded-lg border border-gray-200 shadow-sm p-3 cursor-grab active:cursor-grabbing hover:shadow-md ${
-                      movingId === ticket._id ? 'opacity-50' : ''
+                      movingId === ticket._id ? "opacity-50" : ""
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-mono text-gray-500">#{ticket.number}</span>
+                      <span className="text-xs font-mono text-gray-500">
+                        #{ticket.number}
+                      </span>
                       <span
                         className={`px-2 py-0.5 text-xs rounded-full ${
-                          ticket.priority === 'urgent' || ticket.priority === 'high' || ticket.priority === 'emergency'
-                            ? 'bg-red-100 text-red-700'
-                            : ticket.priority === 'normal' || ticket.priority === 'medium'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-gray-100 text-gray-700'
+                          ticket.priority === "urgent" ||
+                          ticket.priority === "high" ||
+                          ticket.priority === "emergency"
+                            ? "bg-red-100 text-red-700"
+                            : ticket.priority === "normal" ||
+                                ticket.priority === "medium"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-gray-100 text-gray-700"
                         }`}
                       >
                         {ticket.priority}
                       </span>
                     </div>
-                    <p className="text-sm font-medium text-gray-900 truncate">{ticket.subject || ticket.title}</p>
-                    <p className="mt-1 text-xs text-gray-400 capitalize">{ticket.status}</p>
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {ticket.subject || ticket.title}
+                    </p>
+                    <p className="mt-1 text-xs text-gray-400 capitalize">
+                      {ticket.status}
+                    </p>
                   </div>
                 ))}
                 {columns[col].length === 0 && (
-                  <div className="text-center py-8 text-xs text-gray-400">Drop tickets here</div>
+                  <div className="text-center py-8 text-xs text-gray-400">
+                    Drop tickets here
+                  </div>
                 )}
               </div>
             </div>

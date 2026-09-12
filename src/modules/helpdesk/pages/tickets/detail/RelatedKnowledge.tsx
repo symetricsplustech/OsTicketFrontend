@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Button, Card } from '@shared/components/ui';
-import { knowledgeApi } from '@modules/helpdesk/services';
+import { useEffect, useState } from "react";
+import { Button, Card } from "@shared/components/ui";
+import { knowledgeApi } from "@modules/helpdesk/services";
 
 type KnowledgeItem = { _id: string; question: string; helpful?: number };
 
@@ -12,11 +12,13 @@ export function RelatedKnowledge({ subject }: { subject: string }) {
     const timer = window.setTimeout(async () => {
       try {
         const response = await knowledgeApi.search(subject);
-        setItems((response.data.data || []).map((article: any) => ({
-          _id: article._id,
-          question: article.title || article.question,
-          helpful: article.helpfulCount || 0,
-        })));
+        setItems(
+          (response.data.data || []).map((article: any) => ({
+            _id: article._id,
+            question: article.title || article.question,
+            helpful: article.helpfulCount || 0,
+          })),
+        );
       } catch {
         setItems([]);
       }
@@ -28,9 +30,13 @@ export function RelatedKnowledge({ subject }: { subject: string }) {
     try {
       await knowledgeApi.rateArticle(id, helpful ? 5 : 1);
       if (helpful) {
-        setItems((current) => current.map((item) => (
-          item._id === id ? { ...item, helpful: (item.helpful || 0) + 1 } : item
-        )));
+        setItems((current) =>
+          current.map((item) =>
+            item._id === id
+              ? { ...item, helpful: (item.helpful || 0) + 1 }
+              : item,
+          ),
+        );
       }
     } catch {
       // Suggestions and votes are intentionally best-effort.
@@ -47,10 +53,20 @@ export function RelatedKnowledge({ subject }: { subject: string }) {
           <li key={item._id} className="text-sm">
             <div className="text-gray-800">{item.question}</div>
             <div className="mt-1 flex gap-2">
-              <Button variant="ghost" size="sm" onClick={() => vote(item._id, true)}>
-                Helpful{item.helpful ? ` (${item.helpful})` : ''}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => vote(item._id, true)}
+              >
+                Helpful{item.helpful ? ` (${item.helpful})` : ""}
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => vote(item._id, false)}>Not helpful</Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => vote(item._id, false)}
+              >
+                Not helpful
+              </Button>
             </div>
           </li>
         ))}

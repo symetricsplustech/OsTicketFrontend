@@ -4,7 +4,7 @@ export interface Task {
   number: string;
   title: string;
   description: string;
-  type: 'incident' | 'problem' | 'change' | 'request' | 'task' | 'subtask';
+  type: "incident" | "problem" | "change" | "request" | "task" | "subtask";
   state: string;
   priority: string;
   impact?: string;
@@ -35,7 +35,14 @@ export interface TaskActivity {
   _id: string;
   tenantId: string;
   taskId: string;
-  type: 'comment' | 'work_note' | 'state_change' | 'assignment' | 'field_update' | 'attachment' | 'system';
+  type:
+    | "comment"
+    | "work_note"
+    | "state_change"
+    | "assignment"
+    | "field_update"
+    | "attachment"
+    | "system";
   content: string;
   isPublic: boolean;
   actor: string;

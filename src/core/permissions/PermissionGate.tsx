@@ -1,5 +1,5 @@
-import React from 'react';
-import { useAuth } from '@core/auth/useAuth';
+import React from "react";
+import { useAuth } from "@core/auth/useAuth";
 
 interface PermissionGateProps {
   permission?: string;
@@ -10,10 +10,17 @@ interface PermissionGateProps {
 }
 
 /** Hides or replaces action-level UI unless the exact granular grant passes. */
-export function PermissionGate({ permission, anyOf = [], allOf = [], fallback = null, children }: PermissionGateProps) {
+export function PermissionGate({
+  permission,
+  anyOf = [],
+  allOf = [],
+  fallback = null,
+  children,
+}: PermissionGateProps) {
   const { hasPermission, hasAnyPermission } = useAuth();
   const any = permission ? [permission, ...anyOf] : [...anyOf];
-  const allowed = (any.length === 0 || hasAnyPermission(any)) && allOf.every(hasPermission);
+  const allowed =
+    (any.length === 0 || hasAnyPermission(any)) && allOf.every(hasPermission);
   return allowed ? <>{children}</> : <>{fallback}</>;
 }
 

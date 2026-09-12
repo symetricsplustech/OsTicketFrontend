@@ -1,4 +1,4 @@
-import api from '@shared/lib/api';
+import api from "@shared/lib/api";
 
 export interface Incident {
   _id: string;
@@ -181,53 +181,109 @@ export interface MajorIncidentTimelineEvent {
 }
 
 export const incidentApi = {
-  list: (params?: Record<string, unknown>) => api.get('/core/incidents', { params }),
-  create: (body: Record<string, unknown>) => api.post('/core/incidents', body),
+  list: (params?: Record<string, unknown>) =>
+    api.get("/core/incidents", { params }),
+  create: (body: Record<string, unknown>) => api.post("/core/incidents", body),
   getById: (id: string) => api.get(`/core/incidents/${id}`),
-  update: (id: string, body: Record<string, unknown>) => api.put(`/core/incidents/${id}`, body),
-  transition: (id: string, body: { status: string; notes?: string }) => api.post(`/core/incidents/${id}/transition`, body),
-  assign: (id: string, body: Record<string, unknown>) => api.post(`/core/incidents/${id}/assign`, body),
-  addComment: (id: string, body: { message: string; type?: string }) => api.post(`/core/incidents/${id}/comment`, body),
-  resolve: (id: string, body: Record<string, unknown>) => api.post(`/core/incidents/${id}/resolve`, body),
+  update: (id: string, body: Record<string, unknown>) =>
+    api.put(`/core/incidents/${id}`, body),
+  transition: (id: string, body: { status: string; notes?: string }) =>
+    api.post(`/core/incidents/${id}/transition`, body),
+  assign: (id: string, body: Record<string, unknown>) =>
+    api.post(`/core/incidents/${id}/assign`, body),
+  addComment: (id: string, body: { message: string; type?: string }) =>
+    api.post(`/core/incidents/${id}/comment`, body),
+  resolve: (id: string, body: Record<string, unknown>) =>
+    api.post(`/core/incidents/${id}/resolve`, body),
   close: (id: string) => api.post(`/core/incidents/${id}/close`),
-  reopen: (id: string, reason?: string) => api.post(`/core/incidents/${id}/reopen`, { reason }),
-  cancel: (id: string, reason?: string) => api.post(`/core/incidents/${id}/cancel`, { reason }),
-  getAssignmentHistory: (id: string) => api.get(`/core/incidents/${id}/assignment-history`),
-  getDuplicateCandidates: (params: { title: string; category?: string }) => api.get('/core/incidents/duplicates', { params }),
+  reopen: (id: string, reason?: string) =>
+    api.post(`/core/incidents/${id}/reopen`, { reason }),
+  cancel: (id: string, reason?: string) =>
+    api.post(`/core/incidents/${id}/cancel`, { reason }),
+  getAssignmentHistory: (id: string) =>
+    api.get(`/core/incidents/${id}/assignment-history`),
+  getDuplicateCandidates: (params: { title: string; category?: string }) =>
+    api.get("/core/incidents/duplicates", { params }),
 
-  linkCI: (id: string, body: { ciId: string; role?: string }) => api.post(`/core/incidents/${id}/ci`, body),
-  unlinkCI: (id: string, ciId: string) => api.delete(`/core/incidents/${id}/ci/${ciId}`),
+  linkCI: (id: string, body: { ciId: string; role?: string }) =>
+    api.post(`/core/incidents/${id}/ci`, body),
+  unlinkCI: (id: string, ciId: string) =>
+    api.delete(`/core/incidents/${id}/ci/${ciId}`),
   listCIs: (id: string) => api.get(`/core/incidents/${id}/ci`),
-  linkServiceOffering: (id: string, body: { serviceOfferingId: string; role?: string }) => api.post(`/core/incidents/${id}/service-offering`, body),
-  linkIncident: (id: string, body: { targetIncidentId: string; relationshipType: string }) => api.post(`/core/incidents/${id}/relationship`, body),
-  listRelationships: (id: string) => api.get(`/core/incidents/${id}/relationship`),
+  linkServiceOffering: (
+    id: string,
+    body: { serviceOfferingId: string; role?: string },
+  ) => api.post(`/core/incidents/${id}/service-offering`, body),
+  linkIncident: (
+    id: string,
+    body: { targetIncidentId: string; relationshipType: string },
+  ) => api.post(`/core/incidents/${id}/relationship`, body),
+  listRelationships: (id: string) =>
+    api.get(`/core/incidents/${id}/relationship`),
 
-  createTask: (id: string, body: Record<string, unknown>) => api.post(`/core/incidents/${id}/task`, body),
-  listTasks: (id: string, params?: Record<string, unknown>) => api.get(`/core/incidents/${id}/task`, { params }),
+  createTask: (id: string, body: Record<string, unknown>) =>
+    api.post(`/core/incidents/${id}/task`, body),
+  listTasks: (id: string, params?: Record<string, unknown>) =>
+    api.get(`/core/incidents/${id}/task`, { params }),
 
-  nominateMajor: (id: string, body?: Record<string, unknown>) => api.post(`/core/incidents/${id}/major/nominate`, body || {}),
+  nominateMajor: (id: string, body?: Record<string, unknown>) =>
+    api.post(`/core/incidents/${id}/major/nominate`, body || {}),
   approveMajor: (id: string) => api.post(`/core/incidents/${id}/major/approve`),
-  rejectMajor: (id: string, reason?: string) => api.post(`/core/incidents/${id}/major/reject`, { reason }),
-  demoteMajor: (id: string, reason?: string) => api.post(`/core/incidents/${id}/major/demote`, { reason }),
-  listMajorIncidents: (params?: Record<string, unknown>) => api.get('/core/incidents/major', { params }),
+  rejectMajor: (id: string, reason?: string) =>
+    api.post(`/core/incidents/${id}/major/reject`, { reason }),
+  demoteMajor: (id: string, reason?: string) =>
+    api.post(`/core/incidents/${id}/major/demote`, { reason }),
+  listMajorIncidents: (params?: Record<string, unknown>) =>
+    api.get("/core/incidents/major", { params }),
   getMajorIncident: (id: string) => api.get(`/core/incidents/${id}/major`),
-  listMajorCandidates: (params?: Record<string, unknown>) => api.get('/core/incidents/major/candidates', { params }),
-  updateMajorCommPlan: (id: string, body: Record<string, unknown>) => api.put(`/core/incidents/${id}/major/comm-plan`, body),
-  updateMajorExecSummary: (id: string, execSummary: string) => api.put(`/core/incidents/${id}/major/exec-summary`, { execSummary }),
-  addMajorParticipant: (id: string, body: Record<string, unknown>) => api.post(`/core/incidents/${id}/major/participant`, body),
-  removeMajorParticipant: (id: string, userId: string) => api.delete(`/core/incidents/${id}/major/participant/${userId}`),
-  listMajorParticipants: (id: string) => api.get(`/core/incidents/${id}/major/participant`),
-  addMajorTimelineEvent: (id: string, body: Record<string, unknown>) => api.post(`/core/incidents/${id}/major/timeline`, body),
-  listMajorTimelineEvents: (id: string, params?: Record<string, unknown>) => api.get(`/core/incidents/${id}/major/timeline`, { params }),
+  listMajorCandidates: (params?: Record<string, unknown>) =>
+    api.get("/core/incidents/major/candidates", { params }),
+  updateMajorCommPlan: (id: string, body: Record<string, unknown>) =>
+    api.put(`/core/incidents/${id}/major/comm-plan`, body),
+  updateMajorExecSummary: (id: string, execSummary: string) =>
+    api.put(`/core/incidents/${id}/major/exec-summary`, { execSummary }),
+  addMajorParticipant: (id: string, body: Record<string, unknown>) =>
+    api.post(`/core/incidents/${id}/major/participant`, body),
+  removeMajorParticipant: (id: string, userId: string) =>
+    api.delete(`/core/incidents/${id}/major/participant/${userId}`),
+  listMajorParticipants: (id: string) =>
+    api.get(`/core/incidents/${id}/major/participant`),
+  addMajorTimelineEvent: (id: string, body: Record<string, unknown>) =>
+    api.post(`/core/incidents/${id}/major/timeline`, body),
+  listMajorTimelineEvents: (id: string, params?: Record<string, unknown>) =>
+    api.get(`/core/incidents/${id}/major/timeline`, { params }),
 
-  createPIR: (body: Record<string, unknown>) => api.post('/core/incidents', body),
-  listPIRs: (params?: Record<string, unknown>) => api.get('/core/incidents/pir', { params }),
-  getPIR: (id: string, pirId: string) => api.get(`/core/incidents/${id}/pir/${pirId}`),
-  updatePIR: (id: string, pirId: string, body: Record<string, unknown>) => api.put(`/core/incidents/${id}/pir/${pirId}`, body),
-  submitPIRForReview: (id: string, pirId: string) => api.post(`/core/incidents/${id}/pir/${pirId}/submit`),
-  approvePIR: (id: string, pirId: string) => api.post(`/core/incidents/${id}/pir/${pirId}/approve`),
-  publishPIR: (id: string, pirId: string) => api.post(`/core/incidents/${id}/pir/${pirId}/publish`),
-  addPIRActionItem: (id: string, pirId: string, body: Record<string, unknown>) => api.post(`/core/incidents/${id}/pir/${pirId}/action-item`, body),
-  updatePIRActionItem: (id: string, pirId: string, actionItemId: string, body: Record<string, unknown>) => api.put(`/core/incidents/${id}/pir/${pirId}/action-item/${actionItemId}`, body),
-  deletePIRActionItem: (id: string, pirId: string, actionItemId: string) => api.delete(`/core/incidents/${id}/pir/${pirId}/action-item/${actionItemId}`),
+  createPIR: (body: Record<string, unknown>) =>
+    api.post("/core/incidents", body),
+  listPIRs: (params?: Record<string, unknown>) =>
+    api.get("/core/incidents/pir", { params }),
+  getPIR: (id: string, pirId: string) =>
+    api.get(`/core/incidents/${id}/pir/${pirId}`),
+  updatePIR: (id: string, pirId: string, body: Record<string, unknown>) =>
+    api.put(`/core/incidents/${id}/pir/${pirId}`, body),
+  submitPIRForReview: (id: string, pirId: string) =>
+    api.post(`/core/incidents/${id}/pir/${pirId}/submit`),
+  approvePIR: (id: string, pirId: string) =>
+    api.post(`/core/incidents/${id}/pir/${pirId}/approve`),
+  publishPIR: (id: string, pirId: string) =>
+    api.post(`/core/incidents/${id}/pir/${pirId}/publish`),
+  addPIRActionItem: (
+    id: string,
+    pirId: string,
+    body: Record<string, unknown>,
+  ) => api.post(`/core/incidents/${id}/pir/${pirId}/action-item`, body),
+  updatePIRActionItem: (
+    id: string,
+    pirId: string,
+    actionItemId: string,
+    body: Record<string, unknown>,
+  ) =>
+    api.put(
+      `/core/incidents/${id}/pir/${pirId}/action-item/${actionItemId}`,
+      body,
+    ),
+  deletePIRActionItem: (id: string, pirId: string, actionItemId: string) =>
+    api.delete(
+      `/core/incidents/${id}/pir/${pirId}/action-item/${actionItemId}`,
+    ),
 };

@@ -1,4 +1,4 @@
-import api from '@shared/lib/api';
+import api from "@shared/lib/api";
 
 export interface Problem {
   _id: string;
@@ -85,38 +85,65 @@ export interface ProblemAssignmentHistory {
 }
 
 export const problemApi = {
-  list: (params?: Record<string, unknown>) => api.get('/core/problems', { params }),
-  create: (body: Record<string, unknown>) => api.post('/core/problems', body),
+  list: (params?: Record<string, unknown>) =>
+    api.get("/core/problems", { params }),
+  create: (body: Record<string, unknown>) => api.post("/core/problems", body),
   getById: (id: string) => api.get(`/core/problems/${id}`),
-  update: (id: string, body: Record<string, unknown>) => api.put(`/core/problems/${id}`, body),
-  transition: (id: string, body: { status: string; notes?: string }) => api.post(`/core/problems/${id}/transition`, body),
-  assign: (id: string, body: Record<string, unknown>) => api.post(`/core/problems/${id}/assign`, body),
-  addComment: (id: string, body: { message: string }) => api.post(`/core/problems/${id}/comment`, body),
-  getAssignmentHistory: (id: string) => api.get(`/core/problems/${id}/assignment-history`),
+  update: (id: string, body: Record<string, unknown>) =>
+    api.put(`/core/problems/${id}`, body),
+  transition: (id: string, body: { status: string; notes?: string }) =>
+    api.post(`/core/problems/${id}/transition`, body),
+  assign: (id: string, body: Record<string, unknown>) =>
+    api.post(`/core/problems/${id}/assign`, body),
+  addComment: (id: string, body: { message: string }) =>
+    api.post(`/core/problems/${id}/comment`, body),
+  getAssignmentHistory: (id: string) =>
+    api.get(`/core/problems/${id}/assignment-history`),
 
-  linkIncident: (id: string, incidentId: string) => api.post(`/core/problems/${id}/incident`, { incidentId }),
-  unlinkIncident: (id: string, incidentId: string) => api.delete(`/core/problems/${id}/incident/${incidentId}`),
+  linkIncident: (id: string, incidentId: string) =>
+    api.post(`/core/problems/${id}/incident`, { incidentId }),
+  unlinkIncident: (id: string, incidentId: string) =>
+    api.delete(`/core/problems/${id}/incident/${incidentId}`),
   listIncidents: (id: string) => api.get(`/core/problems/${id}/incident`),
 
-  linkCI: (id: string, body: { ciId: string; role?: string }) => api.post(`/core/problems/${id}/ci`, body),
-  unlinkCI: (id: string, ciId: string) => api.delete(`/core/problems/${id}/ci/${ciId}`),
+  linkCI: (id: string, body: { ciId: string; role?: string }) =>
+    api.post(`/core/problems/${id}/ci`, body),
+  unlinkCI: (id: string, ciId: string) =>
+    api.delete(`/core/problems/${id}/ci/${ciId}`),
   listCIs: (id: string) => api.get(`/core/problems/${id}/ci`),
 
-  linkServiceOffering: (id: string, body: { serviceOfferingId: string; role?: string }) => api.post(`/core/problems/${id}/service-offering`, body),
-  linkChange: (id: string, body: { changeId: string; relationshipType?: string }) => api.post(`/core/problems/${id}/change`, body),
+  linkServiceOffering: (
+    id: string,
+    body: { serviceOfferingId: string; role?: string },
+  ) => api.post(`/core/problems/${id}/service-offering`, body),
+  linkChange: (
+    id: string,
+    body: { changeId: string; relationshipType?: string },
+  ) => api.post(`/core/problems/${id}/change`, body),
   listChanges: (id: string) => api.get(`/core/problems/${id}/change`),
-  linkKnowledge: (id: string, body: { knowledgeArticleId: string; role?: string }) => api.post(`/core/problems/${id}/knowledge`, body),
+  linkKnowledge: (
+    id: string,
+    body: { knowledgeArticleId: string; role?: string },
+  ) => api.post(`/core/problems/${id}/knowledge`, body),
 
-  createTask: (id: string, body: Record<string, unknown>) => api.post(`/core/problems/${id}/task`, body),
-  listTasks: (id: string, params?: Record<string, unknown>) => api.get(`/core/problems/${id}/task`, { params }),
+  createTask: (id: string, body: Record<string, unknown>) =>
+    api.post(`/core/problems/${id}/task`, body),
+  listTasks: (id: string, params?: Record<string, unknown>) =>
+    api.get(`/core/problems/${id}/task`, { params }),
 
-  publishWorkaround: (id: string) => api.post(`/core/problems/${id}/publish-workaround`),
-  acceptRisk: (id: string, reason?: string) => api.post(`/core/problems/${id}/accept-risk`, { reason }),
+  publishWorkaround: (id: string) =>
+    api.post(`/core/problems/${id}/publish-workaround`),
+  acceptRisk: (id: string, reason?: string) =>
+    api.post(`/core/problems/${id}/accept-risk`, { reason }),
   reanalyze: (id: string) => api.post(`/core/problems/${id}/reanalyze`),
 
-  createKnownError: (id: string, body: Record<string, unknown>) => api.post(`/core/problems/${id}/known-error`, body),
-  listKnownErrors: (params?: Record<string, unknown>) => api.get('/core/problems/known-errors', { params }),
+  createKnownError: (id: string, body: Record<string, unknown>) =>
+    api.post(`/core/problems/${id}/known-error`, body),
+  listKnownErrors: (params?: Record<string, unknown>) =>
+    api.get("/core/problems/known-errors", { params }),
 
-  createRootCauseRecord: (id: string, body: Record<string, unknown>) => api.post(`/core/problems/${id}/root-cause`, body),
-  listRootCauseRecords: (id: string) => api.get(`/core/problems/${id}/root-cause`),
+  createRootCauseRecord: (id: string, body: Record<string, unknown>) =>
+    api.post(`/core/problems/${id}/root-cause`, body),
+  listRootCauseRecords: (id: string) =>
+    api.get(`/core/problems/${id}/root-cause`),
 };
