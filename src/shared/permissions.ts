@@ -256,6 +256,14 @@ const LEGACY_ALIAS_MAP: Record<string, string[]> = {
   'tenant.user.read': ['users.view'],
 };
 
+const CANONICAL_BY_LEGACY = Object.entries(LEGACY_ALIAS_MAP).reduce<Record<string, string[]>>(
+  (result, [canonical, legacyKeys]) => {
+    legacyKeys.forEach((legacy) => { result[legacy] = [...(result[legacy] || []), canonical]; });
+    return result;
+  },
+  {},
+);
+
 // --- Permission Evaluation ---
 
 /**
@@ -283,6 +291,10 @@ export const can = (
     if (!grant.endsWith('.*')) return false;
     return key.startsWith(grant.slice(0, -1));
   })) return true;
+
+  // Keep old UI checks working while stored roles migrate to canonical keys.
+  const canonicalAliases = CANONICAL_BY_LEGACY[key] || [];
+  if (canonicalAliases.some((canonical) => userPermissions.includes(canonical))) return true;
 
   // 2. canonical itsm.* key – try legacy alias map
   if (isItsmKey(key)) {

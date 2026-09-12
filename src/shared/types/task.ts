@@ -24,6 +24,7 @@ export interface Task {
   dueDate?: string;
   resolvedAt?: string;
   closedAt?: string;
+  deletedAt?: string;
   tags?: string[];
   isMajorIncident?: boolean;
   createdAt: string;

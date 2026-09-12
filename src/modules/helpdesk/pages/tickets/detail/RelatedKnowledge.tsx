@@ -11,8 +11,12 @@ export function RelatedKnowledge({ subject }: { subject: string }) {
     if (subject.trim().length < 4) return;
     const timer = window.setTimeout(async () => {
       try {
-        const response = await knowledgeApi.suggest(subject);
-        setItems(response.data.items || []);
+        const response = await knowledgeApi.search(subject);
+        setItems((response.data.data || []).map((article: any) => ({
+          _id: article._id,
+          question: article.title || article.question,
+          helpful: article.helpfulCount || 0,
+        })));
       } catch {
         setItems([]);
       }
@@ -22,7 +26,7 @@ export function RelatedKnowledge({ subject }: { subject: string }) {
 
   const vote = async (id: string, helpful: boolean) => {
     try {
-      await knowledgeApi.vote(id, helpful);
+      await knowledgeApi.rateArticle(id, helpful ? 5 : 1);
       if (helpful) {
         setItems((current) => current.map((item) => (
           item._id === id ? { ...item, helpful: (item.helpful || 0) + 1 } : item

@@ -26,7 +26,7 @@ const KINDS = ['chat', 'status', 'decision', 'action_item'];
 
 export default function WarRoom() {
   const { hasPermission } = useAuth();
-  const canUpdate = hasPermission('records.update');
+  const canUpdate = hasPermission('itsm.major_incident.bridge_session.update');
   const [incidents, setIncidents] = useState<IncidentRow[]>([]);
   const [selectedId, setSelectedId] = useState('');
   const [messages, setMessages] = useState<WarMessage[]>([]);

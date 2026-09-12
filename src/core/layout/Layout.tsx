@@ -18,11 +18,11 @@ interface NavItem {
 const allNavItems: NavItem[] = [
   { label: 'Dashboard', path: '/', icon: LayoutDashboard },
   // Helpdesk
-  { label: 'Tasks', path: '/tasks', icon: Ticket, module: 'helpdesk', section: 'ITSM', permissions: ['itsm.core.task.read', 'itsm.core.ui.task_list.access'] },
+  { label: 'Tasks', path: '/tasks', icon: Ticket, module: 'helpdesk', section: 'ITSM', permissions: ['itsm.core.task.read', 'itsm.core.ui.task_record_shell.access'] },
   { label: 'Incidents', path: '/incidents', icon: AlertTriangle, module: 'helpdesk', permissions: ['itsm.incident.incident.read', 'itsm.incident.ui.incident_list.access'] },
   { label: 'Problems', path: '/problems', icon: Search, module: 'helpdesk', permissions: ['itsm.problem.problem.read', 'itsm.problem.ui.problem_list.access'] },
   { label: 'Changes', path: '/changes', icon: Zap, module: 'helpdesk', permissions: ['itsm.change.change_request.read', 'itsm.change.ui.change_list.access'] },
-  { label: 'Requests & Catalog', path: '/catalog', icon: ShoppingCart, module: 'helpdesk', permissions: ['itsm.request_catalog.catalog_item.read', 'itsm.request_catalog.ui.catalog_browser.access'] },
+  { label: 'Requests & Catalog', path: '/catalog', icon: ShoppingCart, module: 'helpdesk', permissions: ['itsm.request_catalog.catalog_item.read', 'itsm.request_catalog.ui.catalog_home.access'] },
   { label: 'Knowledge', path: '/kb', icon: BookOpen, module: 'helpdesk', permissions: ['itsm.knowledge.knowledge_article.read', 'itsm.knowledge.ui.knowledge_search.access'] },
   { label: 'Service Levels', path: '/sla-dashboard', icon: Clock, module: 'helpdesk', permissions: ['itsm.sla.definition_read', 'itsm.sla.ui.sla_dashboard.access'] },
   { label: 'Assignment', path: '/assignment-dashboard', icon: GitBranch, module: 'helpdesk', permissions: ['itsm.assignment.routing_rule.read', 'itsm.assignment.ui.assignment_admin.access'] },

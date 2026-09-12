@@ -23,8 +23,8 @@ const RISKS = ['low', 'medium', 'high', 'critical'];
 
 export default function Changes() {
   const { hasPermission } = useAuth();
-  const canCreate = hasPermission('records.create');
-  const canView = hasPermission('records.view');
+  const canCreate = hasPermission('itsm.change.change_request.create');
+  const canView = hasPermission('itsm.change.change_request.read');
   const [changes, setChanges] = useState<Change[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

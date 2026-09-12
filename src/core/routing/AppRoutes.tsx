@@ -57,6 +57,7 @@ const NeuralSearch = lazy(() => import('@modules/helpdesk/pages/knowledge/Neural
 const SlaDashboard = lazy(() => import('@modules/helpdesk/pages/slm/SlaDashboard'));
 const AssignmentDashboard = lazy(() => import('@modules/helpdesk/pages/assignments/AssignmentDashboard'));
 const ApprovalDashboard = lazy(() => import('@modules/helpdesk/pages/approvals/ApprovalDashboard'));
+const WalkupDashboard = lazy(() => import('@modules/helpdesk/pages/walkup/WalkupDashboard'));
 const ServiceCatalog = lazy(() => import('@modules/helpdesk/pages/support/ServiceCatalog'));
 const MyWork = lazy(() => import('@modules/helpdesk/pages/support/MyWork'));
 const CabBoard = lazy(() => import('@modules/helpdesk/pages/support/CabBoard'));
@@ -185,6 +186,9 @@ export function AppRoutes() {
 
           {/* Helpdesk Approval Engine */}
           <Route path="approval-dashboard" element={<ModuleGuard module="helpdesk"><ApprovalDashboard /></ModuleGuard>} />
+
+          {/* Helpdesk Walk-Up Experience */}
+          <Route path="walkup-dashboard" element={<ModuleGuard module="helpdesk"><WalkupDashboard /></ModuleGuard>} />
 
           {/* Helpdesk Support */}
           <Route path="catalog" element={<ModuleGuard module="helpdesk"><ServiceCatalog /></ModuleGuard>} />

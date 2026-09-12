@@ -22,7 +22,7 @@ const PRIORITIES = ['low', 'medium', 'high', 'critical'];
 
 export default function Problems() {
   const { hasPermission } = useAuth();
-  const canCreate = hasPermission('records.create');
+  const canCreate = hasPermission('itsm.problem.problem.create');
   const [problems, setProblems] = useState<Problem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

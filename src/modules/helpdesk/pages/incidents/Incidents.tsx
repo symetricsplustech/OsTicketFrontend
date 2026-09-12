@@ -22,8 +22,8 @@ const IMPACTS = ['low', 'medium', 'high', 'enterprise'];
 
 export default function Incidents() {
   const { hasPermission } = useAuth();
-  const canCreate = hasPermission('records.create');
-  const canUpdate = hasPermission('records.update');
+  const canCreate = hasPermission('itsm.incident.incident.create');
+  const canUpdate = hasPermission('itsm.incident.incident.update');
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

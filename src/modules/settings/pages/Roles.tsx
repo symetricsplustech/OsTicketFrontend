@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '@shared/lib/api';
 import toast from 'react-hot-toast';
+import ItsmPermissionPicker from '@modules/settings/components/ItsmPermissionPicker';
 
 interface Role {
   _id: string;
@@ -15,15 +16,6 @@ interface Role {
 }
 
 const ALL_MODULES = ['helpdesk', 'crm', 'csm', 'itam', 'itom', 'projects', 'hr', 'field-service', 'workflow', 'analytics', 'ai', 'settings'];
-
-const ALL_PERMISSIONS = [
-  'tickets.view', 'tickets.create', 'tickets.reply', 'tickets.assign', 'tickets.manage',
-  'users.view', 'users.manage', 'departments.view', 'departments.manage',
-  'sla.view', 'sla.manage', 'roles.view', 'roles.manage', 'teams.view', 'teams.manage',
-  'kb.view', 'kb.manage', 'assets.view', 'assets.manage',
-  'incidents.view', 'problems.view', 'changes.view',
-  'reports.view', 'settings.manage', 'audit.view',
-];
 
 export default function Roles() {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -55,12 +47,10 @@ export default function Roles() {
     } catch { toast.error('Failed to create role'); } finally { setSaving(false); }
   };
 
-  const togglePerm = (perm: string) => {
-    setSelectedPerms(prev => prev.includes(perm) ? prev.filter(p => p !== perm) : [...prev, perm]);
-  };
-
   const [scopeEditing, setScopeEditing] = useState<string | null>(null);
   const [scopeSelection, setScopeSelection] = useState<string[]>([]);
+  const [permissionEditing, setPermissionEditing] = useState<string | null>(null);
+  const [permissionSelection, setPermissionSelection] = useState<string[]>([]);
 
   const openScope = (role: Role) => {
     setScopeEditing(role._id);
@@ -73,6 +63,18 @@ export default function Roles() {
       setScopeEditing(null);
       load();
     } catch { toast.error('Failed to save module scope'); }
+  };
+  const openPermissions = (role: Role) => {
+    setPermissionEditing(role._id);
+    setPermissionSelection(role.permissions || []);
+  };
+  const savePermissions = async (roleId: string) => {
+    try {
+      await api.put(`/admin/roles/${roleId}`, { permissions: permissionSelection });
+      toast.success('Granular permissions saved');
+      setPermissionEditing(null);
+      load();
+    } catch { toast.error('Failed to save permissions'); }
   };
 
   return (
@@ -115,14 +117,7 @@ export default function Roles() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Permissions</label>
-              <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3">
-                {ALL_PERMISSIONS.map(perm => (
-                  <label key={perm} className="flex items-center gap-2 text-sm cursor-pointer">
-                    <input type="checkbox" checked={selectedPerms.includes(perm)} onChange={() => togglePerm(perm)} className="rounded border-gray-300 text-brand-600" />
-                    <span className="text-gray-600">{perm}</span>
-                  </label>
-                ))}
-              </div>
+              <ItsmPermissionPicker value={selectedPerms} onChange={setSelectedPerms} />
             </div>
             <div className="flex gap-2">
               <button type="submit" disabled={saving} className="btn-primary">{saving ? 'Creating...' : 'Create Role'}</button>
@@ -151,7 +146,19 @@ export default function Roles() {
                   <td className="px-6 py-4 text-sm font-medium">{r.name}</td>
                   <td className="px-6 py-4 text-xs text-gray-600">{r.category || 'operational'} · {(r.recordScopes || ['own']).join(', ')}</td>
                   <td className="px-6 py-4">{r.isAdmin ? <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700">Admin</span> : <span className="text-xs text-gray-400">—</span>}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{r.permissions?.length || 0} permissions</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {permissionEditing === r._id ? (
+                      <div className="min-w-[48rem] space-y-2">
+                        <ItsmPermissionPicker value={permissionSelection} onChange={setPermissionSelection} />
+                        <div className="flex gap-2">
+                          <button onClick={() => savePermissions(r._id)} className="btn-primary text-xs px-2 py-1">Save</button>
+                          <button onClick={() => setPermissionEditing(null)} className="btn-secondary text-xs px-2 py-1">Cancel</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button onClick={() => openPermissions(r)} className="rounded bg-blue-50 px-2 py-1 text-xs text-blue-700 hover:bg-blue-100">{r.permissions?.length || 0} permissions · Edit</button>
+                    )}
+                  </td>
                   <td className="px-6 py-4">
                     {scopeEditing === r._id ? (
                       <div className="space-y-2">

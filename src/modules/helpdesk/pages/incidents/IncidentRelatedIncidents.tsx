@@ -54,7 +54,10 @@ export default function IncidentRelatedIncidents() {
             {relationships.map(rel => (
               <div key={rel._id} className="border rounded p-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="font-medium">{rel.sourceIncident?.number || rel.sourceIncident} &harr; {rel.targetIncident?.number || rel.targetIncident}</span>
+                  <span className="font-medium">
+                    {typeof rel.sourceIncident === 'string' ? rel.sourceIncident : rel.sourceIncident?.number} &harr;{' '}
+                    {typeof rel.targetIncident === 'string' ? rel.targetIncident : rel.targetIncident?.number}
+                  </span>
                   <span className="text-xs px-2 py-0.5 rounded bg-gray-100">{rel.relationshipType}</span>
                 </div>
                 <div className="text-gray-500 text-xs mt-1">Linked {formatDate(rel.linkedAt)}</div>

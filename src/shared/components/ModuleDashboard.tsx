@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { useGetRecordsQuery } from '@shared/store/crudApi';
-import { useGetUsageSummaryQuery } from '@shared/store/apiEndpoints';
 
 // Module dashboard with REAL data from the generic CRUD API
 export function ModuleDashboard({ entity, title }: { entity: string; title: string }) {
@@ -73,4 +72,3 @@ function StatCard({ label, value, color }: { label: string; value: any; color?: 
     </div>
   );
 }
-

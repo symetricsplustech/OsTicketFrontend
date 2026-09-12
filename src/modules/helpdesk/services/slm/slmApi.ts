@@ -98,7 +98,7 @@ export const slmApi = {
   listRepairJobs: (params?: Record<string, unknown>) => api.get<{ success: boolean; data: SLARepairJob[] }>('/core/slm/repair-jobs', { params }),
   createRepairJob: (data: Partial<SLARepairJob>) => api.post<{ success: boolean; data: SLARepairJob }>('/core/slm/repair-jobs', data),
   startRepairJob: (id: string) => api.post<{ success: boolean; data: SLARepairJob }>(`/core/slm/repair-jobs/${id}/start`),
-  completeRepairJob: (id: string, result: { success: boolean; processed: number; success: number; failures: number }) => api.post<{ success: boolean; data: SLARepairJob }>(`/core/slm/repair-jobs/${id}/complete`, result),
+  completeRepairJob: (id: string, result: { completed: boolean; processed: number; succeeded: number; failures: number }) => api.post<{ success: boolean; data: SLARepairJob }>(`/core/slm/repair-jobs/${id}/complete`, result),
   getDashboard: () => api.get<{ success: boolean; data: SLADashboard }>('/core/slm/dashboard'),
   recalculate: (slaPlanId: string) => api.post<{ success: boolean; data: { recalculated: number; total: number } }>('/core/slm/recalculate', { slaPlanId }),
 };

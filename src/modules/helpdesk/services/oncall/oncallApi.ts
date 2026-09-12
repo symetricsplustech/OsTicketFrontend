@@ -1,4 +1,4 @@
-import api from '@/core/api';
+import api from '@shared/lib/api';
 
 export interface OnCallSchedule {
   _id: string; tenantId: string; number: string; name: string; description: string;

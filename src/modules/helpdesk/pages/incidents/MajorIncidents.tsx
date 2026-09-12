@@ -24,8 +24,8 @@ interface MajorIncident {
 
 export default function MajorIncidents() {
   const { hasPermission } = useAuth();
-  const canCreate = hasPermission('records.create');
-  const canUpdate = hasPermission('records.update');
+  const canCreate = hasPermission('itsm.major_incident.major_incident.create');
+  const canUpdate = hasPermission('itsm.major_incident.major_incident.update');
   const [items, setItems] = useState<MajorIncident[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

@@ -59,10 +59,10 @@ export default function IncidentCIRelated() {
             {cis.map(ci => (
               <div key={ci._id} className="flex justify-between items-center border rounded p-3">
                 <div>
-                  <span className="font-medium">{ci.ci?.name || ci.ci}</span>
+                  <span className="font-medium">{typeof ci.ci === 'string' ? ci.ci : ci.ci?.name}</span>
                   <span className="ml-2 text-xs text-gray-500">{ci.role}</span>
                 </div>
-                <button onClick={() => handleUnlink(ci.ci?._id || ci.ci)} className="text-red-600 text-sm hover:underline">Unlink</button>
+                <button onClick={() => handleUnlink(typeof ci.ci === 'string' ? ci.ci : ci.ci._id)} className="text-red-600 text-sm hover:underline">Unlink</button>
               </div>
             ))}
           </div>
