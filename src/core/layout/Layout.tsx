@@ -195,8 +195,47 @@ const allNavItems: NavItem[] = [
       "itsm.major_incident.ui.mi_dashboard.access",
     ],
   },
+  {
+    label: "Walk-Up",
+    path: "/walkup",
+    icon: Store,
+    module: "helpdesk",
+    permissions: [
+      "itsm.walkup.walkup_location.read",
+      "itsm.walkup.ui.location_finder.access",
+    ],
+  },
+  {
+    label: "Walk-Up Check-In",
+    path: "/walkup/checkin",
+    icon: CheckCircle,
+    module: "helpdesk",
+    permissions: [
+      "itsm.walkup.walkup_checkin.create",
+      "itsm.walkup.ui.check_in.access",
+    ],
+  },
+  {
+    label: "Walk-Up Queue",
+    path: "/walkup/queue",
+    icon: Users,
+    module: "helpdesk",
+    permissions: [
+      "itsm.walkup.walkup_queue.read",
+      "itsm.walkup.ui.queue_monitor.access",
+    ],
+  },
   { label: "Playbooks", path: "/playbooks", icon: Play, module: "helpdesk" },
-  { label: "On-Call", path: "/oncall", icon: Calendar, module: "helpdesk" },
+  {
+    label: "On-Call",
+    path: "/oncall",
+    icon: Calendar,
+    module: "helpdesk",
+    permissions: [
+      "itsm.on_call.on_call_schedule.read",
+      "itsm.on_call.ui.on_call_dashboard.access",
+    ],
+  },
   {
     label: "Templates",
     path: "/templates",

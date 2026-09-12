@@ -8,7 +8,6 @@ export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [company, setCompany] = useState("");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -17,10 +16,10 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post("/auth/register", { name, email, password, company });
+      await api.post("/auth/register", { name, email, password });
       await login(email, password);
-      toast.success("Account created. Welcome to Helpdesk.");
-      navigate("/");
+      toast.success("Account created. Welcome to Unified Platform.");
+      navigate("/platform");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
       toast.error(error.response?.data?.message || "Registration failed");
@@ -34,10 +33,10 @@ export default function Register() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h1 className="text-center text-3xl font-bold text-gray-900">
-            Create Account
+            Create Platform Account
           </h1>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Get started with your free trial
+            Your personal account to access the platform
           </p>
         </div>
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
@@ -53,19 +52,6 @@ export default function Register() {
                 onChange={(e) => setName(e.target.value)}
                 className="mt-1 input-field"
                 placeholder="John Doe"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Tenant invitation or company ID
-              </label>
-              <input
-                type="text"
-                required
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                className="mt-1 input-field"
-                placeholder="Provided by your organisation administrator"
               />
             </div>
             <div>
@@ -111,6 +97,9 @@ export default function Register() {
             >
               Sign in
             </Link>
+          </p>
+          <p className="text-center text-xs text-gray-500">
+            After registration, you can create an Instance or accept an invitation from Platform Home.
           </p>
         </form>
       </div>

@@ -155,6 +155,9 @@ const WalkupDashboard = lazy(
 const CmdbDashboard = lazy(
   () => import("@modules/helpdesk/pages/cmdb/CmdbDashboard"),
 );
+const ReleaseDashboard = lazy(
+  () => import("@modules/helpdesk/pages/release/ReleaseDashboard"),
+);
 const ServiceCatalog = lazy(
   () => import("@modules/helpdesk/pages/support/ServiceCatalog"),
 );
@@ -723,6 +726,16 @@ export function AppRoutes() {
             element={
               <ModuleGuard module="helpdesk">
                 <CmdbDashboard />
+              </ModuleGuard>
+            }
+          />
+
+          {/* Helpdesk Release Management */}
+          <Route
+            path="release-dashboard"
+            element={
+              <ModuleGuard module="helpdesk">
+                <ReleaseDashboard />
               </ModuleGuard>
             }
           />
