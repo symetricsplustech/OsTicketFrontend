@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import api from "@shared/lib/api";
+import { invitationReturnTo } from "./returnTo";
 
 export default function ConfirmEmail() {
   const [params] = useSearchParams();
   const [message, setMessage] = useState("Confirming your email...");
   const [confirmed, setConfirmed] = useState(false);
   const token = params.get("token");
+  const invitation = invitationReturnTo(params.get("next"));
 
   useEffect(() => {
     if (!token) {
@@ -17,7 +19,8 @@ export default function ConfirmEmail() {
       .then(() => {
         setConfirmed(true);
         setMessage("Email confirmed. You can now sign in.");
-        window.history.replaceState({}, "", "/confirm-email");
+        window.history.replaceState({}, "", invitation
+          ? `/confirm-email?next=${encodeURIComponent(invitation)}` : "/confirm-email");
       })
       .catch((error) => setMessage(error?.response?.data?.message || "Confirmation link is invalid or expired."));
   }, [token]);
@@ -25,6 +28,6 @@ export default function ConfirmEmail() {
   return <main className="mx-auto mt-24 max-w-md rounded-lg border bg-white p-6 text-center">
     <h1 className="text-2xl font-semibold">Email confirmation</h1>
     <p role="status" className="my-5 text-gray-600">{message}</p>
-    {confirmed && <Link className="text-brand-600 underline" to="/login">Sign in</Link>}
+    {confirmed && <Link className="text-brand-600 underline" to={invitation ? `/login?next=${encodeURIComponent(invitation)}` : "/login"}>Sign in</Link>}
   </main>;
 }

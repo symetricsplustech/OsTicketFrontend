@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import api from "@shared/lib/api";
 import { useAuth } from "@core/auth/useAuth";
 import { formatRelativeTime } from "@shared/lib/format";
+import { dashboardApi, type DashboardTicket } from "../../services/dashboardApi";
 import {
   TicketIcon,
   AlertTriangle,
@@ -21,16 +21,6 @@ interface Stats {
   total: number;
 }
 
-interface RecentTicket {
-  _id: string;
-  number: string;
-  title: string;
-  status: string;
-  priority: string;
-  createdAt: string;
-  user?: { name: string };
-}
-
 export default function Dashboard() {
   const { user, modules, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -43,8 +33,10 @@ export default function Dashboard() {
     today: 0,
     total: 0,
   });
-  const [recent, setRecent] = useState<RecentTicket[]>([]);
+  const [recent, setRecent] = useState<DashboardTicket[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const isCustomer = user?.role === "customer" || user?.role === "user";
 
   useEffect(() => {
     if (user?.role === "superadmin") {
@@ -53,20 +45,17 @@ export default function Dashboard() {
     }
     const load = async () => {
       try {
-        const [dashRes, ticketsRes] = await Promise.all([
-          api.get("/agent/dashboard"),
-          api.get("/agent/tickets?limit=5"),
-        ]);
-        setStats(dashRes.data.stats || dashRes.data);
-        setRecent(ticketsRes.data.tickets || []);
+        const result = await (isCustomer ? dashboardApi.customer() : dashboardApi.agent());
+        setStats((current) => ({ ...current, ...result.stats }));
+        setRecent(result.recent);
       } catch {
-        // fallback
+        setError("Unable to load dashboard data for this account.");
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [user?.role]);
+  }, [user?.role, isCustomer]);
 
   // While auth/modules resolve, wait — never bounce to setup on stale state.
   if (authLoading) {
@@ -127,6 +116,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {error && <p role="alert" className="rounded bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <Link
@@ -169,7 +159,7 @@ export default function Dashboard() {
             recent.map((t) => (
               <Link
                 key={t._id}
-                to={`/tickets/${t._id}`}
+                to={`/tickets/${isCustomer ? t.number : t._id}`}
                 className="flex items-center justify-between px-5 py-3 hover:bg-gray-50"
               >
                 <div>

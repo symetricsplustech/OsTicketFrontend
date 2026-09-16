@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@core/auth/useAuth";
 import toast from "react-hot-toast";
+import { invitationReturnTo } from "./returnTo";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -12,6 +13,8 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const invitation = invitationReturnTo(new URLSearchParams(location.search).get("next") ||
+    (location.state as { from?: string } | null)?.from);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +22,7 @@ export default function Login() {
     try {
       await login(email, password, needs2FA ? totpCode : undefined);
       toast.success("Welcome back!");
-      navigate((location.state as { from?: string } | null)?.from || "/");
+      navigate(invitation || (location.state as { from?: string } | null)?.from || "/");
     } catch (err: unknown) {
       const error = err as { message?: string; twoFactorRequired?: boolean };
       if (error.twoFactorRequired) {
@@ -132,7 +135,7 @@ export default function Login() {
           <p className="text-center text-sm text-gray-600">
             Don't have an account?{" "}
             <Link
-              to="/register"
+              to={invitation ? `/register?next=${encodeURIComponent(invitation)}` : "/register"}
               className="text-brand-600 hover:text-brand-500 font-medium"
             >
               Sign up

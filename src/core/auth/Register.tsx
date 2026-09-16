@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import api from "@shared/lib/api";
 import toast from "react-hot-toast";
+import { invitationReturnTo } from "./returnTo";
 
 export default function Register() {
+  const location = useLocation();
+  const invitation = invitationReturnTo(new URLSearchParams(location.search).get("next"));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,7 +20,7 @@ export default function Register() {
     setLoading(true);
     try {
       const res = await api.post<{ confirmationUrl?: string }>("/auth/register", {
-        name, email, password, policyConsent,
+        name, email, password, policyConsent, returnTo: invitation,
       });
       setConfirmationUrl(res.data.confirmationUrl || "");
       setRegistered(true);
@@ -54,7 +57,7 @@ export default function Register() {
           <div className="space-y-4 rounded-lg border bg-white p-6 text-sm">
             <p>Check {email} for a confirmation link before signing in.</p>
             {confirmationUrl && <a className="text-brand-600 underline" href={confirmationUrl}>Confirm account (development)</a>}
-            <p><Link className="text-brand-600 underline" to="/login">Return to sign in</Link></p>
+            <p><Link className="text-brand-600 underline" to={invitation ? `/login?next=${encodeURIComponent(invitation)}` : "/login"}>Return to sign in</Link></p>
           </div>
         ) : <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-4">
@@ -114,7 +117,7 @@ export default function Register() {
           <p className="text-center text-sm text-gray-600">
             Already have an account?{" "}
             <Link
-              to="/login"
+              to={invitation ? `/login?next=${encodeURIComponent(invitation)}` : "/login"}
               className="text-brand-600 hover:text-brand-500 font-medium"
             >
               Sign in

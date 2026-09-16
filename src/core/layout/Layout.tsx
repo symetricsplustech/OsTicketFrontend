@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Outlet, Link, useLocation } from "react-router-dom";
+import { Outlet, Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@core/auth/useAuth";
 import {
   useGetNotificationsQuery,
@@ -400,9 +400,17 @@ export default function Layout() {
     ? approvals.reduce((s2: number, a2: any) => s2 + (a2.count || 1), 0)
     : 0;
   const location = useLocation();
+  const requesterCanView = (path: string) => {
+    if (["/", "/tickets", "/tickets/new", "/catalog", "/kb", "/approval-dashboard"].includes(path) ||
+        /^\/tickets\/[^/]+$/.test(path) && path !== "/tickets/manage" ||
+        path.startsWith("/catalog/") || path.startsWith("/kb/")) return true;
+    return false;
+  };
 
   // Items visible based on module/permission
   const canSeeModuleItem = (item: NavItem): boolean => {
+    if (user?.instanceRole === "requester" && !requesterCanView(item.path))
+      return false;
     if (item.path === "/settings/organization-structure")
       return hasModule("settings") && !!localStorage.getItem("activeInstanceId") &&
         ["instance_owner", "instance_admin"].includes(user?.instanceRole || "");
@@ -667,7 +675,8 @@ export default function Layout() {
 
       <main className="flex-1 overflow-y-auto">
         <div className="p-6">
-          <Outlet />
+          {user?.instanceRole === "requester" && !requesterCanView(location.pathname)
+            ? <Navigate to="/" replace /> : <Outlet />}
         </div>
       </main>
     </div>
