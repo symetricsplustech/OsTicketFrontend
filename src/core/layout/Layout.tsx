@@ -74,6 +74,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Activity,
+  Building2,
 } from "lucide-react";
 import { getItsmRouteAccess } from "@shared/itsmAccess";
 
@@ -354,6 +355,28 @@ const allNavItems: NavItem[] = [
     icon: KeyRound,
     module: "settings",
   },
+  {
+    label: "Organization Structure",
+    path: "/settings/organization-structure",
+    icon: Building2,
+    module: "settings",
+  },
+];
+
+const platformNavItems: NavItem[] = [
+  { label: "Platform overview", path: "/", icon: LayoutDashboard },
+  { label: "Organizations", path: "/platform/organizations", icon: Building2 },
+  {
+    label: "Organization permissions",
+    path: "/platform/permissions",
+    icon: CloudCog,
+  },
+  {
+    label: "Platform operators",
+    path: "/platform/operators",
+    icon: ShieldCheck,
+  },
+  { label: "Audit & operations", path: "/platform", icon: Activity },
 ];
 
 export default function Layout() {
@@ -362,7 +385,9 @@ export default function Layout() {
   const { data: notifData } = useGetNotificationsQuery();
   const [markRead] = useMarkReadMutation();
   const [markAllRead] = useMarkAllReadMutation();
-  const { data: approvals } = useMyApprovalsQuery();
+  const { data: approvals } = useMyApprovalsQuery(undefined, {
+    skip: user?.role === "superadmin",
+  });
   const [showNotifs, setShowNotifs] = useState(false);
   const [searchQ, setSearchQ] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -378,6 +403,9 @@ export default function Layout() {
 
   // Items visible based on module/permission
   const canSeeModuleItem = (item: NavItem): boolean => {
+    if (item.path === "/settings/organization-structure")
+      return hasModule("settings") && !!localStorage.getItem("activeInstanceId") &&
+        ["instance_owner", "instance_admin"].includes(user?.instanceRole || "");
     if (!item.module && !item.permission) return true;
     const moduleAllowed = !item.module || hasModule(item.module);
     // Settings is owner-owned: visible only to admins who hold admin/access
@@ -396,7 +424,10 @@ export default function Layout() {
     return moduleAllowed && permissionAllowed;
   };
 
-  const visibleItems = allNavItems.filter(canSeeModuleItem);
+  const visibleItems =
+    user?.role === "superadmin"
+      ? platformNavItems
+      : allNavItems.filter(canSeeModuleItem);
 
   const renderNavItem = (item: NavItem, colorClass: string) => {
     const isActive =
@@ -454,7 +485,11 @@ export default function Layout() {
     return elements;
   };
 
-  const sidebarWidth = collapsed ? "w-16" : "w-64";
+  const sidebarWidth = collapsed
+    ? "w-16"
+    : user?.role === "superadmin"
+      ? "w-80"
+      : "w-64";
 
   return (
     <div className="flex h-screen bg-gray-50">

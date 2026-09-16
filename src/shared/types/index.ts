@@ -5,6 +5,9 @@ export interface User {
   role: "user" | "customer" | "agent" | "admin" | "superadmin";
   permissions: string[];
   modules: string[];
+  platformRole?: string;
+  instanceRole?: string;
+  company?: string | null;
   status?: string;
   isAdmin?: boolean;
 }

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@core/auth/useAuth";
 import toast from "react-hot-toast";
 
@@ -11,6 +11,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,7 +19,7 @@ export default function Login() {
     try {
       await login(email, password, needs2FA ? totpCode : undefined);
       toast.success("Welcome back!");
-      navigate("/");
+      navigate((location.state as { from?: string } | null)?.from || "/");
     } catch (err: unknown) {
       const error = err as { message?: string; twoFactorRequired?: boolean };
       if (error.twoFactorRequired) {

@@ -1,25 +1,27 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import api from "@shared/lib/api";
-import { useAuth } from "@core/auth/useAuth";
 import toast from "react-hot-toast";
 
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [policyConsent, setPolicyConsent] = useState(false);
+  const [confirmationUrl, setConfirmationUrl] = useState("");
+  const [registered, setRegistered] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await api.post("/auth/register", { name, email, password });
-      await login(email, password);
-      toast.success("Account created. Welcome to Helpdesk.");
-      navigate("/");
+      const res = await api.post<{ confirmationUrl?: string }>("/auth/register", {
+        name, email, password, policyConsent,
+      });
+      setConfirmationUrl(res.data.confirmationUrl || "");
+      setRegistered(true);
+      toast.success("Account created. Check your email to confirm it.");
     } catch (err: unknown) {
       const error = err as {
         response?: {
@@ -48,7 +50,13 @@ export default function Register() {
             Your account to access helpdesk and settings
           </p>
         </div>
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+        {registered ? (
+          <div className="space-y-4 rounded-lg border bg-white p-6 text-sm">
+            <p>Check {email} for a confirmation link before signing in.</p>
+            {confirmationUrl && <a className="text-brand-600 underline" href={confirmationUrl}>Confirm account (development)</a>}
+            <p><Link className="text-brand-600 underline" to="/login">Return to sign in</Link></p>
+          </div>
+        ) : <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">
@@ -91,6 +99,11 @@ export default function Register() {
               />
             </div>
           </div>
+          <label className="flex items-start gap-2 text-sm text-gray-700">
+            <input type="checkbox" required checked={policyConsent}
+              onChange={(event) => setPolicyConsent(event.target.checked)} />
+            <span>I agree to the privacy policy and terms of service.</span>
+          </label>
           <button
             type="submit"
             disabled={loading}
@@ -110,7 +123,7 @@ export default function Register() {
           <p className="text-center text-xs text-gray-500">
             Your organization's admin can grant granular access in Settings.
           </p>
-        </form>
+        </form>}
       </div>
     </div>
   );

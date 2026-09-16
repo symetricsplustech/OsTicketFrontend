@@ -18,7 +18,12 @@ function HydrateAuth() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter
+      future={{
+        v7_relativeSplatPath: true,
+        v7_startTransition: true,
+      }}
+    >
       <Provider store={store}>
         <HydrateAuth />
         <AppRoutes />

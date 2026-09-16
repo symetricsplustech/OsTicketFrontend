@@ -2,14 +2,27 @@ import React, { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "@core/layout/Layout";
 import { ModuleGuard } from "@core/permissions/ModuleGuard";
-import {
-  AdminRoute,
-  ProtectedRoute,
-} from "@core/routing/RouteGuards";
+import { AdminRoute, InstanceAdminRoute, ProtectedRoute } from "@core/routing/RouteGuards";
 import { LoadingSpinner } from "@shared/components/ui";
+import { useAuth } from "@core/auth/useAuth";
 
-const Login = lazy(() => import("@core/auth/Login").then(m => ({ default: m.default })));
-const Register = lazy(() => import("@core/auth/Register").then(m => ({ default: m.default })));
+const Login = lazy(() =>
+  import("@core/auth/Login").then((m) => ({ default: m.default })),
+);
+const Register = lazy(() =>
+  import("@core/auth/Register").then((m) => ({ default: m.default })),
+);
+const ConfirmEmail = lazy(() => import("@core/auth/ConfirmEmail"));
+const PlatformHome = lazy(() => import("@modules/platform/PlatformHome"));
+const AcceptInvitation = lazy(() => import("@modules/platform/AcceptInvitation"));
+const PlatformDashboard = lazy(
+  () => import("@modules/platform/PlatformDashboard"),
+);
+const OrganizationsPage = lazy(
+  () => import("@modules/platform/OrganizationsPage"),
+);
+const OperatorsPage = lazy(() => import("@modules/platform/OperatorsPage"));
+const PermissionsPage = lazy(() => import("@modules/platform/PermissionsPage"));
 
 // Helpdesk
 const Dashboard = lazy(
@@ -210,13 +223,14 @@ const AccessControl = lazy(
   () => import("@modules/settings/pages/AccessControl"),
 );
 const Departments = lazy(() => import("@modules/settings/pages/Departments"));
+const OrganizationStructure = lazy(
+  () => import("@modules/settings/pages/OrganizationStructure"),
+);
 const SlaPlans = lazy(() => import("@modules/settings/pages/SlaPlans"));
 const EmailSettings = lazy(
   () => import("@modules/settings/pages/EmailSettings"),
 );
-const AuditLogs = lazy(
-  () => import("@modules/settings/pages/AuditLogs"),
-);
+const AuditLogs = lazy(() => import("@modules/settings/pages/AuditLogs"));
 
 // Core Task Engine
 const TaskListPage = lazy(() => import("@modules/tasks/pages/TaskList"));
@@ -225,12 +239,22 @@ const TaskCreatePage = lazy(() => import("@modules/tasks/pages/TaskCreate"));
 const MyWorkPage = lazy(() => import("@modules/tasks/pages/MyWork"));
 const GroupQueuesPage = lazy(() => import("@modules/tasks/pages/GroupQueues"));
 
+function WorkspaceEntry() {
+  const { user } = useAuth();
+  if (user?.role === "customer" && !user.company && !localStorage.getItem("activeInstanceId"))
+    return <Navigate to="/platform/home" replace />;
+  return <Dashboard />;
+}
+
 export function AppRoutes() {
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/confirm-email" element={<ConfirmEmail />} />
+        <Route path="/platform/home" element={<ProtectedRoute><PlatformHome /></ProtectedRoute>} />
+        <Route path="/platform/invitations/:instanceId" element={<ProtectedRoute><AcceptInvitation /></ProtectedRoute>} />
 
         <Route
           path="/"
@@ -240,7 +264,14 @@ export function AppRoutes() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Dashboard />} />
+          <Route index element={<WorkspaceEntry />} />
+          <Route path="platform" element={<PlatformDashboard />} />
+          <Route
+            path="platform/organizations"
+            element={<OrganizationsPage />}
+          />
+          <Route path="platform/operators" element={<OperatorsPage />} />
+          <Route path="platform/permissions" element={<PermissionsPage />} />
 
           {/* Helpdesk Tickets */}
           <Route
@@ -677,7 +708,10 @@ export function AppRoutes() {
           />
 
           {/* Helpdesk Walk-Up Experience */}
-          <Route path="walkup" element={<Navigate to="/walkup-dashboard" replace />} />
+          <Route
+            path="walkup"
+            element={<Navigate to="/walkup-dashboard" replace />}
+          />
           <Route
             path="walkup/checkin"
             element={<Navigate to="/walkup-dashboard" replace />}
@@ -940,6 +974,16 @@ export function AppRoutes() {
                   <Departments />
                 </ModuleGuard>
               </AdminRoute>
+            }
+          />
+          <Route
+            path="settings/organization-structure"
+            element={
+              <InstanceAdminRoute>
+                <ModuleGuard module="settings">
+                  <OrganizationStructure />
+                </ModuleGuard>
+              </InstanceAdminRoute>
             }
           />
           <Route

@@ -46,30 +46,11 @@ export default function Dashboard() {
   const [recent, setRecent] = useState<RecentTicket[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Platform admin goes to superadmin dashboard
-  if (user?.role === "superadmin") {
-    return <Navigate to="/superadmin" replace />;
-  }
-
-  // While auth/modules resolve, wait — never bounce to setup on stale state.
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600" />
-      </div>
-    );
-  }
-
-  // Admins go to the setup wizard ONLY when the tenant has no active
-  // modules yet (fresh tenant). Otherwise they get the real dashboard.
-  if (
-    (user?.role === "admin" || (user as any)?.isAdmin) &&
-    modules.length === 0
-  ) {
-    return <Navigate to="/setup" replace />;
-  }
-
   useEffect(() => {
+    if (user?.role === "superadmin") {
+      setLoading(false);
+      return;
+    }
     const load = async () => {
       try {
         const [dashRes, ticketsRes] = await Promise.all([
@@ -85,7 +66,29 @@ export default function Dashboard() {
       }
     };
     load();
-  }, []);
+  }, [user?.role]);
+
+  // While auth/modules resolve, wait — never bounce to setup on stale state.
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600" />
+      </div>
+    );
+  }
+
+  if (user?.role === "superadmin") {
+    return <Navigate to="/platform" replace />;
+  }
+
+  // Admins go to the setup wizard ONLY when the tenant has no active
+  // modules yet (fresh tenant). Otherwise they get the real dashboard.
+  if (
+    (user?.role === "admin" || (user as any)?.isAdmin) &&
+    modules.length === 0
+  ) {
+    return <Navigate to="/setup" replace />;
+  }
 
   if (loading) {
     return (

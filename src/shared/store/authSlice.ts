@@ -56,6 +56,7 @@ export const loginThunk = createAsyncThunk<
       };
 
       localStorage.setItem("token", token);
+      localStorage.removeItem("activeInstanceId");
       localStorage.setItem(
         "user",
         JSON.stringify({ user: resolvedUser, tenant: t }),
@@ -91,6 +92,7 @@ export const logoutThunk = createAsyncThunk(
   async (_, { dispatch }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("activeInstanceId");
     dispatch(platformApi.util.resetApiState());
     window.location.href = "/login";
   },
@@ -215,7 +217,13 @@ export function hasModule(
   modules: string[],
   moduleKey: string,
 ): boolean {
-  if (user?.role === "superadmin") return false;
+  if (user?.role === "superadmin") {
+    return (
+      user.platformRole === "platform_owner" ||
+      user.modules?.includes(moduleKey) === true ||
+      modules.includes(moduleKey)
+    );
+  }
   if (user?.modules?.includes(moduleKey)) return true;
   return modules.includes(moduleKey);
 }
