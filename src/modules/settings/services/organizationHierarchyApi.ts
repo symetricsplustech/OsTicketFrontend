@@ -5,6 +5,7 @@ export type Unit = {
   _id: string;
   name: string;
   type: string;
+  active?: boolean;
   parent?: { _id: string; name: string } | null;
   instanceCompany?: { _id: string; name: string; isPrimary: boolean } | null;
 };

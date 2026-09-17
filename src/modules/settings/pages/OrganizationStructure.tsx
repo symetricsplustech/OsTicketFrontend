@@ -7,6 +7,8 @@ import type { OperationalRecord } from "../types/OperationalRecord";
 import { Button, Card } from "@shared/components/ui";
 import { instanceDepartmentApi, type OperationalDepartment } from "../services/instanceDepartmentApi";
 import { instanceTeamApi } from "../services/instanceTeamApi";
+import { instanceMemberApi, type InstanceMember } from "../services/instanceMemberApi";
+import MemberPlacement from "../components/MemberPlacement";
 
 export default function OrganizationStructure() {
   const [types, setTypes] = useState<UnitType[]>([]);
@@ -14,23 +16,26 @@ export default function OrganizationStructure() {
   const [companies, setCompanies] = useState<InstanceCompany[]>([]);
   const [departments, setDepartments] = useState<OperationalDepartment[]>([]);
   const [teams, setTeams] = useState<OperationalRecord[]>([]);
+  const [members, setMembers] = useState<InstanceMember[]>([]);
   const [typeForm, setTypeForm] = useState({ type: "", label: "" });
   const [unitForm, setUnitForm] = useState({ name: "", type: "", parent: "", instanceCompany: "" });
   const [error, setError] = useState("");
 
   async function load() {
-    const [unitTypes, organizationUnits, instanceCompanies, operationalDepartments, operationalTeams] = await Promise.all([
+    const [unitTypes, organizationUnits, instanceCompanies, operationalDepartments, operationalTeams, instanceMembers] = await Promise.all([
       organizationHierarchyApi.listTypes(),
       organizationHierarchyApi.listUnits(),
       instanceCompanyApi.list(),
       instanceDepartmentApi.list(),
       instanceTeamApi.list(),
+      instanceMemberApi.list(),
     ]);
     setTypes(unitTypes);
     setUnits(organizationUnits);
     setCompanies(instanceCompanies);
     setDepartments(operationalDepartments);
     setTeams(operationalTeams);
+    setMembers(instanceMembers);
     setUnitForm((current) => ({ ...current, instanceCompany: current.instanceCompany || instanceCompanies.find((item) => item.isPrimary)?._id || "" }));
   }
 
@@ -103,6 +108,16 @@ export default function OrganizationStructure() {
     }
   }
 
+  async function placeMember(userId: string, unitId: string | null) {
+    try {
+      setError("");
+      await instanceMemberApi.place(userId, unitId);
+      await load();
+    } catch (cause: any) {
+      setError(cause?.response?.data?.message || "Unable to place member.");
+    }
+  }
+
   const labelFor = (type: string) => types.find((item) => item.type === type)?.label || type;
   const childrenOf = (parentId: string | null) =>
     units.filter((unit) => (unit.parent?._id || null) === parentId)
@@ -172,6 +187,7 @@ export default function OrganizationStructure() {
         records={departments} units={units} onLink={linkDepartment} />
       <OperationalRecordLinks title="Operational teams" kind="Team" unitType="team"
         records={teams} units={units} onLink={linkTeam} />
+      <MemberPlacement members={members} units={units} onPlace={placeMember} />
     </div>
   );
 }
