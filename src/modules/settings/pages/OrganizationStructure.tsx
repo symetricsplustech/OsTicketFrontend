@@ -1,20 +1,27 @@
 import { useEffect, useState } from "react";
 import { organizationHierarchyApi, type Unit, type UnitType } from "../services/organizationHierarchyApi";
+import { instanceCompanyApi, type InstanceCompany } from "../services/instanceCompanyApi";
+import UnitPlacementEditor from "../components/UnitPlacementEditor";
+import { Button, Card } from "@shared/components/ui";
 
 export default function OrganizationStructure() {
   const [types, setTypes] = useState<UnitType[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
+  const [companies, setCompanies] = useState<InstanceCompany[]>([]);
   const [typeForm, setTypeForm] = useState({ type: "", label: "" });
-  const [unitForm, setUnitForm] = useState({ name: "", type: "", parent: "" });
+  const [unitForm, setUnitForm] = useState({ name: "", type: "", parent: "", instanceCompany: "" });
   const [error, setError] = useState("");
 
   async function load() {
-    const [unitTypes, organizationUnits] = await Promise.all([
+    const [unitTypes, organizationUnits, instanceCompanies] = await Promise.all([
       organizationHierarchyApi.listTypes(),
       organizationHierarchyApi.listUnits(),
+      instanceCompanyApi.list(),
     ]);
     setTypes(unitTypes);
     setUnits(organizationUnits);
+    setCompanies(instanceCompanies);
+    setUnitForm((current) => ({ ...current, instanceCompany: current.instanceCompany || instanceCompanies.find((item) => item.isPrimary)?._id || "" }));
   }
 
   useEffect(() => {
@@ -38,7 +45,7 @@ export default function OrganizationStructure() {
     try {
       setError("");
       await organizationHierarchyApi.createUnit({ ...unitForm, parent: unitForm.parent || null });
-      setUnitForm({ name: "", type: "", parent: "" });
+      setUnitForm({ name: "", type: "", parent: "", instanceCompany: unitForm.instanceCompany });
       await load();
     } catch (cause: any) {
       setError(cause?.response?.data?.message || "Unable to create unit.");
@@ -53,6 +60,16 @@ export default function OrganizationStructure() {
       await load();
     } catch (cause: any) {
       setError(cause?.response?.data?.message || "Unable to delete unit.");
+    }
+  }
+
+  async function moveUnit(id: string, input: { instanceCompany: string; parent: string | null }) {
+    try {
+      setError("");
+      await organizationHierarchyApi.updateUnit(id, input);
+      await load();
+    } catch (cause: any) {
+      setError(cause?.response?.data?.message || "Unable to move unit.");
     }
   }
 
@@ -83,14 +100,14 @@ export default function OrganizationStructure() {
         <p className="mt-1 text-sm text-gray-500">Create types and nested units for your organization.</p>
       </div>
       {error && <p role="alert" className="rounded bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      <form onSubmit={addType} className="grid gap-3 rounded-lg border bg-white p-5 md:grid-cols-3">
+      <Card><form onSubmit={addType} className="grid gap-3 p-5 md:grid-cols-3">
         <input required aria-label="Type key" placeholder="Type key, e.g. business_unit" value={typeForm.type}
           onChange={(event) => setTypeForm({ ...typeForm, type: event.target.value })} className="rounded border px-3 py-2 text-sm" />
         <input required aria-label="Type label" placeholder="Display label, e.g. Business Unit" value={typeForm.label}
           onChange={(event) => setTypeForm({ ...typeForm, label: event.target.value })} className="rounded border px-3 py-2 text-sm" />
-        <button className="rounded bg-brand-600 px-4 py-2 text-sm text-white">Add unit type</button>
-      </form>
-      <form onSubmit={addUnit} className="grid gap-3 rounded-lg border bg-white p-5 md:grid-cols-4">
+        <Button>Add unit type</Button>
+      </form></Card>
+      <Card><form onSubmit={addUnit} className="grid gap-3 p-5 md:grid-cols-5">
         <input required aria-label="Unit name" placeholder="Unit name" value={unitForm.name}
           onChange={(event) => setUnitForm({ ...unitForm, name: event.target.value })} className="rounded border px-3 py-2 text-sm" />
         <select required aria-label="Unit type" value={unitForm.type}
@@ -98,21 +115,29 @@ export default function OrganizationStructure() {
           <option value="">Choose type</option>
           {types.map((item) => <option key={item.type} value={item.type}>{item.label}</option>)}
         </select>
+        <select required aria-label="Company" value={unitForm.instanceCompany}
+          onChange={(event) => setUnitForm({ ...unitForm, instanceCompany: event.target.value, parent: "" })} className="rounded border px-3 py-2 text-sm">
+          <option value="">Choose company</option>
+          {companies.filter((item) => item.status === "active").map((item) =>
+            <option key={item._id} value={item._id}>{item.name}</option>)}
+        </select>
         <select aria-label="Parent unit" value={unitForm.parent}
           onChange={(event) => setUnitForm({ ...unitForm, parent: event.target.value })} className="rounded border px-3 py-2 text-sm">
           <option value="">Under Company</option>
-          {units.map((item) => <option key={item._id} value={item._id}>{item.name} ({labelFor(item.type)})</option>)}
+          {units.filter((item) => item.instanceCompany?._id === unitForm.instanceCompany).map((item) =>
+            <option key={item._id} value={item._id}>{item.name} ({labelFor(item.type)})</option>)}
         </select>
-        <button disabled={!types.length} className="rounded bg-brand-600 px-4 py-2 text-sm text-white disabled:opacity-50">Add unit</button>
-      </form>
-      <div className="divide-y rounded-lg border bg-white">
+        <Button disabled={!types.length}>Add unit</Button>
+      </form></Card>
+      <Card className="divide-y">
         {rows.map(({ unit, depth }) => <div key={unit._id} className="flex items-center justify-between p-4" style={{ paddingLeft: `${1 + depth * 1.5}rem` }}>
           <div><div className="font-medium">{unit.name}</div>
-            <div className="text-sm text-gray-500">{labelFor(unit.type)} · {unit.parent?.name || "Company"}</div></div>
-          <button onClick={() => removeUnit(unit._id)} className="text-sm text-red-600">Delete</button>
+            <div className="text-sm text-gray-500">{labelFor(unit.type)} · {unit.parent?.name || unit.instanceCompany?.name || "Company"}</div>
+            <UnitPlacementEditor unit={unit} units={units} companies={companies} onSave={moveUnit} /></div>
+          <Button variant="danger" size="sm" onClick={() => removeUnit(unit._id)}>Delete</Button>
         </div>)}
         {!units.length && <p className="p-5 text-sm text-gray-500">No organization units yet.</p>}
-      </div>
+      </Card>
     </div>
   );
 }
