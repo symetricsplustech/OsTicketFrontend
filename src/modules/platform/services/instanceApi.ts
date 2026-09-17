@@ -18,8 +18,8 @@ type Selection = {
 
 export const instanceApi = {
   list: async () => (await api.get<{ instances: InstanceMembership[] }>("/instances/my-instances")).data.instances,
-  create: async (name: string, domain: string) =>
-    (await api.post<{ instance: { _id: string } }>("/instances", { name, domain })).data.instance,
+  create: async (name: string, domain: string, companyName: string) =>
+    (await api.post<{ instance: { _id: string } }>("/instances", { name, domain, companyName })).data.instance,
   select: async (id: string) => (await api.post<Selection>(`/instances/${id}/select`, {})).data,
   accept: async (id: string, token: string) =>
     api.post(`/instances/${id}/accept-invitation`, { token }),

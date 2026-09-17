@@ -226,6 +226,7 @@ const Departments = lazy(() => import("@modules/settings/pages/Departments"));
 const OrganizationStructure = lazy(
   () => import("@modules/settings/pages/OrganizationStructure"),
 );
+const InstanceCompanies = lazy(() => import("@modules/settings/pages/InstanceCompanies"));
 const SlaPlans = lazy(() => import("@modules/settings/pages/SlaPlans"));
 const EmailSettings = lazy(
   () => import("@modules/settings/pages/EmailSettings"),
@@ -985,6 +986,10 @@ export function AppRoutes() {
                 </ModuleGuard>
               </InstanceAdminRoute>
             }
+          />
+          <Route
+            path="settings/companies"
+            element={<InstanceAdminRoute><ModuleGuard module="settings"><InstanceCompanies /></ModuleGuard></InstanceAdminRoute>}
           />
           <Route
             path="settings/sla"

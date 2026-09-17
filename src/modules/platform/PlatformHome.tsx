@@ -8,7 +8,7 @@ export default function PlatformHome() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [instances, setInstances] = useState<InstanceMembership[]>([]);
-  const [form, setForm] = useState({ name: "", domain: "" });
+  const [form, setForm] = useState({ name: "", domain: "", companyName: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [invitationLink, setInvitationLink] = useState("");
@@ -23,7 +23,7 @@ export default function PlatformHome() {
     event.preventDefault();
     try {
       setError("");
-      const instance = await instanceApi.create(form.name, form.domain);
+      const instance = await instanceApi.create(form.name, form.domain, form.companyName);
       enterInstance(await instanceApi.select(instance._id));
     } catch (cause: any) {
       setError(cause?.response?.data?.message || "Unable to create instance.");
@@ -83,6 +83,8 @@ export default function PlatformHome() {
         onChange={(event) => setForm({ ...form, name: event.target.value })} className="rounded border px-3 py-2" />
       <input required aria-label="Instance domain" placeholder="Domain, e.g. company.example.com" value={form.domain}
         onChange={(event) => setForm({ ...form, domain: event.target.value })} className="rounded border px-3 py-2" />
+      <input aria-label="Primary company name" placeholder="Primary company name (optional)" value={form.companyName}
+        onChange={(event) => setForm({ ...form, companyName: event.target.value })} className="rounded border px-3 py-2" />
       <button className="rounded bg-brand-600 px-4 py-2 text-white">Create</button>
     </form>
     <form onSubmit={openInvitation} className="flex flex-wrap gap-2">

@@ -361,6 +361,12 @@ const allNavItems: NavItem[] = [
     icon: Building2,
     module: "settings",
   },
+  {
+    label: "Companies",
+    path: "/settings/companies",
+    icon: Building2,
+    module: "settings",
+  },
 ];
 
 const platformNavItems: NavItem[] = [
@@ -411,7 +417,7 @@ export default function Layout() {
   const canSeeModuleItem = (item: NavItem): boolean => {
     if (user?.instanceRole === "requester" && !requesterCanView(item.path))
       return false;
-    if (item.path === "/settings/organization-structure")
+    if (["/settings/organization-structure", "/settings/companies"].includes(item.path))
       return hasModule("settings") && !!localStorage.getItem("activeInstanceId") &&
         ["instance_owner", "instance_admin"].includes(user?.instanceRole || "");
     if (!item.module && !item.permission) return true;
