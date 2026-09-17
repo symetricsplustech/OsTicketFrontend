@@ -1,10 +1,7 @@
 import api from "@shared/lib/api";
+import type { OperationalRecord } from "../types/OperationalRecord";
 
-export type OperationalDepartment = {
-  _id: string;
-  name: string;
-  organizationUnit?: { _id: string; name: string; type: string } | null;
-};
+export type OperationalDepartment = OperationalRecord;
 
 const base = () => {
   const instanceId = localStorage.getItem("activeInstanceId");

@@ -2,30 +2,35 @@ import { useEffect, useState } from "react";
 import { organizationHierarchyApi, type Unit, type UnitType } from "../services/organizationHierarchyApi";
 import { instanceCompanyApi, type InstanceCompany } from "../services/instanceCompanyApi";
 import UnitPlacementEditor from "../components/UnitPlacementEditor";
-import DepartmentLinks from "../components/DepartmentLinks";
+import OperationalRecordLinks from "../components/OperationalRecordLinks";
+import type { OperationalRecord } from "../types/OperationalRecord";
 import { Button, Card } from "@shared/components/ui";
 import { instanceDepartmentApi, type OperationalDepartment } from "../services/instanceDepartmentApi";
+import { instanceTeamApi } from "../services/instanceTeamApi";
 
 export default function OrganizationStructure() {
   const [types, setTypes] = useState<UnitType[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [companies, setCompanies] = useState<InstanceCompany[]>([]);
   const [departments, setDepartments] = useState<OperationalDepartment[]>([]);
+  const [teams, setTeams] = useState<OperationalRecord[]>([]);
   const [typeForm, setTypeForm] = useState({ type: "", label: "" });
   const [unitForm, setUnitForm] = useState({ name: "", type: "", parent: "", instanceCompany: "" });
   const [error, setError] = useState("");
 
   async function load() {
-    const [unitTypes, organizationUnits, instanceCompanies, operationalDepartments] = await Promise.all([
+    const [unitTypes, organizationUnits, instanceCompanies, operationalDepartments, operationalTeams] = await Promise.all([
       organizationHierarchyApi.listTypes(),
       organizationHierarchyApi.listUnits(),
       instanceCompanyApi.list(),
       instanceDepartmentApi.list(),
+      instanceTeamApi.list(),
     ]);
     setTypes(unitTypes);
     setUnits(organizationUnits);
     setCompanies(instanceCompanies);
     setDepartments(operationalDepartments);
+    setTeams(operationalTeams);
     setUnitForm((current) => ({ ...current, instanceCompany: current.instanceCompany || instanceCompanies.find((item) => item.isPrimary)?._id || "" }));
   }
 
@@ -85,6 +90,16 @@ export default function OrganizationStructure() {
       await load();
     } catch (cause: any) {
       setError(cause?.response?.data?.message || "Unable to link department.");
+    }
+  }
+
+  async function linkTeam(teamId: string, unitId: string | null) {
+    try {
+      setError("");
+      await instanceTeamApi.linkUnit(teamId, unitId);
+      await load();
+    } catch (cause: any) {
+      setError(cause?.response?.data?.message || "Unable to link team.");
     }
   }
 
@@ -153,7 +168,10 @@ export default function OrganizationStructure() {
         </div>)}
         {!units.length && <p className="p-5 text-sm text-gray-500">No organization units yet.</p>}
       </Card>
-      <DepartmentLinks departments={departments} units={units} onLink={linkDepartment} />
+      <OperationalRecordLinks title="Operational departments" kind="Department" unitType="department"
+        records={departments} units={units} onLink={linkDepartment} />
+      <OperationalRecordLinks title="Operational teams" kind="Team" unitType="team"
+        records={teams} units={units} onLink={linkTeam} />
     </div>
   );
 }
