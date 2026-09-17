@@ -2,25 +2,30 @@ import { useEffect, useState } from "react";
 import { organizationHierarchyApi, type Unit, type UnitType } from "../services/organizationHierarchyApi";
 import { instanceCompanyApi, type InstanceCompany } from "../services/instanceCompanyApi";
 import UnitPlacementEditor from "../components/UnitPlacementEditor";
+import DepartmentLinks from "../components/DepartmentLinks";
 import { Button, Card } from "@shared/components/ui";
+import { instanceDepartmentApi, type OperationalDepartment } from "../services/instanceDepartmentApi";
 
 export default function OrganizationStructure() {
   const [types, setTypes] = useState<UnitType[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [companies, setCompanies] = useState<InstanceCompany[]>([]);
+  const [departments, setDepartments] = useState<OperationalDepartment[]>([]);
   const [typeForm, setTypeForm] = useState({ type: "", label: "" });
   const [unitForm, setUnitForm] = useState({ name: "", type: "", parent: "", instanceCompany: "" });
   const [error, setError] = useState("");
 
   async function load() {
-    const [unitTypes, organizationUnits, instanceCompanies] = await Promise.all([
+    const [unitTypes, organizationUnits, instanceCompanies, operationalDepartments] = await Promise.all([
       organizationHierarchyApi.listTypes(),
       organizationHierarchyApi.listUnits(),
       instanceCompanyApi.list(),
+      instanceDepartmentApi.list(),
     ]);
     setTypes(unitTypes);
     setUnits(organizationUnits);
     setCompanies(instanceCompanies);
+    setDepartments(operationalDepartments);
     setUnitForm((current) => ({ ...current, instanceCompany: current.instanceCompany || instanceCompanies.find((item) => item.isPrimary)?._id || "" }));
   }
 
@@ -70,6 +75,16 @@ export default function OrganizationStructure() {
       await load();
     } catch (cause: any) {
       setError(cause?.response?.data?.message || "Unable to move unit.");
+    }
+  }
+
+  async function linkDepartment(departmentId: string, unitId: string | null) {
+    try {
+      setError("");
+      await instanceDepartmentApi.linkUnit(departmentId, unitId);
+      await load();
+    } catch (cause: any) {
+      setError(cause?.response?.data?.message || "Unable to link department.");
     }
   }
 
@@ -138,6 +153,7 @@ export default function OrganizationStructure() {
         </div>)}
         {!units.length && <p className="p-5 text-sm text-gray-500">No organization units yet.</p>}
       </Card>
+      <DepartmentLinks departments={departments} units={units} onLink={linkDepartment} />
     </div>
   );
 }
