@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
     "moduleResolution": "bundler",
@@ -17,12 +17,15 @@
     "noFallthroughCasesInSwitch": true,
     "ignoreDeprecations": "6.0",
     "paths": {
-      "@core/*": ["./src/core/*"],
-      "@modules/*": ["./src/modules/*"],
+      "@app/*": ["./src/app/*"],
+      "@shells/*": ["./src/shells/*"],
       "@shared/*": ["./src/shared/*"],
-      "@setup/*": ["./src/setup/*"],
+      "@page-shells/*": ["./src/page-shells/*"],
+      "@features/*": ["./src/features/*"],
+      "@portal/*": ["./src/portal/*"],
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src/main.tsx", "src/vite-env.d.ts"],
+  "exclude": ["src/e2e"]
 }

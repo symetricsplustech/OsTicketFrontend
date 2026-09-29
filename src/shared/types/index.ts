@@ -1,200 +1,421 @@
-export interface User {
+export interface ApiErrorBody {
+  success?: boolean;
+  message?: string;
+  error?: string;
+  [key: string]: unknown;
+}
+
+// ── Auth ────────────────────────────────────────────────────────────────
+
+export interface AuthUser {
   _id: string;
   name: string;
   email: string;
-  role: "user" | "customer" | "agent" | "admin" | "superadmin";
-  permissions: string[];
-  modules: string[];
-  platformRole?: string;
-  instanceRole?: string;
-  company?: string | null;
-  status?: string;
-  isAdmin?: boolean;
+  role?: string;
+  [key: string]: unknown;
 }
 
-export interface Tenant {
+export interface PortalLoginArgs {
+  email: string;
+  password: string;
+  totpCode?: string;
+}
+
+export interface PortalLoginResponse {
+  success: boolean;
+  token: string;
+  user: AuthUser;
+  role?: string;
+  permissions?: string[];
+  moduleKeys?: string[];
+}
+
+export interface MeResponse {
+  success: boolean;
+  user: AuthUser;
+}
+
+export interface MyInstance {
   _id: string;
   name: string;
   domain?: string;
-  email?: string;
-  phone?: string;
+  instanceCode?: string;
+  instanceStatus?: string;
+  createdAt?: string;
+  role?: string;
+  membershipStatus?: string;
+  joinedAt?: string;
 }
 
-export interface TenantModule {
-  _id: string;
-  tenantId: string;
-  moduleKey: string;
-  status: "active" | "inactive";
-  activatedAt: string;
-  updatedAt: string;
+export interface MyInstancesResponse {
+  success: boolean;
+  instances: MyInstance[];
 }
 
-export interface Ticket {
-  _id: string;
-  number: string;
-  title: string;
-  body?: string;
-  status: string;
-  priority: string;
-  category?: string;
-  source?: string;
-  department?: string;
-  assignedTo?: { name: string; email: string };
-  createdBy: { name: string; email: string };
-  departmentId?: { name: string };
-  slaPlan?: { name: string };
-  firstResponseDue?: string;
-  resolutionDue?: string;
-  thread?: TicketThread[];
-  attachments?: string[];
-  tags?: string[];
-  createdAt: string;
-  updatedAt: string;
+export interface SelectInstanceResponse {
+  success: boolean;
+  token: string;
+  instance: { _id: string; name: string; status?: string };
+  role?: string;
+  permissions?: string[];
+  moduleKeys?: string[];
 }
 
-export interface TicketThread {
-  _id: string;
-  type: string;
-  content: string;
-  author?: { name: string; email: string };
-  attachments?: string[];
-  createdAt: string;
-}
+// ── Users Directory ─────────────────────────────────────────────────────
 
-export interface Asset {
-  _id: string;
-  assetId: string;
+export interface DirectoryUnit {
+  id: string;
   name: string;
   type: string;
-  status: string;
-  condition?: string;
-  location?: string;
-  assignedTo?: { name: string };
-  department?: { name: string };
-  purchaseDate?: string;
-  warrantyEnd?: string;
-  createdAt: string;
 }
 
-export interface Incident {
-  _id: string;
-  title: string;
-  status: string;
-  priority: string;
-  impact?: string;
-  urgency?: string;
-  assignedTo?: { name: string };
-  createdAt: string;
-}
-
-export interface Problem {
-  _id: string;
-  title: string;
-  status: string;
-  priority: string;
-  rootCause?: string;
-  assignedTo?: { name: string };
-  createdAt: string;
-}
-
-export interface Change {
-  _id: string;
-  title: string;
-  status: string;
-  type?: string;
-  risk?: string;
-  assignedTo?: { name: string };
-  createdAt: string;
-}
-
-export interface Lead {
-  _id: string;
+export interface GroupSummary {
+  id: string;
   name: string;
-  email?: string;
-  phone?: string;
-  company?: string;
-  status: string;
-  source?: string;
-  score?: number;
-  assignedTo?: { name: string };
-  createdAt: string;
+  role?: string;
 }
 
-export interface Account {
-  _id: string;
-  name: string;
-  industry?: string;
-  website?: string;
-  phone?: string;
-  email?: string;
-  status?: string;
-  revenue?: number;
-  employees?: number;
-  createdAt: string;
-}
-
-export interface Contact {
+export interface DirectoryUser {
   _id: string;
   name: string;
   email: string;
-  phone?: string;
-  account?: { name: string };
-  createdAt: string;
+  membershipStatus: string;
+  role: string | null;
+  company: string | null;
+  businessUnit: string | null;
+  department: string | null;
+  location: string | null;
+  organizationUnit: string | null;
+  unitPath: DirectoryUnit[];
+  managerUserId: string | null;
+  managerName: string | null;
+  teamLeadUserId: string | null;
+  teamLeadName: string | null;
+  groups: GroupSummary[];
+  assignmentGroups: GroupSummary[];
+  roleSummary: { id: string; name: string }[];
+  accessStatus: string;
+  lastSignIn: string | null;
 }
 
-export interface Opportunity {
-  _id: string;
-  name: string;
-  stage: string;
-  value?: number;
-  account?: { name: string };
-  assignedTo?: { name: string };
-  createdAt: string;
+export interface DirectoryQueryArgs {
+  instanceId: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+  userId?: string;
 }
 
-export interface Workflow {
-  _id: string;
-  name: string;
-  description?: string;
-  event: string;
+export interface DirectoryResponse {
+  success: boolean;
+  items: DirectoryUser[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+// ── Effective Access ────────────────────────────────────────────────────
+
+export interface EffectiveMembership {
+  role: string | null;
   status: string;
-  conditions: unknown[];
-  actions: unknown[];
-  createdBy?: { name: string };
+  organizationUnit: string | null;
+  joinedAt: string | null;
+}
+
+export interface EffectiveRole {
+  _id: string;
+  name: string;
+  permissions: string[];
+  deniedPermissions: string[];
+  status?: string;
+}
+
+export interface DelegatedGrant {
+  delegationId: string;
+  delegatorUserId: string;
+  permissions: string[];
+  expiresAt: string | null;
+}
+
+export interface EffectiveAccessResponse {
+  success: boolean;
+  userId: string;
+  name: string;
+  email: string;
+  membership: EffectiveMembership;
+  directPermissions: string[];
+  membershipPermissions: string[];
+  roles: EffectiveRole[];
+  grants: string[];
+  effective: string[];
+  denied: string[];
+  sources: Record<string, string>;
+  scopes: Record<string, unknown>;
+  temporaryGrants: unknown[];
+  delegatedGrants: DelegatedGrant[];
+}
+
+// ── Reporting Line ──────────────────────────────────────────────────────
+
+export interface ReportingLine {
+  _id: string;
+  id: string;
+  memberUserId: string;
+  managerUserId: string | null;
+  teamLeadUserId: string | null;
+  delegatedManagerUserId: string | null;
+  effectiveFrom: string | null;
+  effectiveTo: string | null;
+  isActive: boolean;
+  notes: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface ReportingChainItem {
+  userId: string;
+  viaTeamLead: boolean;
+  effectiveFrom: string | null;
+  effectiveTo: string | null;
+}
+
+export interface ReportingLineResponse {
+  success: boolean;
+  reportingLine: ReportingLine | null;
+  directReports: ReportingLine[];
+  chain: ReportingChainItem[];
+}
+
+export interface SetReportingLineArgs {
+  instanceId: string;
+  userId: string;
+  body: {
+    managerUserId?: string | null;
+    teamLeadUserId?: string | null;
+    delegatedManagerUserId?: string | null;
+    effectiveFrom?: string | null;
+    effectiveTo?: string | null;
+    notes?: string | null;
+  };
+}
+
+// ── Engineer Profile ────────────────────────────────────────────────────
+
+export interface EngineerProfile {
+  _id: string;
+  id: string;
+  userId: string;
+  availability: Record<string, unknown>;
+  skills: string[];
+  territories: string[];
+  schedule: Record<string, unknown>;
+  notes: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface EngineerProfileResponse {
+  success: boolean;
+  profile: EngineerProfile | null;
+}
+
+export interface UpsertEngineerProfileArgs {
+  instanceId: string;
+  userId: string;
+  body: {
+    availability?: Record<string, unknown>;
+    skills?: string[];
+    territories?: string[];
+    schedule?: Record<string, unknown>;
+    notes?: string | null;
+  };
+}
+
+// ── Delegations ─────────────────────────────────────────────────────────
+
+export interface Delegation {
+  _id: string;
+  id: string;
+  delegatorUserId: string;
+  delegateUserId: string;
+  permissions: string[];
+  roleIds: string[];
+  scope: Record<string, unknown>;
+  reason: string | null;
+  startsAt: string | null;
+  expiresAt: string | null;
+  isActive: boolean;
+  status: "active" | "revoked" | "cancelled" | "expired" | "scheduled";
+  revokedAt: string | null;
+  revokedBy: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface DelegationsQueryArgs {
+  instanceId: string;
+  userId?: string;
+  includeInactive?: boolean;
+}
+
+export interface DelegationsResponse {
+  success: boolean;
+  items: Delegation[];
+  activeForMe: Delegation[];
+}
+
+export interface CreateDelegationArgs {
+  instanceId: string;
+  body: {
+    delegatorUserId?: string | null;
+    delegateUserId: string;
+    permissions?: string[];
+    roleIds?: string[];
+    scope?: Record<string, unknown>;
+    reason?: string | null;
+    startsAt?: string | null;
+    expiresAt?: string | null;
+  };
+}
+
+export interface SingleDelegationResponse {
+  success: boolean;
+  delegation: Delegation;
+}
+
+// ── Assigned work / work history / sessions ─────────────────────────────
+
+export interface WorkItem {
+  id: string;
+  type: "ticket" | "task";
+  number: string;
+  title: string;
+  status: string;
+  priority: string;
+  dueAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface AssignedWorkResponse {
+  success: boolean;
+  tickets: WorkItem[];
+  tasks: WorkItem[];
+}
+
+export interface HistoryItem {
+  id: string;
+  type: "ticket" | "task" | "audit";
+  reference: string;
+  title: string;
+  status: string;
+  at: string | null;
+}
+
+export interface WorkHistoryResponse {
+  success: boolean;
+  items: HistoryItem[];
+}
+
+export interface MfaStatus {
+  enabled: boolean;
+  backupCodesRemaining: number;
+  lastLogin: string | null;
+  lastSeenAt: string | null;
+  sessionVersion: number;
+}
+
+export interface SessionItem {
+  _id: string;
+  id: string;
+  userId: string | null;
+  agentId: string | null;
+  email: string;
+  ip: string;
+  userAgent: string;
+  device: string;
+  mfaVerified: boolean;
+  lastActiveAt: string | null;
+  revokedAt: string | null;
+  revokedBy: string | null;
+  status: "active" | "revoked";
   createdAt: string;
   updatedAt: string;
 }
 
-export interface SlaPlan {
-  _id: string;
-  name: string;
-  gracePeriod: number;
-  schedule?: string;
-  status: string;
-  notes?: string;
+export interface SessionsResponse {
+  success: boolean;
+  mfa: MfaStatus;
+  items: SessionItem[];
 }
 
-export interface Department {
-  _id: string;
-  name: string;
-  email?: string;
-  manager?: { name: string };
-  sla?: { name: string };
-  isPublic: boolean;
-  autoAssign: boolean;
+// ── Audit events ────────────────────────────────────────────────────────
+
+export interface AuditEvent {
+  id: string;
+  actorId: { _id?: string; name?: string; email?: string } | string | null;
+  resourceType: string;
+  resourceId: string | null;
+  action: string;
+  outcome?: string;
+  oldValues?: Record<string, unknown>;
+  newValues?: Record<string, unknown>;
+  ip?: string;
+  userAgent?: string;
+  correlationId?: string;
+  createdAt: string;
 }
 
-export interface Role {
-  _id: string;
-  name: string;
-  isAdmin: boolean;
-  permissions: string[];
+export interface AuditQueryArgs {
+  actor?: string;
+  entityType?: string;
+  entityId?: string;
+  action?: string;
+  page?: number;
+  limit?: number;
 }
 
-export interface Team {
+export interface AuditListResponse {
+  events: AuditEvent[];
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+}
+
+// ── Org placement / groups / roles options ──────────────────────────────
+
+export interface TeamSummary {
   _id: string;
+  id?: string;
   name: string;
-  lead?: { name: string };
-  members: Array<{ name: string }>;
-  status: string;
+  kind?: string;
+  members?: unknown[];
+}
+
+export interface RoleSummaryOptions {
+  _id: string;
+  id?: string;
+  name: string;
+  isActive?: boolean;
+}
+
+export interface OrgUnitSummary {
+  _id?: string;
+  id: string;
+  name: string;
+  type: string;
+  parent_id?: string | null;
+}
+
+export interface ListResponse<T> {
+  success: boolean;
+  items: T[];
+}
+
+export interface OrganizationUnitPlaceArgs {
+  instanceId: string;
+  userId: string;
+  organizationUnit: string | null;
 }

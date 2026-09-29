@@ -1,39 +1,44 @@
-export function formatDateTime(dateStr?: string): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleString("en-US", {
+export function formatDate(value?: string | number | Date | null): string {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
     month: "short",
     day: "numeric",
+  });
+}
+
+export function formatDateTime(value?: string | number | Date | null): string {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString(undefined, {
     year: "numeric",
-    hour: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
     minute: "2-digit",
   });
 }
 
-export function formatDate(dateStr?: string): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+export function titleCase(value?: string | null): string {
+  if (!value) return "";
+  return String(value)
+    .replace(/[._-]+/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export function formatRelativeTime(dateStr?: string): string {
-  if (!dateStr) return "—";
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diff = now - then;
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 7) return `${days}d ago`;
-  return formatDate(dateStr);
+export function initials(name?: string | null): string {
+  if (!name) return "?";
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
 }
 
-export function truncate(str?: string, len = 100): string {
-  if (!str) return "";
-  return str.length > len ? str.slice(0, len) + "..." : str;
+export function plural(value: number, singular: string, pluralForm?: string): string {
+  return `${value} ${value === 1 ? singular : (pluralForm ?? `${singular}s`)}`;
 }

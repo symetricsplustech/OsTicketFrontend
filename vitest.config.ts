@@ -6,10 +6,12 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@core": path.resolve(__dirname, "./src/core"),
-      "@modules": path.resolve(__dirname, "./src/modules"),
+      "@app": path.resolve(__dirname, "./src/app"),
+      "@shells": path.resolve(__dirname, "./src/shells"),
       "@shared": path.resolve(__dirname, "./src/shared"),
-      "@setup": path.resolve(__dirname, "./src/setup"),
+      "@page-shells": path.resolve(__dirname, "./src/page-shells"),
+      "@features": path.resolve(__dirname, "./src/features"),
+      "@portal": path.resolve(__dirname, "./src/portal"),
       "@": path.resolve(__dirname, "./src"),
     },
   },
@@ -18,5 +20,9 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./src/__tests__/setup.ts"],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    exclude: [
+      "node_modules/**",
+      "dist/**",
+    ],
   },
 });
