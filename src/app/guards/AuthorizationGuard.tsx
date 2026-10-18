@@ -1,10 +1,10 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useAppSelector } from "@shared/store/hooks";
+import { useAppSelector } from "@store/hooks";
 import {
   selectIsAuthenticated,
   selectPermissions,
-} from "@shared/auth/authSlice";
-import { can } from "@shared/authorization/permissions";
+} from "@services/auth/authSlice";
+import { can } from "@services/authorization/permissions";
 
 interface AuthorizationGuardProps {
   children: React.ReactNode;

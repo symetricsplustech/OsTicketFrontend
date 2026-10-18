@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "src/features/platform/home/src/api/**/*.ts",
+    "src/features/platform/home/src/api/**/*.tsx",
+    "src/features/platform/home/src/model/**/*.ts",
+    "src/features/platform/home/src/model/**/*.tsx",
+    "src/vite-env.d.ts"
+  ]
+}

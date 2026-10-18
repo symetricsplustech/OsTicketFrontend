@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
-import { store } from "@shared/store";
-import { ToastContainer } from "@shared/components/Toast/ToastContainer";
+import { store } from "@store";
+import { ToastContainer } from "@components/common/Toast/ToastContainer";
 import { ErrorBoundary } from "@app/layouts/ErrorBoundary";
 import { Unauthorized } from "@app/layouts/Unauthorized";
 import { NotFound } from "@app/layouts/NotFound";

@@ -1,5 +1,5 @@
 import { Lock } from "lucide-react";
-import { Button } from "@shared/components/ui";
+import { Button } from "@components/common/ui";
 
 export function Unauthorized() {
   return (

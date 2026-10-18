@@ -1,5 +1,5 @@
 import { FileX } from "lucide-react";
-import { Button } from "@shared/components/ui";
+import { Button } from "@components/common/ui";
 
 export function NotFound() {
   return (
