@@ -151,7 +151,7 @@ export function ItsmAdminShell({ children }: { children?: ReactNode }) {
           <Wrench className="h-5 w-5 text-brand-600" />
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-slate-900">
-              ITSM Admin
+              TicketX
             </p>
             <p className="text-[11px] text-slate-400">
               {auth.selectedInstance?.name}

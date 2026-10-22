@@ -70,11 +70,11 @@ export function SideNavigation({
     >
       <header className="flex h-16 shrink-0 items-center gap-3 border-b border-slate-200 px-4">
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-600 text-sm font-bold text-white">
-          N
+          T
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-slate-900">
-            Nexa ITSM
+            TicketX
           </p>
           <p className="truncate text-xs text-slate-500">
             {auth.selectedInstance?.name ?? instanceId}

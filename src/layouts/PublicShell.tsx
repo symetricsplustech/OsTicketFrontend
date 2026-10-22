@@ -18,10 +18,10 @@ export function PublicShell({ children }: PublicShellProps) {
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
           <span className="flex items-center gap-2.5">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-sm font-bold text-white">
-              N
+              T
             </span>
             <span className="text-sm font-semibold text-slate-900">
-              Nexa ITSM
+              TicketX
             </span>
           </span>
           <span className="text-xs text-slate-400">Secure access</span>

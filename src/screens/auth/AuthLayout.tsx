@@ -47,11 +47,11 @@ export function AuthLayout({
         />
         <Link to="/" className="relative flex items-center gap-3">
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-600 text-base font-bold text-white">
-            N
+            T
           </span>
           <span className="text-left">
             <strong className="block text-sm font-semibold text-white">
-              Nexa ITSM
+              TicketX
             </strong>
             <span className="block text-xs text-slate-400">
               ITSM &amp; service management
@@ -84,7 +84,7 @@ export function AuthLayout({
         </div>
 
         <p className="relative text-xs text-slate-500">
-          &copy; {new Date().getFullYear()} Nexa ITSM. All rights reserved.
+          &copy; {new Date().getFullYear()} TicketX. All rights reserved.
         </p>
       </aside>
 
@@ -92,11 +92,11 @@ export function AuthLayout({
         <div className="mx-auto w-full max-w-sm">
           <Link to="/" className="mb-8 flex items-center gap-3 lg:hidden">
             <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-600 text-sm font-bold text-white">
-              N
-            </span>
-            <span className="text-sm font-semibold text-slate-900">
-              Nexa ITSM
-            </span>
+          T
+        </span>
+        <span className="text-sm font-semibold text-slate-900">
+          TicketX
+        </span>
           </Link>
 
           <h1 className="text-2xl font-bold text-slate-900">{title}</h1>

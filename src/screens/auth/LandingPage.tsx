@@ -18,7 +18,7 @@ export function LandingPage() {
         <div className="flex items-center gap-3 mb-6">
           <Activity className="h-8 w-8 text-cyan-400" />
           <span className="text-xs font-bold uppercase tracking-[.22em] text-cyan-300">
-            NEXA ITSM
+            TICKETX
           </span>
         </div>
         <p className="text-xs font-bold uppercase tracking-[.22em] text-cyan-300 mb-4">
