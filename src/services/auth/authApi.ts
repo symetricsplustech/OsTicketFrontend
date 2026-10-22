@@ -1,7 +1,11 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { API_URL, apiErrorMessage, baseQueryWithAuth, loginErrorMessage } from "@services/http";
+import {
+  API_URL,
+  apiErrorMessage,
+  baseQueryWithAuth,
+  loginErrorMessage,
+} from "@services/http";
 import { sessionSet } from "@services/auth/authSlice";
-import { demoLoginSuccess, findDemoAccount } from "@services/auth/demoAccounts";
 import { TokenStore } from "@services/auth/tokenStore";
 import type { AppDispatch } from "@store";
 import type { AuthUser } from "@types";
@@ -87,7 +91,10 @@ export function mapProfileToAuthUser(
   };
 }
 
-function persistSession(dispatch: AppDispatch, session: AuthSessionPayload): void {
+function persistSession(
+  dispatch: AppDispatch,
+  session: AuthSessionPayload,
+): void {
   TokenStore.setRefresh(session.refreshToken);
   dispatch(
     sessionSet({
@@ -111,6 +118,10 @@ function persistSession(dispatch: AppDispatch, session: AuthSessionPayload): voi
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: baseQueryWithAuth,
+  keepUnusedDataFor: 300,
+  refetchOnMountOrArgChange: false,
+  refetchOnFocus: false,
+  refetchOnReconnect: false,
   tagTypes: ["AuthUser", "Session"],
   endpoints: (build) => ({
     login: build.mutation<ApiSuccess<LoginResponse>, LoginArgs>({
@@ -127,13 +138,27 @@ export const authApi = createApi({
       query: () => ({ url: "/auth/logout", method: "POST" }),
       invalidatesTags: ["AuthUser", "Session"],
     }),
-    acceptInvitation: build.mutation<ApiSuccess<MessageResponse>, InvitationAcceptArgs>({
-      query: (body) => ({ url: "/auth/invitation/accept", method: "POST", body }),
+    acceptInvitation: build.mutation<
+      ApiSuccess<MessageResponse>,
+      InvitationAcceptArgs
+    >({
+      query: (body) => ({
+        url: "/auth/invitation/accept",
+        method: "POST",
+        body,
+      }),
     }),
     forgotPassword: build.mutation<ApiSuccess<MessageResponse>, string>({
-      query: (email) => ({ url: "/auth/forgot-password", method: "POST", body: { email } }),
+      query: (email) => ({
+        url: "/auth/forgot-password",
+        method: "POST",
+        body: { email },
+      }),
     }),
-    resetPassword: build.mutation<ApiSuccess<MessageResponse>, ResetPasswordArgs>({
+    resetPassword: build.mutation<
+      ApiSuccess<MessageResponse>,
+      ResetPasswordArgs
+    >({
       query: (body) => ({ url: "/auth/reset-password", method: "POST", body }),
     }),
     changePassword: build.mutation<null, ChangePasswordArgs>({
@@ -146,26 +171,46 @@ export const authApi = createApi({
       query: () => ({ url: "/auth/mfa/status" }),
       providesTags: ["AuthUser"],
     }),
-    mfaEnroll: build.mutation<ApiSuccess<Record<string, unknown>>, MfaEnrollArgs>({
+    mfaEnroll: build.mutation<
+      ApiSuccess<Record<string, unknown>>,
+      MfaEnrollArgs
+    >({
       query: (body) => ({ url: "/auth/mfa/enroll", method: "POST", body }),
     }),
-    mfaVerifyEnrollment: build.mutation<ApiSuccess<RecoveryCodesResponse>, MfaVerifyEnrollmentArgs>({
-      query: (body) => ({ url: "/auth/mfa/verify-enrollment", method: "POST", body }),
+    mfaVerifyEnrollment: build.mutation<
+      ApiSuccess<RecoveryCodesResponse>,
+      MfaVerifyEnrollmentArgs
+    >({
+      query: (body) => ({
+        url: "/auth/mfa/verify-enrollment",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["AuthUser"],
     }),
     mfaDisable: build.mutation<null, MfaDisableArgs>({
       query: (body) => ({ url: "/auth/mfa", method: "DELETE", body }),
       invalidatesTags: ["AuthUser"],
     }),
-    mfaRegenerateRecoveryCodes: build.mutation<ApiSuccess<RecoveryCodesResponse>, { password: string }>({
-      query: (body) => ({ url: "/auth/mfa/recovery-codes/regenerate", method: "POST", body }),
+    mfaRegenerateRecoveryCodes: build.mutation<
+      ApiSuccess<RecoveryCodesResponse>,
+      { password: string }
+    >({
+      query: (body) => ({
+        url: "/auth/mfa/recovery-codes/regenerate",
+        method: "POST",
+        body,
+      }),
     }),
     listSessions: build.query<ApiSuccess<SessionRecord[]>, void>({
       query: () => ({ url: "/auth/sessions" }),
       providesTags: ["Session"],
     }),
     revokeSession: build.mutation<null, string>({
-      query: (sessionId) => ({ url: `/auth/sessions/${encodeURIComponent(sessionId)}`, method: "DELETE" }),
+      query: (sessionId) => ({
+        url: `/auth/sessions/${encodeURIComponent(sessionId)}`,
+        method: "DELETE",
+      }),
       invalidatesTags: ["Session"],
     }),
   }),
@@ -198,13 +243,9 @@ export async function runLogin(
   dispatch: AppDispatch,
   args: LoginArgs,
 ): Promise<LoginResponse> {
-  const demo = findDemoAccount(args.email, args.password);
-  if (demo) {
-    const success = demoLoginSuccess(demo);
-    persistSession(dispatch, success);
-    return success;
-  }
-  const response = await dispatch(authApi.endpoints.login.initiate(args)).unwrap();
+  const response = await dispatch(
+    authApi.endpoints.login.initiate(args),
+  ).unwrap();
   if (response.data.mfaRequired) return response.data;
   persistSession(dispatch, response.data);
   return response.data;
@@ -215,7 +256,9 @@ export async function runMfaVerify(
   dispatch: AppDispatch,
   args: MfaVerifyArgs,
 ): Promise<LoginSuccess> {
-  const response = await dispatch(authApi.endpoints.mfaVerify.initiate(args)).unwrap();
+  const response = await dispatch(
+    authApi.endpoints.mfaVerify.initiate(args),
+  ).unwrap();
   persistSession(dispatch, response.data);
   return response.data;
 }

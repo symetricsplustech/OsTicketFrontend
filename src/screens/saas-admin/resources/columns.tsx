@@ -3,15 +3,21 @@ import type { Column } from "../components/ui/DataTable";
 import { StatusBadge } from "../components/ui/StatusBadge";
 import type { StatusVariant } from "../components/ui/StatusBadge";
 import type { ResourceRow } from "../components/resource/types";
-import { getField, formatDate, displayValue } from "../components/resource/helpers";
+import {
+  getField,
+  formatDate,
+  displayValue,
+} from "../components/resource/helpers";
 
 export function formatCell(value: unknown): ReactNode {
   if (value === null || value === undefined) return "—";
   if (typeof value === "boolean") return value ? "Yes" : "No";
-  if (typeof value === "string" || typeof value === "number") return String(value);
+  if (typeof value === "string" || typeof value === "number")
+    return String(value);
   if (Array.isArray(value)) {
     if (value.length === 0) return "—";
-    if (typeof value[0] === "object") return `${value.length} item${value.length === 1 ? "" : "s"}`;
+    if (typeof value[0] === "object")
+      return `${value.length} item${value.length === 1 ? "" : "s"}`;
     return value.join(", ");
   }
   if (typeof value === "object") {
@@ -31,11 +37,17 @@ export interface TextColOptions {
   headerClassName?: string;
 }
 
-export function textCol(key: string, header: string, opts: TextColOptions = {}): Column<ResourceRow> {
+export function textCol(
+  key: string,
+  header: string,
+  opts: TextColOptions = {},
+): Column<ResourceRow> {
   const value = opts.truncate
     ? (row: ResourceRow) => {
         const text = displayValue(getField(row, key));
-        return text.length > opts.truncate! ? `${text.slice(0, opts.truncate! - 1)}…` : text;
+        return text.length > opts.truncate!
+          ? `${text.slice(0, opts.truncate! - 1)}…`
+          : text;
       }
     : (row: ResourceRow) => formatCell(getField(row, key));
   return {
@@ -48,7 +60,11 @@ export function textCol(key: string, header: string, opts: TextColOptions = {}):
   };
 }
 
-export function dateCol(key: string, header: string, opts: TextColOptions = {}): Column<ResourceRow> {
+export function dateCol(
+  key: string,
+  header: string,
+  opts: TextColOptions = {},
+): Column<ResourceRow> {
   return {
     key,
     header,
@@ -73,8 +89,16 @@ export function statusCol(
     sortable: opts.sortable ?? true,
     render: (row) => {
       const raw = getField(row, key);
-      const status = raw && typeof raw === "object" ? String((raw as { name?: unknown }).name ?? "") : String(raw ?? "");
-      return <StatusBadge status={status || "—"} variant={variant ? variant(row) : "default"} />;
+      const status =
+        raw && typeof raw === "object"
+          ? String((raw as { name?: unknown }).name ?? "")
+          : String(raw ?? "");
+      return (
+        <StatusBadge
+          status={status || "—"}
+          variant={variant ? variant(row) : "default"}
+        />
+      );
     },
   };
 }

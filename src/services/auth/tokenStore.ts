@@ -17,7 +17,8 @@ const memoryStorage: StorageLike = {
 
 function storage(): StorageLike {
   try {
-    const candidate = (globalThis as { localStorage?: StorageLike }).localStorage;
+    const candidate = (globalThis as { localStorage?: StorageLike })
+      .localStorage;
     if (!candidate) return memoryStorage;
     const probe = "__osticket_probe__";
     candidate.setItem(probe, "1");
@@ -91,7 +92,9 @@ export const TokenStore = {
     } catch {
       /* storage unavailable — use the in-memory copy */
     }
-    return memory.has(TOKEN_REFRESH_KEY) ? (memory.get(TOKEN_REFRESH_KEY) as string) : null;
+    return memory.has(TOKEN_REFRESH_KEY)
+      ? (memory.get(TOKEN_REFRESH_KEY) as string)
+      : null;
   },
   setRefresh(token: string): void {
     try {

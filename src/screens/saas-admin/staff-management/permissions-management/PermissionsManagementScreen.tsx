@@ -35,7 +35,8 @@ export function PermissionsManagementScreen() {
         items: ((group.items ?? []) as ApiRecord[]).map((item) => ({
           code: String(item.code ?? item.id),
           name: String(item.name ?? item.code ?? ""),
-          description: typeof item.description === "string" ? item.description : "",
+          description:
+            typeof item.description === "string" ? item.description : "",
         })),
       })),
     [groupsQuery.data],
@@ -47,8 +48,11 @@ export function PermissionsManagementScreen() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const permissionsQuery = useGetRolePermissionsQuery(roleId, { skip: !roleId });
-  const [setRolePermissions, { isLoading: saving }] = useSetRolePermissionsMutation();
+  const permissionsQuery = useGetRolePermissionsQuery(roleId, {
+    skip: !roleId,
+  });
+  const [setRolePermissions, { isLoading: saving }] =
+    useSetRolePermissionsMutation();
 
   useEffect(() => {
     if (!roleId && roles.length > 0) setRoleId(String(roles[0].id));
@@ -84,7 +88,9 @@ export function PermissionsManagementScreen() {
     setMessage(null);
     setSelected((prev) => {
       const next = new Set(prev);
-      module.items.forEach((item) => (value ? next.add(item.code) : next.delete(item.code)));
+      module.items.forEach((item) =>
+        value ? next.add(item.code) : next.delete(item.code),
+      );
       return next;
     });
   };
@@ -94,7 +100,10 @@ export function PermissionsManagementScreen() {
     setError(null);
     setMessage(null);
     try {
-      await setRolePermissions({ roleId, body: { permissionCodes: Array.from(selected) } }).unwrap();
+      await setRolePermissions({
+        roleId,
+        body: { permissionCodes: Array.from(selected) },
+      }).unwrap();
       setMessage("Role permissions updated.");
     } catch (err) {
       setError(apiErrorMessage(err));
@@ -106,7 +115,11 @@ export function PermissionsManagementScreen() {
       <SaasAdminScreen
         title="Permissions Management"
         description="Configure the permission grants for a platform role."
-        breadcrumbs={[{ label: "SaaS Admin" }, { label: "Staff & Access" }, { label: "Permissions" }]}
+        breadcrumbs={[
+          { label: "SaaS Admin" },
+          { label: "Staff & Access" },
+          { label: "Permissions" },
+        ]}
       >
         <ErrorState message="Could not load the permission catalog." />
       </SaasAdminScreen>
@@ -118,7 +131,14 @@ export function PermissionsManagementScreen() {
     .map((group) => {
       if (!term) return group;
       if (group.module.toLowerCase().includes(term)) return group;
-      return { ...group, items: group.items.filter((item) => item.name.toLowerCase().includes(term) || item.code.toLowerCase().includes(term)) };
+      return {
+        ...group,
+        items: group.items.filter(
+          (item) =>
+            item.name.toLowerCase().includes(term) ||
+            item.code.toLowerCase().includes(term),
+        ),
+      };
     })
     .filter((group) => group.items.length > 0);
 
@@ -126,23 +146,49 @@ export function PermissionsManagementScreen() {
     <SaasAdminScreen
       title="Permissions Management"
       description="Configure the permission grants for a platform role."
-      breadcrumbs={[{ label: "SaaS Admin" }, { label: "Staff & Access" }, { label: "Permissions" }]}
+      breadcrumbs={[
+        { label: "SaaS Admin" },
+        { label: "Staff & Access" },
+        { label: "Permissions" },
+      ]}
       actions={
-        <Button onClick={handleSave} loading={saving} disabled={!dirty || !roleId}>
+        <Button
+          onClick={handleSave}
+          loading={saving}
+          disabled={!dirty || !roleId}
+        >
           <Save className="h-4 w-4 mr-2" /> Save Changes
         </Button>
       }
     >
-      {message ? <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">{message}</div> : null}
-      {error ? <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
+      {message ? (
+        <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+          {message}
+        </div>
+      ) : null}
+      {error ? (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {error}
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap items-end gap-4 mb-6">
         <label className="flex flex-col gap-1 text-sm">
           <span className="font-medium text-slate-700">Role</span>
-          <Select value={roleId} onChange={(e) => { setRoleId(e.target.value); setMessage(null); setError(null); }} className="min-w-64">
+          <Select
+            value={roleId}
+            onChange={(e) => {
+              setRoleId(e.target.value);
+              setMessage(null);
+              setError(null);
+            }}
+            className="min-w-64"
+          >
             <option value="">Select a role…</option>
             {roles.map((role) => (
-              <option key={String(role.id)} value={String(role.id)}>{String(role.name ?? role.key)}</option>
+              <option key={String(role.id)} value={String(role.id)}>
+                {String(role.name ?? role.key)}
+              </option>
             ))}
           </Select>
         </label>
@@ -159,29 +205,48 @@ export function PermissionsManagementScreen() {
             />
           </div>
         </label>
-        <span className="ml-auto text-sm text-slate-500">{selected.size} permission{selected.size === 1 ? "" : "s"} selected</span>
+        <span className="ml-auto text-sm text-slate-500">
+          {selected.size} permission{selected.size === 1 ? "" : "s"} selected
+        </span>
       </div>
 
       {!roleId ? (
-        <p className="text-sm text-slate-500">Select a role to view and edit its permissions.</p>
+        <p className="text-sm text-slate-500">
+          Select a role to view and edit its permissions.
+        </p>
       ) : permissionsQuery.isLoading ? (
         <p className="text-sm text-slate-500">Loading permissions…</p>
       ) : (
         <div className="space-y-6">
           {visibleGroups.map((group) => {
-            const allSelected = group.items.every((item) => selected.has(item.code));
+            const allSelected = group.items.every((item) =>
+              selected.has(item.code),
+            );
             return (
-              <section key={group.module} className="rounded-xl border border-slate-200 bg-white p-5">
+              <section
+                key={group.module}
+                className="rounded-xl border border-slate-200 bg-white p-5"
+              >
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-base font-semibold text-slate-900">{group.module}</h3>
+                  <h3 className="text-base font-semibold text-slate-900">
+                    {group.module}
+                  </h3>
                   <label className="flex items-center gap-2 text-xs text-slate-500 cursor-pointer">
-                    <input type="checkbox" className="h-4 w-4" checked={allSelected} onChange={(e) => toggleModule(group, e.target.checked)} />
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4"
+                      checked={allSelected}
+                      onChange={(e) => toggleModule(group, e.target.checked)}
+                    />
                     Select all
                   </label>
                 </div>
                 <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {group.items.map((item) => (
-                    <label key={item.code} className="flex items-start gap-2 rounded-lg border border-slate-100 p-2 hover:bg-slate-50 cursor-pointer">
+                    <label
+                      key={item.code}
+                      className="flex items-start gap-2 rounded-lg border border-slate-100 p-2 hover:bg-slate-50 cursor-pointer"
+                    >
                       <input
                         type="checkbox"
                         className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
@@ -189,8 +254,12 @@ export function PermissionsManagementScreen() {
                         onChange={() => toggle(item.code)}
                       />
                       <span className="text-sm">
-                        <span className="font-medium text-slate-800">{item.name}</span>
-                        <span className="block font-mono text-xs text-slate-400">{item.code}</span>
+                        <span className="font-medium text-slate-800">
+                          {item.name}
+                        </span>
+                        <span className="block font-mono text-xs text-slate-400">
+                          {item.code}
+                        </span>
                       </span>
                     </label>
                   ))}
@@ -203,7 +272,9 @@ export function PermissionsManagementScreen() {
 
       <div className="mt-4 p-4 rounded-lg border border-amber-200 bg-amber-50 text-sm text-amber-700">
         <Shield className="h-4 w-4 inline mr-2" />
-        <strong>Note:</strong> Permissions are enforced by the backend on every protected operation. Editing a system role may require additional privileges.
+        <strong>Note:</strong> Permissions are enforced by the backend on every
+        protected operation. Editing a system role may require additional
+        privileges.
       </div>
     </SaasAdminScreen>
   );

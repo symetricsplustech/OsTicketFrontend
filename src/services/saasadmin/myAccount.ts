@@ -12,7 +12,11 @@ export const myAccountApi = saasadminApi.injectEndpoints({
       providesTags: ["MyAccount", "AuthUser"],
     }),
     updateMyProfile: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/my-account/profile", method: "PATCH", body }),
+      query: (body) => ({
+        url: "/admin/my-account/profile",
+        method: "PATCH",
+        body,
+      }),
       invalidatesTags: ["MyAccount", "AuthUser"],
     }),
     getMyPreferences: build.query<ApiSuccess<ApiRecord>, void>({
@@ -20,7 +24,11 @@ export const myAccountApi = saasadminApi.injectEndpoints({
       providesTags: ["MyAccount"],
     }),
     updateMyPreferences: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/my-account/preferences", method: "PATCH", body }),
+      query: (body) => ({
+        url: "/admin/my-account/preferences",
+        method: "PATCH",
+        body,
+      }),
       invalidatesTags: ["MyAccount"],
     }),
     listMySessions: build.query<ApiSuccess<SessionRecord[]>, void>({
@@ -38,14 +46,31 @@ export const myAccountApi = saasadminApi.injectEndpoints({
       query: () => ({ url: "/admin/my-account/security" }),
       providesTags: ["MyAccount"],
     }),
-    requestEmailChange: build.mutation<ApiSuccess<ApiRecord>, { newEmail: string } & ApiRecord>({
-      query: (body) => ({ url: "/admin/my-account/email-change", method: "POST", body }),
+    requestEmailChange: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { newEmail: string } & ApiRecord
+    >({
+      query: (body) => ({
+        url: "/admin/my-account/email-change",
+        method: "POST",
+        body,
+      }),
     }),
-    confirmEmailChange: build.mutation<ApiSuccess<ApiRecord>, { token: string } & ApiRecord>({
-      query: (body) => ({ url: "/admin/my-account/email-change/confirm", method: "POST", body }),
+    confirmEmailChange: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { token: string } & ApiRecord
+    >({
+      query: (body) => ({
+        url: "/admin/my-account/email-change/confirm",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["MyAccount", "AuthUser"],
     }),
-    regenerateMyRecoveryCodes: build.mutation<ApiSuccess<ApiRecord>, { password: string }>({
+    regenerateMyRecoveryCodes: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { password: string }
+    >({
       query: (body) => ({
         url: "/admin/my-account/mfa/recovery-codes/regenerate",
         method: "POST",

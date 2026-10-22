@@ -49,6 +49,7 @@ export function DataTable<T>({
   selection,
   actions,
 }: DataTableProps<T>) {
+  const safeRows: T[] = Array.isArray(rows) ? rows : [];
   if (loading) {
     return (
       <div className="space-y-3 p-4">
@@ -58,11 +59,13 @@ export function DataTable<T>({
       </div>
     );
   }
-  if (rows.length === 0) {
+  if (safeRows.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-slate-300 px-6 py-12 text-center">
         <p className="text-sm font-medium text-slate-700">{emptyTitle}</p>
-        {emptyDescription ? <p className="mt-1 text-xs text-slate-500">{emptyDescription}</p> : null}
+        {emptyDescription ? (
+          <p className="mt-1 text-xs text-slate-500">{emptyDescription}</p>
+        ) : null}
       </div>
     );
   }
@@ -79,12 +82,24 @@ export function DataTable<T>({
                 <input
                   type="checkbox"
                   className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-                  checked={rows.every((r) => selection.selectedKeys.has(selection.getKey(r)))}
+                  checked={safeRows.every((r) =>
+                    r != null && selection.selectedKeys.has(selection.getKey(r)),
+                  )}
                   onChange={() => {
-                    if (rows.every((r) => selection.selectedKeys.has(selection.getKey(r)))) {
+                    if (
+                      safeRows.every((r) =>
+                        r != null && selection.selectedKeys.has(selection.getKey(r)),
+                      )
+                    ) {
                       selection.onChange(new Set());
                     } else {
-                      selection.onChange(new Set(rows.map(selection.getKey)));
+                      selection.onChange(
+                        new Set(
+                          safeRows
+                            .filter((r) => r != null)
+                            .map(selection.getKey),
+                        ),
+                      );
                     }
                   }}
                 />
@@ -96,7 +111,8 @@ export function DataTable<T>({
                 scope="col"
                 className={cn(
                   "px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500",
-                  col.sortable && "cursor-pointer hover:bg-slate-100 select-none",
+                  col.sortable &&
+                    "cursor-pointer hover:bg-slate-100 select-none",
                   col.headerClassName,
                 )}
                 onClick={() => col.sortable && handleSort(col.key)}
@@ -117,9 +133,12 @@ export function DataTable<T>({
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 bg-white">
-          {rows.map((row) => {
+          {safeRows.map((row) => {
+            if (row == null) return null;
             const key = rowKey(row);
-            const isSelected = selection?.selectedKeys.has(selection.getKey(row));
+            const isSelected = selection?.selectedKeys.has(
+              selection.getKey(row),
+            );
             return (
               <tr
                 key={key}
@@ -137,7 +156,8 @@ export function DataTable<T>({
                       checked={isSelected}
                       onChange={(e) => {
                         const newKeys = new Set(selection.selectedKeys);
-                        if (e.target.checked) newKeys.add(selection.getKey(row));
+                        if (e.target.checked)
+                          newKeys.add(selection.getKey(row));
                         else newKeys.delete(selection.getKey(row));
                         selection.onChange(newKeys);
                       }}
@@ -145,7 +165,13 @@ export function DataTable<T>({
                   </td>
                 )}
                 {columns.map((col) => (
-                  <td key={col.key} className={cn("px-4 py-3 text-sm text-slate-800", col.className)}>
+                  <td
+                    key={col.key}
+                    className={cn(
+                      "px-4 py-3 text-sm text-slate-800",
+                      col.className,
+                    )}
+                  >
                     {col.render(row)}
                   </td>
                 ))}
@@ -167,8 +193,8 @@ export function DataTable<T>({
                               action.variant === "danger"
                                 ? "text-red-600 hover:bg-red-50"
                                 : action.variant === "ghost"
-                                ? "text-slate-600 hover:bg-slate-100"
-                                : "text-brand-600 hover:bg-brand-50",
+                                  ? "text-slate-600 hover:bg-slate-100"
+                                  : "text-brand-600 hover:bg-brand-50",
                             )}
                           >
                             {action.icon}

@@ -19,12 +19,22 @@ export const CMDB_ASSET_MANAGEMENT_LISTS: ResourceListConfig[] = [
   {
     path: "/saas-admin/cmdb-asset-management/cmdb-config",
     title: "CMDB Configuration",
-    description: "Discovery profiles that define how configuration items are discovered and synced.",
+    description:
+      "Discovery profiles that define how configuration items are discovered and synced.",
     sectionLabel: SECTION,
     rowId: "profileId",
-    source: { kind: "api", useList: asQueryHook(useListDiscoveryProfilesQuery) },
+    source: {
+      kind: "api",
+      useList: asQueryHook(useListDiscoveryProfilesQuery),
+    },
     columns: [
-      { key: "key", header: "Key", render: (r) => <span className="font-mono text-xs">{String(r.key ?? "—")}</span> },
+      {
+        key: "key",
+        header: "Key",
+        render: (r) => (
+          <span className="font-mono text-xs">{String(r.key ?? "—")}</span>
+        ),
+      },
       textCol("name", "Profile"),
       textCol("mode", "Mode"),
       textCol("schedule", "Schedule"),
@@ -42,8 +52,19 @@ export const CMDB_ASSET_MANAGEMENT_LISTS: ResourceListConfig[] = [
       useCreate: asMutationHook(useCreateDiscoveryProfileMutation),
     },
     stats: [
-      { key: "total", label: "Profiles", compute: (rows) => rows.length, icon: <Settings className="h-5 w-5" /> },
-      { key: "enabled", label: "Enabled", compute: (rows) => rows.filter((r) => r.isEnabled).length, color: "success", icon: <Settings className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Profiles",
+        compute: (rows) => rows.length,
+        icon: <Settings className="h-5 w-5" />,
+      },
+      {
+        key: "enabled",
+        label: "Enabled",
+        compute: (rows) => rows.filter((r) => r.isEnabled).length,
+        color: "success",
+        icon: <Settings className="h-5 w-5" />,
+      },
     ],
   },
   {
@@ -54,7 +75,13 @@ export const CMDB_ASSET_MANAGEMENT_LISTS: ResourceListConfig[] = [
     rowId: "typeId",
     source: { kind: "api", useList: asQueryHook(useListCiTypesQuery) },
     columns: [
-      { key: "key", header: "Key", render: (r) => <span className="font-mono text-xs">{String(r.key ?? "—")}</span> },
+      {
+        key: "key",
+        header: "Key",
+        render: (r) => (
+          <span className="font-mono text-xs">{String(r.key ?? "—")}</span>
+        ),
+      },
       textCol("name", "Type"),
       textCol("description", "Description"),
       textCol("fields", "Fields"),
@@ -71,7 +98,12 @@ export const CMDB_ASSET_MANAGEMENT_LISTS: ResourceListConfig[] = [
       useCreate: asMutationHook(useCreateCiTypeMutation),
     },
     stats: [
-      { key: "total", label: "CI Types", compute: (rows) => rows.length, icon: <Boxes className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "CI Types",
+        compute: (rows) => rows.length,
+        icon: <Boxes className="h-5 w-5" />,
+      },
     ],
   },
   {
@@ -82,7 +114,13 @@ export const CMDB_ASSET_MANAGEMENT_LISTS: ResourceListConfig[] = [
     rowId: "categoryId",
     source: { kind: "api", useList: asQueryHook(useListAssetCategoriesQuery) },
     columns: [
-      { key: "key", header: "Key", render: (r) => <span className="font-mono text-xs">{String(r.key ?? "—")}</span> },
+      {
+        key: "key",
+        header: "Key",
+        render: (r) => (
+          <span className="font-mono text-xs">{String(r.key ?? "—")}</span>
+        ),
+      },
       textCol("name", "Category"),
       textCol("parent.name", "Parent"),
       textCol("depreciation", "Depreciation"),
@@ -99,18 +137,33 @@ export const CMDB_ASSET_MANAGEMENT_LISTS: ResourceListConfig[] = [
       useCreate: asMutationHook(useCreateAssetCategoryMutation),
     },
     stats: [
-      { key: "total", label: "Categories", compute: (rows) => rows.length, icon: <Package className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Categories",
+        compute: (rows) => rows.length,
+        icon: <Package className="h-5 w-5" />,
+      },
     ],
   },
   {
     path: "/saas-admin/cmdb-asset-management/lifecycle-rules",
     title: "Asset Lifecycle Rules",
-    description: "Relationship types that encode asset lifecycle and inter-CI dependencies.",
+    description:
+      "Relationship types that encode asset lifecycle and inter-CI dependencies.",
     sectionLabel: SECTION,
     rowId: "relationshipTypeId",
-    source: { kind: "api", useList: asQueryHook(useListRelationshipTypesQuery) },
+    source: {
+      kind: "api",
+      useList: asQueryHook(useListRelationshipTypesQuery),
+    },
     columns: [
-      { key: "key", header: "Key", render: (r) => <span className="font-mono text-xs">{String(r.key ?? "—")}</span> },
+      {
+        key: "key",
+        header: "Key",
+        render: (r) => (
+          <span className="font-mono text-xs">{String(r.key ?? "—")}</span>
+        ),
+      },
       textCol("name", "Relationship"),
       textCol("sourceTypeKey", "Source Type"),
       textCol("targetTypeKey", "Target Type"),
@@ -129,7 +182,12 @@ export const CMDB_ASSET_MANAGEMENT_LISTS: ResourceListConfig[] = [
       useCreate: asMutationHook(useCreateRelationshipTypeMutation),
     },
     stats: [
-      { key: "total", label: "Relationships", compute: (rows) => rows.length, icon: <RefreshCw className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Relationships",
+        compute: (rows) => rows.length,
+        icon: <RefreshCw className="h-5 w-5" />,
+      },
     ],
   },
 ];

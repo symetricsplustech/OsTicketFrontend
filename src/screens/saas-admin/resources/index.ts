@@ -1,17 +1,33 @@
-import type { ResourceListConfig, ConfigPanelConfig } from "../components/resource/types";
+import type {
+  ResourceListConfig,
+  ConfigPanelConfig,
+} from "../components/resource/types";
 import { SERVICE_MANAGEMENT_LISTS } from "./serviceManagement";
 import { SLA_MANAGEMENT_LISTS } from "./slaManagement";
 import { WORKFLOW_MANAGEMENT_LISTS } from "./workflowManagement";
-import { ITSM_CONFIGURATION_LISTS, ITSM_CONFIGURATION_PANELS } from "./itsmConfiguration";
+import {
+  ITSM_CONFIGURATION_LISTS,
+  ITSM_CONFIGURATION_PANELS,
+} from "./itsmConfiguration";
 import { KNOWLEDGE_MANAGEMENT_LISTS } from "./knowledgeManagement";
 import { CMDB_ASSET_MANAGEMENT_LISTS } from "./cmdbAssets";
 import { EMAIL_NOTIFICATION_LISTS } from "./emailNotifications";
-import { INTEGRATIONS_API_LISTS, INTEGRATIONS_API_PANELS } from "./integrationsApi";
+import {
+  INTEGRATIONS_API_LISTS,
+  INTEGRATIONS_API_PANELS,
+} from "./integrationsApi";
 import { SUPPORT_MANAGEMENT_LISTS } from "./supportManagement";
 import { REPORTS_ANALYTICS_LISTS } from "./reportsAnalytics";
-import { SECURITY_AUDIT_LISTS, SECURITY_AUDIT_EXTRA_LISTS, SECURITY_AUDIT_PANELS } from "./securityAudit";
+import {
+  SECURITY_AUDIT_LISTS,
+  SECURITY_AUDIT_EXTRA_LISTS,
+  SECURITY_AUDIT_PANELS,
+} from "./securityAudit";
 import { SYSTEM_ADMINISTRATION_LISTS } from "./systemAdministration";
-import { PLATFORM_SETTINGS_LISTS, PLATFORM_SETTINGS_PANELS } from "./platformSettings";
+import {
+  PLATFORM_SETTINGS_LISTS,
+  PLATFORM_SETTINGS_PANELS,
+} from "./platformSettings";
 import { MY_ACCOUNT_LISTS, MY_ACCOUNT_PANELS } from "./myAccount";
 import { APPROVAL_MANAGEMENT_LISTS } from "./approvals";
 

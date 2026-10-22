@@ -10,12 +10,10 @@ import { PublicShell } from "@layouts/PublicShell";
 import { Card, CardHeader, CardBody } from "@components/common/ui";
 import { Button } from "@components/common/ui";
 import { Badge } from "@components/common/Badge";
-import { ToastContainer } from "@components/common/Toast/ToastContainer";
 
 export function LandingPage() {
   return (
     <PublicShell>
-      <ToastContainer />
       <section className="overflow-hidden rounded-2xl bg-[#0b1830] px-7 py-14 text-white md:px-12">
         <div className="flex items-center gap-3 mb-6">
           <Activity className="h-8 w-8 text-cyan-400" />

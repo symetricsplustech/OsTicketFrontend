@@ -32,7 +32,9 @@ export function CustomerContactsView({
 
   const [search, setSearch] = useState("");
   const [customerId, setCustomerId] = useState("");
-  const [portalStatus, setPortalStatus] = useState<CustomerPortalStatus | "">(portalFocus ? "INVITED" : "");
+  const [portalStatus, setPortalStatus] = useState<CustomerPortalStatus | "">(
+    portalFocus ? "INVITED" : "",
+  );
   const [adding, setAdding] = useState(false);
 
   const customersQuery = useListCustomersQuery({ limit: 100 });
@@ -48,12 +50,20 @@ export function CustomerContactsView({
     <div>
       <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Customers & Customer Contacts</p>
-          <h1 className="mt-1 text-2xl font-bold text-slate-900 md:text-3xl">{title}</h1>
+          <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">
+            Customers & Customer Contacts
+          </p>
+          <h1 className="mt-1 text-2xl font-bold text-slate-900 md:text-3xl">
+            {title}
+          </h1>
           <p className="mt-2 max-w-3xl text-sm text-slate-500">{description}</p>
         </div>
         {canManageContacts ? (
-          <button type="button" className={buttonPrimary} onClick={() => setAdding(true)}>
+          <button
+            type="button"
+            className={buttonPrimary}
+            onClick={() => setAdding(true)}
+          >
             <Plus className="h-4 w-4" /> Add contact
           </button>
         ) : null}
@@ -70,7 +80,11 @@ export function CustomerContactsView({
               className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
             />
           </label>
-          <select className={`${inputClass} w-56`} value={customerId} onChange={(event) => setCustomerId(event.target.value)}>
+          <select
+            className={`${inputClass} w-56`}
+            value={customerId}
+            onChange={(event) => setCustomerId(event.target.value)}
+          >
             <option value="">All customers</option>
             {customers.map((customer) => (
               <option key={customer.id} value={customer.id}>
@@ -81,7 +95,9 @@ export function CustomerContactsView({
           <select
             className={`${inputClass} w-44`}
             value={portalStatus}
-            onChange={(event) => setPortalStatus(event.target.value as CustomerPortalStatus | "")}
+            onChange={(event) =>
+              setPortalStatus(event.target.value as CustomerPortalStatus | "")
+            }
           >
             <option value="">All portal states</option>
             <option value="INVITED">Invited</option>
@@ -108,7 +124,11 @@ export function CustomerContactsView({
         </div>
       </div>
 
-      <ContactFormModal open={adding} onClose={() => setAdding(false)} customers={customers} />
+      <ContactFormModal
+        open={adding}
+        onClose={() => setAdding(false)}
+        customers={customers}
+      />
     </div>
   );
 }

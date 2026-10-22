@@ -1,11 +1,19 @@
 import { useMemo } from "react";
-import { FALLBACK_ROLE_PRESETS, FALLBACK_ROLE_CATEGORIES, RolePreset, RoleCategory } from "./rolePresets.ts";
+import {
+  FALLBACK_ROLE_PRESETS,
+  FALLBACK_ROLE_CATEGORIES,
+  RolePreset,
+  RoleCategory,
+} from "./rolePresets.ts";
 
 export function useRolePresets() {
   // Role presets are static on the SaaS Admin control plane; the previous
   // instance-scoped `roleApi` no longer exists.
   const presets = useMemo<RolePreset[]>(() => FALLBACK_ROLE_PRESETS, []);
-  const categories = useMemo<RoleCategory[]>(() => FALLBACK_ROLE_CATEGORIES, []);
+  const categories = useMemo<RoleCategory[]>(
+    () => FALLBACK_ROLE_CATEGORIES,
+    [],
+  );
 
   const presetsByCategory = useMemo(() => {
     const map: Record<string, RolePreset[]> = {};
@@ -43,10 +51,16 @@ export function useEffectiveRole(userPermissions?: string[]): string | null {
   if (!permissions) return null;
 
   // Check for platform_owner (has saas.* and tenant.* but NOT itsm.*)
-  const hasSaas = permissions.some(p => p === "saas.*" || p.startsWith("saas."));
-  const hasTenant = permissions.some(p => p === "tenant.*" || p.startsWith("tenant."));
-  const hasItsm = permissions.some(p => p === "itsm.*" || p.startsWith("itsm."));
-  
+  const hasSaas = permissions.some(
+    (p) => p === "saas.*" || p.startsWith("saas."),
+  );
+  const hasTenant = permissions.some(
+    (p) => p === "tenant.*" || p.startsWith("tenant."),
+  );
+  const hasItsm = permissions.some(
+    (p) => p === "itsm.*" || p.startsWith("itsm."),
+  );
+
   if (hasSaas && hasTenant && !hasItsm) return "platform_owner";
   if (hasSaas && hasTenant && hasItsm) return "platform_admin"; // legacy/platform_admin with ITSM
 
@@ -55,7 +69,13 @@ export function useEffectiveRole(userPermissions?: string[]): string | null {
     .map((role) => {
       let matches = 0;
       for (const perm of role.permissions) {
-        if (permissions.some((p) => p === perm || (perm.endsWith(".*") && p.startsWith(perm.slice(0, -1))))) {
+        if (
+          permissions.some(
+            (p) =>
+              p === perm ||
+              (perm.endsWith(".*") && p.startsWith(perm.slice(0, -1))),
+          )
+        ) {
           matches++;
         }
       }
@@ -70,14 +90,23 @@ export function useEffectiveRole(userPermissions?: string[]): string | null {
  * Synchronous helper to compute effective role from permissions and presets.
  * Use this when you already have the presets data (e.g., from useRolePresets).
  */
-export function computeEffectiveRoleSync(permissions: string[] | undefined, presets: RolePreset[]): string | null {
+export function computeEffectiveRoleSync(
+  permissions: string[] | undefined,
+  presets: RolePreset[],
+): string | null {
   if (!permissions) return null;
 
   // Check for platform_owner (has saas.* and tenant.* but NOT itsm.*)
-  const hasSaas = permissions.some(p => p === "saas.*" || p.startsWith("saas."));
-  const hasTenant = permissions.some(p => p === "tenant.*" || p.startsWith("tenant."));
-  const hasItsm = permissions.some(p => p === "itsm.*" || p.startsWith("itsm."));
-  
+  const hasSaas = permissions.some(
+    (p) => p === "saas.*" || p.startsWith("saas."),
+  );
+  const hasTenant = permissions.some(
+    (p) => p === "tenant.*" || p.startsWith("tenant."),
+  );
+  const hasItsm = permissions.some(
+    (p) => p === "itsm.*" || p.startsWith("itsm."),
+  );
+
   if (hasSaas && hasTenant && !hasItsm) return "platform_owner";
   if (hasSaas && hasTenant && hasItsm) return "platform_admin"; // legacy/platform_admin with ITSM
 
@@ -86,7 +115,13 @@ export function computeEffectiveRoleSync(permissions: string[] | undefined, pres
     .map((role) => {
       let matches = 0;
       for (const perm of role.permissions) {
-        if (permissions.some((p) => p === perm || (perm.endsWith(".*") && p.startsWith(perm.slice(0, -1))))) {
+        if (
+          permissions.some(
+            (p) =>
+              p === perm ||
+              (perm.endsWith(".*") && p.startsWith(perm.slice(0, -1))),
+          )
+        ) {
           matches++;
         }
       }
@@ -129,7 +164,8 @@ export function useAvailableRolesForAssignment(): RolePreset[] {
   const effectiveRole = useEffectiveRole();
 
   if (!effectiveRole) return [];
-  if (effectiveRole === "platform_owner") return presets.filter((r) => !r.isSystem);
+  if (effectiveRole === "platform_owner")
+    return presets.filter((r) => !r.isSystem);
 
   const currentRolePreset = presets.find((r) => r.id === effectiveRole);
   if (!currentRolePreset) return [];

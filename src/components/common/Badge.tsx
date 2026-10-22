@@ -32,11 +32,18 @@ export function Badge({ variant = "default", className, ...rest }: BadgeProps) {
 export function StatusBadge({ status }: { status?: string | null }) {
   const value = String(status ?? "unknown").toLowerCase();
   const variant: Variant =
-    value === "active" || value === "enabled" || value === "resolved" || value === "done"
+    value === "active" ||
+    value === "enabled" ||
+    value === "resolved" ||
+    value === "done"
       ? "success"
       : value === "invited" || value === "pending" || value === "scheduled"
         ? "warning"
-        : value === "suspended" || value === "revoked" || value === "disabled" || value === "cancelled" || value === "expired"
+        : value === "suspended" ||
+            value === "revoked" ||
+            value === "disabled" ||
+            value === "cancelled" ||
+            value === "expired"
           ? "danger"
           : value === "closed"
             ? "info"

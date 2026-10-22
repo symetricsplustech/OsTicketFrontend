@@ -20,7 +20,9 @@ export function PublicShell({ children }: PublicShellProps) {
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-sm font-bold text-white">
               N
             </span>
-            <span className="text-sm font-semibold text-slate-900">Nexa ITSM</span>
+            <span className="text-sm font-semibold text-slate-900">
+              Nexa ITSM
+            </span>
           </span>
           <span className="text-xs text-slate-400">Secure access</span>
         </div>

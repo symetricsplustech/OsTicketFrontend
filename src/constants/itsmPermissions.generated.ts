@@ -10,11 +10,11 @@ export interface ItsmPermissionModule {
 
 export const ITSM_PERMISSION_MODULES = [
   {
-    "number": 1,
-    "key": "core",
-    "label": "CORE PLATFORM / TASK ENGINE",
-    "namespace": "itsm.core.*",
-    "permissions": [
+    number: 1,
+    key: "core",
+    label: "CORE PLATFORM / TASK ENGINE",
+    namespace: "itsm.core.*",
+    permissions: [
       "itsm.core.activity_read",
       "itsm.core.approval.archive",
       "itsm.core.approval.create",
@@ -257,15 +257,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.core.user_role.view_history",
       "itsm.core.watcher_manage",
       "itsm.core.work_note_create",
-      "itsm.core.work_note_read"
-    ]
+      "itsm.core.work_note_read",
+    ],
   },
   {
-    "number": 2,
-    "key": "incident",
-    "label": "INCIDENT MANAGEMENT",
-    "namespace": "itsm.incident.*",
-    "permissions": [
+    number: 2,
+    key: "incident",
+    label: "INCIDENT MANAGEMENT",
+    namespace: "itsm.incident.*",
+    permissions: [
       "itsm.incident.add_public_comment",
       "itsm.incident.add_work_note",
       "itsm.incident.assign",
@@ -501,15 +501,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.incident.unlink_change",
       "itsm.incident.unlink_problem",
       "itsm.incident.view_audit",
-      "itsm.incident.view_history"
-    ]
+      "itsm.incident.view_history",
+    ],
   },
   {
-    "number": 3,
-    "key": "problem",
-    "label": "PROBLEM MANAGEMENT",
-    "namespace": "itsm.problem.*",
-    "permissions": [
+    number: 3,
+    key: "problem",
+    label: "PROBLEM MANAGEMENT",
+    namespace: "itsm.problem.*",
+    permissions: [
       "itsm.problem.accept_risk",
       "itsm.problem.assign",
       "itsm.problem.automation.knowledge_review_linkage.manage",
@@ -685,15 +685,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.problem.unlink_incident",
       "itsm.problem.unlink_service",
       "itsm.problem.view_audit",
-      "itsm.problem.view_history"
-    ]
+      "itsm.problem.view_history",
+    ],
   },
   {
-    "number": 4,
-    "key": "change",
-    "label": "CHANGE MANAGEMENT / CHANGE ENABLEMENT",
-    "namespace": "itsm.change.*",
-    "permissions": [
+    number: 4,
+    key: "change",
+    label: "CHANGE MANAGEMENT / CHANGE ENABLEMENT",
+    namespace: "itsm.change.*",
+    permissions: [
       "itsm.change.apply_template",
       "itsm.change.approve",
       "itsm.change.assess_risk",
@@ -975,15 +975,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.change.ui.risk_assessment.access",
       "itsm.change.validate",
       "itsm.change.view_audit",
-      "itsm.change.view_history"
-    ]
+      "itsm.change.view_history",
+    ],
   },
   {
-    "number": 5,
-    "key": "request_catalog",
-    "label": "REQUEST MANAGEMENT + SERVICE CATALOG",
-    "namespace": "itsm.request_catalog.*",
-    "permissions": [
+    number: 5,
+    key: "request_catalog",
+    label: "REQUEST MANAGEMENT + SERVICE CATALOG",
+    namespace: "itsm.request_catalog.*",
+    permissions: [
       "itsm.request_catalog.automation.abandoned_cart_cleanup.manage",
       "itsm.request_catalog.automation.approval_reminders.manage",
       "itsm.request_catalog.automation.catalog_indexing.manage",
@@ -1246,15 +1246,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.request_catalog.variable_set.view_audit",
       "itsm.request_catalog.variable_set.view_history",
       "itsm.request_catalog.view_audit",
-      "itsm.request_catalog.view_history"
-    ]
+      "itsm.request_catalog.view_history",
+    ],
   },
   {
-    "number": 6,
-    "key": "knowledge",
-    "label": "KNOWLEDGE MANAGEMENT",
-    "namespace": "itsm.knowledge.*",
-    "permissions": [
+    number: 6,
+    key: "knowledge",
+    label: "KNOWLEDGE MANAGEMENT",
+    namespace: "itsm.knowledge.*",
+    permissions: [
       "itsm.knowledge.analytics",
       "itsm.knowledge.article_approve",
       "itsm.knowledge.article_comment",
@@ -1414,15 +1414,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.knowledge.ui.knowledge_analytics.access",
       "itsm.knowledge.ui.knowledge_search.access",
       "itsm.knowledge.ui.review_queue.access",
-      "itsm.knowledge.ui.version_history.access"
-    ]
+      "itsm.knowledge.ui.version_history.access",
+    ],
   },
   {
-    "number": 7,
-    "key": "sla",
-    "label": "SERVICE LEVEL MANAGEMENT",
-    "namespace": "itsm.sla.*",
-    "permissions": [
+    number: 7,
+    key: "sla",
+    label: "SERVICE LEVEL MANAGEMENT",
+    namespace: "itsm.sla.*",
+    permissions: [
       "itsm.sla.automation.analytics_aggregation.manage",
       "itsm.sla.automation.breach_events.manage",
       "itsm.sla.automation.repair_queue.manage",
@@ -1571,15 +1571,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.sla.underpinning_contract_target.update",
       "itsm.sla.underpinning_contract_target.view_audit",
       "itsm.sla.underpinning_contract_target.view_history",
-      "itsm.sla.view_history"
-    ]
+      "itsm.sla.view_history",
+    ],
   },
   {
-    "number": 8,
-    "key": "universal_request",
-    "label": "ASSIGNMENT / ROUTING / ADVANCED WORK DISTRIBUTION",
-    "namespace": "itsm.universal_request.*",
-    "permissions": [
+    number: 8,
+    key: "universal_request",
+    label: "ASSIGNMENT / ROUTING / ADVANCED WORK DISTRIBUTION",
+    namespace: "itsm.universal_request.*",
+    permissions: [
       "itsm.universal_request.request.create",
       "itsm.universal_request.request.delete",
       "itsm.universal_request.request.link",
@@ -1588,15 +1588,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.universal_request.request.update",
       "itsm.universal_request.ui.agent.access",
       "itsm.universal_request.ui.configuration.access",
-      "itsm.universal_request.ui.requester.access"
-    ]
+      "itsm.universal_request.ui.requester.access",
+    ],
   },
   {
-    "number": 8,
-    "key": "assignment",
-    "label": "ASSIGNMENT / ROUTING / ADVANCED WORK DISTRIBUTION",
-    "namespace": "itsm.assignment.*",
-    "permissions": [
+    number: 8,
+    key: "assignment",
+    label: "ASSIGNMENT / ROUTING / ADVANCED WORK DISTRIBUTION",
+    namespace: "itsm.assignment.*",
+    permissions: [
       "itsm.assignment.agent_assign",
       "itsm.assignment.agent_capacity.archive",
       "itsm.assignment.agent_capacity.create",
@@ -1720,15 +1720,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.assignment.unassign",
       "itsm.assignment.view_assignment_history",
       "itsm.assignment.work_offer_accept",
-      "itsm.assignment.work_offer_decline"
-    ]
+      "itsm.assignment.work_offer_decline",
+    ],
   },
   {
-    "number": 9,
-    "key": "approval",
-    "label": "APPROVAL ENGINE",
-    "namespace": "itsm.approval.*",
-    "permissions": [
+    number: 9,
+    key: "approval",
+    label: "APPROVAL ENGINE",
+    namespace: "itsm.approval.*",
+    permissions: [
       "itsm.approval.approval_approve",
       "itsm.approval.approval_cancel",
       "itsm.approval.approval_decision.archive",
@@ -1834,15 +1834,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.approval.ui.approval_detail.access",
       "itsm.approval.ui.approval_history.access",
       "itsm.approval.ui.delegation.access",
-      "itsm.approval.ui.my_approvals.access"
-    ]
+      "itsm.approval.ui.my_approvals.access",
+    ],
   },
   {
-    "number": 10,
-    "key": "asset",
-    "label": "MAJOR INCIDENT + COMMUNICATIONS",
-    "namespace": "itsm.asset.*",
-    "permissions": [
+    number: 10,
+    key: "asset",
+    label: "MAJOR INCIDENT + COMMUNICATIONS",
+    namespace: "itsm.asset.*",
+    permissions: [
       "itsm.asset.asset.create",
       "itsm.asset.asset.delete",
       "itsm.asset.asset.read",
@@ -1938,15 +1938,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.asset.transfer_line.update",
       "itsm.asset.ui.asset_configuration.access",
       "itsm.asset.view_audit",
-      "itsm.asset.view_history"
-    ]
+      "itsm.asset.view_history",
+    ],
   },
   {
-    "number": 10,
-    "key": "major_incident",
-    "label": "MAJOR INCIDENT + COMMUNICATIONS",
-    "namespace": "itsm.major_incident.*",
-    "permissions": [
+    number: 10,
+    key: "major_incident",
+    label: "MAJOR INCIDENT + COMMUNICATIONS",
+    namespace: "itsm.major_incident.*",
+    permissions: [
       "itsm.major_incident.assign_commander",
       "itsm.major_incident.assign_manager",
       "itsm.major_incident.automation.candidate_rules.manage",
@@ -2116,15 +2116,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.major_incident.ui.timeline.access",
       "itsm.major_incident.update",
       "itsm.major_incident.view_audit",
-      "itsm.major_incident.view_executive_report"
-    ]
+      "itsm.major_incident.view_executive_report",
+    ],
   },
   {
-    "number": 11,
-    "key": "on_call",
-    "label": "ON-CALL SCHEDULING",
-    "namespace": "itsm.on_call.*",
-    "permissions": [
+    number: 11,
+    key: "on_call",
+    label: "ON-CALL SCHEDULING",
+    namespace: "itsm.on_call.*",
+    permissions: [
       "itsm.on_call.automation.escalation_timers.manage",
       "itsm.on_call.automation.gap_conflict_detection.manage",
       "itsm.on_call.automation.shift_reminders.manage",
@@ -2278,15 +2278,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.on_call.ui.roster_editor.access",
       "itsm.on_call.ui.shift_editor.access",
       "itsm.on_call.ui.timeline.access",
-      "itsm.on_call.view_dashboard"
-    ]
+      "itsm.on_call.view_dashboard",
+    ],
   },
   {
-    "number": 12,
-    "key": "walkup",
-    "label": "WALK-UP EXPERIENCE",
-    "namespace": "itsm.walkup.*",
-    "permissions": [
+    number: 12,
+    key: "walkup",
+    label: "WALK-UP EXPERIENCE",
+    namespace: "itsm.walkup.*",
+    permissions: [
       "itsm.walkup.appointment.archive",
       "itsm.walkup.appointment.create",
       "itsm.walkup.appointment.delete",
@@ -2414,15 +2414,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.walkup.walkup_service.restore",
       "itsm.walkup.walkup_service.update",
       "itsm.walkup.walkup_service.view_audit",
-      "itsm.walkup.walkup_service.view_history"
-    ]
+      "itsm.walkup.walkup_service.view_history",
+    ],
   },
   {
-    "number": 13,
-    "key": "service_cmdb",
-    "label": "SERVICE PORTFOLIO / SERVICE BUILDER / CMDB-CSDM CONTEXT",
-    "namespace": "itsm.service_cmdb.*",
-    "permissions": [
+    number: 13,
+    key: "service_cmdb",
+    label: "SERVICE PORTFOLIO / SERVICE BUILDER / CMDB-CSDM CONTEXT",
+    namespace: "itsm.service_cmdb.*",
+    permissions: [
       "itsm.service_cmdb.automation.retirement_checks.manage",
       "itsm.service_cmdb.automation.search_indexing.manage",
       "itsm.service_cmdb.business_service.archive",
@@ -2547,15 +2547,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.service_cmdb.ui.ownership_admin.access",
       "itsm.service_cmdb.ui.portfolio.access",
       "itsm.service_cmdb.ui.service_builder.access",
-      "itsm.service_cmdb.ui.service_detail.access"
-    ]
+      "itsm.service_cmdb.ui.service_detail.access",
+    ],
   },
   {
-    "number": 14,
-    "key": "release",
-    "label": "RELEASE MANAGEMENT",
-    "namespace": "itsm.release.*",
-    "permissions": [
+    number: 14,
+    key: "release",
+    label: "RELEASE MANAGEMENT",
+    namespace: "itsm.release.*",
+    permissions: [
       "itsm.release.approve",
       "itsm.release.automation.milestone_reminders.manage",
       "itsm.release.automation.readiness_checks.manage",
@@ -2667,15 +2667,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.release.ui.review_dashboard.access",
       "itsm.release.update",
       "itsm.release.view_audit",
-      "itsm.release.view_history"
-    ]
+      "itsm.release.view_history",
+    ],
   },
   {
-    "number": 15,
-    "key": "improvement",
-    "label": "CONTINUAL IMPROVEMENT MANAGEMENT",
-    "namespace": "itsm.improvement.*",
-    "permissions": [
+    number: 15,
+    key: "improvement",
+    label: "CONTINUAL IMPROVEMENT MANAGEMENT",
+    namespace: "itsm.improvement.*",
+    permissions: [
       "itsm.improvement.automation.benefit_tracking.manage",
       "itsm.improvement.automation.metric_refresh.manage",
       "itsm.improvement.automation.review_reminders.manage",
@@ -2785,15 +2785,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.improvement.ui.opportunity_backlog.access",
       "itsm.improvement.ui.tasks.access",
       "itsm.improvement.view_dashboard",
-      "itsm.improvement.view_history"
-    ]
+      "itsm.improvement.view_history",
+    ],
   },
   {
-    "number": 16,
-    "key": "outage",
-    "label": "OUTAGE / SERVICE AVAILABILITY",
-    "namespace": "itsm.outage.*",
-    "permissions": [
+    number: 16,
+    key: "outage",
+    label: "OUTAGE / SERVICE AVAILABILITY",
+    namespace: "itsm.outage.*",
+    permissions: [
       "itsm.outage.activate",
       "itsm.outage.automation.active_outage_reminders.manage",
       "itsm.outage.automation.availability_calculation.manage",
@@ -2876,15 +2876,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.outage.unlink_incident",
       "itsm.outage.unlink_service",
       "itsm.outage.update",
-      "itsm.outage.view_history"
-    ]
+      "itsm.outage.view_history",
+    ],
   },
   {
-    "number": 17,
-    "key": "experience",
-    "label": "WORKSPACE / SELF-SERVICE / MOBILE",
-    "namespace": "itsm.experience.*",
-    "permissions": [
+    number: 17,
+    key: "experience",
+    label: "WORKSPACE / SELF-SERVICE / MOBILE",
+    namespace: "itsm.experience.*",
+    permissions: [
       "itsm.experience.automation.notification_badges.manage",
       "itsm.experience.dashboard_access",
       "itsm.experience.mobile_access",
@@ -2957,15 +2957,15 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.experience.workspace_preference.view_audit",
       "itsm.experience.workspace_preference.view_history",
       "itsm.experience.workspace_saved_view_manage",
-      "itsm.experience.workspace_team_queue"
-    ]
+      "itsm.experience.workspace_team_queue",
+    ],
   },
   {
-    "number": 18,
-    "key": "reporting_admin",
-    "label": "REPORTING / AUDIT / ADMINISTRATION",
-    "namespace": "itsm.reporting_admin.*",
-    "permissions": [
+    number: 18,
+    key: "reporting_admin",
+    label: "REPORTING / AUDIT / ADMINISTRATION",
+    namespace: "itsm.reporting_admin.*",
+    permissions: [
       "itsm.reporting_admin.audit_configuration_read",
       "itsm.reporting_admin.audit_event.archive",
       "itsm.reporting_admin.audit_event.create",
@@ -3082,9 +3082,11 @@ export const ITSM_PERMISSION_MODULES = [
       "itsm.reporting_admin.widget.restore",
       "itsm.reporting_admin.widget.update",
       "itsm.reporting_admin.widget.view_audit",
-      "itsm.reporting_admin.widget.view_history"
-    ]
-  }
+      "itsm.reporting_admin.widget.view_history",
+    ],
+  },
 ] as const satisfies readonly ItsmPermissionModule[];
 
-export const ITSM_PERMISSION_KEYS = ITSM_PERMISSION_MODULES.flatMap((module) => [...module.permissions]);
+export const ITSM_PERMISSION_KEYS = ITSM_PERMISSION_MODULES.flatMap(
+  (module) => [...module.permissions],
+);

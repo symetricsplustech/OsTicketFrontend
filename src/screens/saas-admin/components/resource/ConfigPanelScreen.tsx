@@ -26,7 +26,9 @@ function ConfigPanelContent({ config }: ConfigPanelScreenProps) {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [initialized, setInitialized] = useState(false);
   const [saving, setSaving] = useState(false);
-  const updateTriggerRef = useRef<((body?: unknown) => Promise<unknown>) | null>(null);
+  const updateTriggerRef = useRef<
+    ((body?: unknown) => Promise<unknown>) | null
+  >(null);
 
   const value = useMemo(() => extractValue(result.data), [result.data]);
 
@@ -78,7 +80,11 @@ function ConfigPanelContent({ config }: ConfigPanelScreenProps) {
 
   const version = config.getVersion?.(value);
 
-  const breadcrumbs = [{ label: "SaaS Admin" }, { label: config.sectionLabel }, { label: config.title }];
+  const breadcrumbs = [
+    { label: "SaaS Admin" },
+    { label: config.sectionLabel },
+    { label: config.title },
+  ];
 
   const stats = config.stats?.(value) ?? [];
 
@@ -100,24 +106,35 @@ function ConfigPanelContent({ config }: ConfigPanelScreenProps) {
             ) : null}
             <Button onClick={save} disabled={saving || !dirty}>
               <Save className="h-4 w-4 mr-1" />
-              {saving ? "Saving…" : config.saveLabel ?? "Save Changes"}
+              {saving ? "Saving…" : (config.saveLabel ?? "Save Changes")}
             </Button>
           </div>
         ) : undefined
       }
     >
       {config.useUpdate ? (
-        <MutationBridge hook={config.useUpdate} onReady={(t) => (updateTriggerRef.current = t)} />
+        <MutationBridge
+          hook={config.useUpdate}
+          onReady={(t) => (updateTriggerRef.current = t)}
+        />
       ) : null}
 
       {version !== undefined && version !== null ? (
-        <p className="text-xs text-slate-500">Configuration version: <span className="font-medium text-slate-700">{String(version)}</span></p>
+        <p className="text-xs text-slate-500">
+          Configuration version:{" "}
+          <span className="font-medium text-slate-700">{String(version)}</span>
+        </p>
       ) : null}
 
       {stats.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {stats.map((stat, i) => (
-            <StatCard key={`${stat.label}-${i}`} label={stat.label} value={stat.value} color={stat.color} />
+            <StatCard
+              key={`${stat.label}-${i}`}
+              label={stat.label}
+              value={stat.value}
+              color={stat.color}
+            />
           ))}
         </div>
       )}
@@ -125,7 +142,9 @@ function ConfigPanelContent({ config }: ConfigPanelScreenProps) {
       {Boolean(result.error) && (
         <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>{apiErrorMessage((result.error as { data?: unknown }).data)}</span>
+          <span>
+            {apiErrorMessage((result.error as { data?: unknown }).data)}
+          </span>
         </div>
       )}
 
@@ -133,7 +152,10 @@ function ConfigPanelContent({ config }: ConfigPanelScreenProps) {
         {result.isLoading && !initialized ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-10 animate-pulse rounded bg-slate-100" />
+              <div
+                key={i}
+                className="h-10 animate-pulse rounded bg-slate-100"
+              />
             ))}
           </div>
         ) : (

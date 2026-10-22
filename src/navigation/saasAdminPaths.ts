@@ -5,7 +5,8 @@ import { SAAS_ADMIN_BASE_PATH } from "./saasAdminNavigation";
  * these instead of hardcoding `/saas-admin/...` strings so a route change is a
  * single-file edit.
  */
-const build = (...segments: string[]): string => [SAAS_ADMIN_BASE_PATH, ...segments].join("/");
+const build = (...segments: string[]): string =>
+  [SAAS_ADMIN_BASE_PATH, ...segments].join("/");
 
 export const SAAS_ADMIN_PATHS = {
   dashboard: {
@@ -15,18 +16,21 @@ export const SAAS_ADMIN_PATHS = {
     all: build("tenants", "all-tenants"),
     create: build("tenants", "create-tenant"),
     details: (tenantId: string) => build("tenants", "details", tenantId),
-    configuration: (tenantId: string) => build("tenants", "configuration", tenantId),
+    configuration: (tenantId: string) =>
+      build("tenants", "configuration", tenantId),
     status: build("tenants", "status"),
   },
   staff: {
     accounts: build("staff-management", "staff-accounts"),
-    account: (staffId: string) => build("staff-management", "staff-accounts", staffId),
+    account: (staffId: string) =>
+      build("staff-management", "staff-accounts", staffId),
     create: build("staff-management", "create-staff"),
     edit: (staffId: string) => build("staff-management", "edit", staffId),
     roles: build("staff-management", "roles"),
     role: (roleId: string) => build("staff-management", "roles", roleId),
     roleNew: build("staff-management", "roles", "new"),
-    roleEdit: (roleId: string) => build("staff-management", "roles", "edit", roleId),
+    roleEdit: (roleId: string) =>
+      build("staff-management", "roles", "edit", roleId),
     permissions: build("staff-management", "permissions"),
     roleAssignment: build("staff-management", "role-assignment"),
     auditLogs: build("staff-management", "audit-logs"),

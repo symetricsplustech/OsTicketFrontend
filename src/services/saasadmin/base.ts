@@ -14,6 +14,10 @@ export type SaasAdminBaseQuery = AuthBaseQuery;
 export const saasadminApi = createApi({
   reducerPath: "saasadminApi",
   baseQuery: baseQueryWithAuth,
+  keepUnusedDataFor: 300,
+  refetchOnMountOrArgChange: false,
+  refetchOnFocus: false,
+  refetchOnReconnect: false,
   tagTypes: [
     "AuthUser",
     "Session",

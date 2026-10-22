@@ -3,7 +3,8 @@ import type { ApiSuccess, PaginationMeta } from "@services/http";
 
 export type CustomerStatus = "ACTIVE" | "INACTIVE" | "PROSPECT";
 export type CustomerType = "COMPANY" | "INDIVIDUAL";
-export type CustomerContactRole = "PRIMARY" | "TECHNICAL" | "BILLING" | "AUTHORIZED";
+export type CustomerContactRole =
+  "PRIMARY" | "TECHNICAL" | "BILLING" | "AUTHORIZED";
 export type CustomerPortalStatus = "NONE" | "INVITED" | "ACTIVE" | "REVOKED";
 
 export interface CustomerContact {
@@ -109,7 +110,7 @@ export interface SiteListArgs {
   limit?: number;
 }
 
-export interface IncidentListArgs {
+export interface CustomerIncidentListArgs {
   search?: string;
   customerId?: string;
   statusKey?: string;
@@ -164,7 +165,9 @@ export interface SiteWriteBody {
   notes?: string;
 }
 
-function queryString(params: Record<string, string | number | boolean | undefined>): string {
+function queryString(
+  params: Record<string, string | number | boolean | undefined>,
+): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === "") continue;
@@ -176,7 +179,10 @@ function queryString(params: Record<string, string | number | boolean | undefine
 
 export const customersApi = tenantadminApi.injectEndpoints({
   endpoints: (build) => ({
-    listCustomers: build.query<ApiSuccess<Customer[]> & { meta?: PaginationMeta }, CustomerListArgs | void>({
+    listCustomers: build.query<
+      ApiSuccess<Customer[]> & { meta?: PaginationMeta },
+      CustomerListArgs | void
+    >({
       query: (args) => ({
         url: `/tenant-admin/customers${queryString({
           search: args?.search,
@@ -188,14 +194,28 @@ export const customersApi = tenantadminApi.injectEndpoints({
       providesTags: ["Customer"],
     }),
     getCustomer: build.query<ApiSuccess<Customer>, string>({
-      query: (customerId) => ({ url: `/tenant-admin/customers/${encodeURIComponent(customerId)}` }),
-      providesTags: (_result, _error, customerId) => [{ type: "Customer", id: customerId }],
+      query: (customerId) => ({
+        url: `/tenant-admin/customers/${encodeURIComponent(customerId)}`,
+      }),
+      providesTags: (_result, _error, customerId) => [
+        { type: "Customer", id: customerId },
+      ],
     }),
     createCustomer: build.mutation<ApiSuccess<Customer>, CustomerWriteBody>({
-      query: (body) => ({ url: "/tenant-admin/customers", method: "POST", body }),
+      query: (body) => ({
+        url: "/tenant-admin/customers",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["Customer"],
     }),
-    updateCustomer: build.mutation<ApiSuccess<Customer>, { customerId: string; body: Partial<CustomerWriteBody> & { status?: CustomerStatus } }>({
+    updateCustomer: build.mutation<
+      ApiSuccess<Customer>,
+      {
+        customerId: string;
+        body: Partial<CustomerWriteBody> & { status?: CustomerStatus };
+      }
+    >({
       query: ({ customerId, body }) => ({
         url: `/tenant-admin/customers/${encodeURIComponent(customerId)}`,
         method: "PATCH",
@@ -302,7 +322,7 @@ export const customersApi = tenantadminApi.injectEndpoints({
     }),
     listIncidents: build.query<
       ApiSuccess<IncidentSummary[]> & { meta?: PaginationMeta },
-      IncidentListArgs | void
+      CustomerIncidentListArgs | void
     >({
       query: (args) => ({
         url: `/itsm/incidents${queryString({

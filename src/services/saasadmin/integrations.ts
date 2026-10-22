@@ -7,7 +7,10 @@ import type { ApiSuccess, ApiRecord, ListQuery } from "./types";
 export const integrationsApi = saasadminApi.injectEndpoints({
   endpoints: (build) => ({
     listIntegrations: build.query<ApiSuccess<ApiRecord[]>, ListQuery | void>({
-      query: (params) => ({ url: "/admin/integrations", params: params ?? undefined }),
+      query: (params) => ({
+        url: "/admin/integrations",
+        params: params ?? undefined,
+      }),
       providesTags: ["Integration"],
     }),
     createIntegration: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
@@ -18,9 +21,14 @@ export const integrationsApi = saasadminApi.injectEndpoints({
       query: (integrationId) => ({
         url: `/admin/integrations/${encodeURIComponent(integrationId)}`,
       }),
-      providesTags: (_r, _e, integrationId) => [{ type: "Integration", id: integrationId }],
+      providesTags: (_r, _e, integrationId) => [
+        { type: "Integration", id: integrationId },
+      ],
     }),
-    updateIntegration: build.mutation<ApiSuccess<ApiRecord>, { integrationId: string; body: ApiRecord }>({
+    updateIntegration: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { integrationId: string; body: ApiRecord }
+    >({
       query: ({ integrationId, body }) => ({
         url: `/admin/integrations/${encodeURIComponent(integrationId)}`,
         method: "PATCH",
@@ -57,12 +65,17 @@ export const integrationsApi = saasadminApi.injectEndpoints({
         { type: "Integration", id: integrationId },
       ],
     }),
-    getIntegrationLogs: build.query<ApiSuccess<ApiRecord[]>, { integrationId: string } & ListQuery>({
+    getIntegrationLogs: build.query<
+      ApiSuccess<ApiRecord[]>,
+      { integrationId: string } & ListQuery
+    >({
       query: ({ integrationId, ...params }) => ({
         url: `/admin/integrations/${encodeURIComponent(integrationId)}/logs`,
         params,
       }),
-      providesTags: (_r, _e, { integrationId }) => [{ type: "Integration", id: integrationId }],
+      providesTags: (_r, _e, { integrationId }) => [
+        { type: "Integration", id: integrationId },
+      ],
     }),
   }),
 });

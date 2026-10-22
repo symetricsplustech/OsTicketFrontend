@@ -39,6 +39,10 @@ export function initials(name?: string | null): string {
     .join("");
 }
 
-export function plural(value: number, singular: string, pluralForm?: string): string {
+export function plural(
+  value: number,
+  singular: string,
+  pluralForm?: string,
+): string {
   return `${value} ${value === 1 ? singular : (pluralForm ?? `${singular}s`)}`;
 }

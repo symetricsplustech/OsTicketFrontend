@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { ArrowLeft, Building2, Pencil, Plus } from "lucide-react";
 import { useAppSelector } from "@store/hooks";
 import { selectPermissions } from "@services/auth/authSlice";
@@ -10,8 +15,16 @@ import {
   useUpdateCustomerMutation,
   type Customer,
 } from "@services/tenantadmin";
-import { CustomerFormModal, ContactFormModal, SiteFormModal } from "./customerForms";
-import { CustomerContactsTable, CustomerSitesTable, CustomerTicketsTable } from "./customerTables";
+import {
+  CustomerFormModal,
+  ContactFormModal,
+  SiteFormModal,
+} from "./customerForms";
+import {
+  CustomerContactsTable,
+  CustomerSitesTable,
+  CustomerTicketsTable,
+} from "./customerTables";
 import {
   Card,
   CustomerStatusBadge,
@@ -33,10 +46,18 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "tickets", label: "Tickets" },
 ];
 
-function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
+function DetailRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) {
   return (
     <div>
-      <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</dt>
+      <dt className="text-xs font-medium uppercase tracking-wide text-slate-400">
+        {label}
+      </dt>
       <dd className="mt-1 text-sm text-slate-700">{value || "—"}</dd>
     </div>
   );
@@ -54,7 +75,9 @@ export function OrganizationCustomerDetailPage() {
   const canManagePortal = can(permissions, "customers.portal.manage");
 
   const initialTab = (searchParams.get("tab") as TabKey) || "overview";
-  const [tab, setTab] = useState<TabKey>(TABS.some((entry) => entry.key === initialTab) ? initialTab : "overview");
+  const [tab, setTab] = useState<TabKey>(
+    TABS.some((entry) => entry.key === initialTab) ? initialTab : "overview",
+  );
   const [editingCustomer, setEditingCustomer] = useState(false);
   const [addingContact, setAddingContact] = useState(false);
   const [addingSite, setAddingSite] = useState(false);
@@ -87,8 +110,10 @@ export function OrganizationCustomerDetailPage() {
     }
   };
 
-  if (customerQuery.isLoading) return <LoadingState label="Loading customer…" />;
-  if (customerQuery.error) return <ErrorState message={apiErrorMessage(customerQuery.error)} />;
+  if (customerQuery.isLoading)
+    return <LoadingState label="Loading customer…" />;
+  if (customerQuery.error)
+    return <ErrorState message={apiErrorMessage(customerQuery.error)} />;
   if (!customer) return <ErrorState message="Customer not found." />;
 
   return (
@@ -107,14 +132,22 @@ export function OrganizationCustomerDetailPage() {
           </span>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-bold text-slate-900">{customer.name}</h1>
+              <h1 className="text-2xl font-bold text-slate-900">
+                {customer.name}
+              </h1>
               <CustomerStatusBadge status={customer.status} />
               {customer.isDataCenter ? (
-                <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700">Data center operator</span>
+                <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700">
+                  Data center operator
+                </span>
               ) : null}
             </div>
             <p className="mt-1 text-sm text-slate-500">
-              {[customer.code, customer.industry, [customer.city, customer.country].filter(Boolean).join(", ")]
+              {[
+                customer.code,
+                customer.industry,
+                [customer.city, customer.country].filter(Boolean).join(", "),
+              ]
                 .filter(Boolean)
                 .join(" · ")}
             </p>
@@ -122,10 +155,18 @@ export function OrganizationCustomerDetailPage() {
         </div>
         {canManage ? (
           <div className="flex items-center gap-2">
-            <button type="button" className={buttonSecondary} onClick={() => setEditingCustomer(true)}>
+            <button
+              type="button"
+              className={buttonSecondary}
+              onClick={() => setEditingCustomer(true)}
+            >
               <Pencil className="h-4 w-4" /> Edit
             </button>
-            <button type="button" className={buttonPrimary} onClick={toggleStatus}>
+            <button
+              type="button"
+              className={buttonPrimary}
+              onClick={toggleStatus}
+            >
               {customer.status === "ACTIVE" ? "Deactivate" : "Activate"}
             </button>
           </div>
@@ -159,20 +200,34 @@ export function OrganizationCustomerDetailPage() {
         <div className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-3">
             <Card>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Contacts</p>
-              <p className="mt-2 text-2xl font-bold text-slate-800">{customer._count?.contacts ?? customer.contacts?.length ?? 0}</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                Contacts
+              </p>
+              <p className="mt-2 text-2xl font-bold text-slate-800">
+                {customer._count?.contacts ?? customer.contacts?.length ?? 0}
+              </p>
             </Card>
             <Card>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Sites</p>
-              <p className="mt-2 text-2xl font-bold text-slate-800">{customer._count?.sites ?? customer.sites?.length ?? 0}</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                Sites
+              </p>
+              <p className="mt-2 text-2xl font-bold text-slate-800">
+                {customer._count?.sites ?? customer.sites?.length ?? 0}
+              </p>
             </Card>
             <Card>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Tickets</p>
-              <p className="mt-2 text-2xl font-bold text-slate-800">{customer._count?.incidents ?? 0}</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                Tickets
+              </p>
+              <p className="mt-2 text-2xl font-bold text-slate-800">
+                {customer._count?.incidents ?? 0}
+              </p>
             </Card>
           </div>
           <Card>
-            <h2 className="mb-4 text-sm font-semibold text-slate-800">Customer details</h2>
+            <h2 className="mb-4 text-sm font-semibold text-slate-800">
+              Customer details
+            </h2>
             <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <DetailRow label="Type" value={customer.type} />
               <DetailRow label="Email" value={customer.email} />
@@ -182,11 +237,16 @@ export function OrganizationCustomerDetailPage() {
               <DetailRow label="Timezone" value={customer.timezone} />
               <DetailRow
                 label="Created"
-                value={new Date(customer.createdAt).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}
+                value={new Date(customer.createdAt).toLocaleDateString(
+                  undefined,
+                  { year: "numeric", month: "long", day: "numeric" },
+                )}
               />
             </dl>
             {customer.description ? (
-              <p className="mt-4 border-t border-slate-100 pt-4 text-sm text-slate-600">{customer.description}</p>
+              <p className="mt-4 border-t border-slate-100 pt-4 text-sm text-slate-600">
+                {customer.description}
+              </p>
             ) : null}
           </Card>
         </div>
@@ -195,9 +255,15 @@ export function OrganizationCustomerDetailPage() {
       {tab === "contacts" ? (
         <Card>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-800">Contacts & portal access</h2>
+            <h2 className="text-sm font-semibold text-slate-800">
+              Contacts & portal access
+            </h2>
             {canManageContacts ? (
-              <button type="button" className={buttonPrimary} onClick={() => setAddingContact(true)}>
+              <button
+                type="button"
+                className={buttonPrimary}
+                onClick={() => setAddingContact(true)}
+              >
                 <Plus className="h-4 w-4" /> Add contact
               </button>
             ) : null}
@@ -218,9 +284,15 @@ export function OrganizationCustomerDetailPage() {
       {tab === "sites" ? (
         <Card>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-800">Sites & data center locations</h2>
+            <h2 className="text-sm font-semibold text-slate-800">
+              Sites & data center locations
+            </h2>
             {canManageSites ? (
-              <button type="button" className={buttonPrimary} onClick={() => setAddingSite(true)}>
+              <button
+                type="button"
+                className={buttonPrimary}
+                onClick={() => setAddingSite(true)}
+              >
                 <Plus className="h-4 w-4" /> Add site
               </button>
             ) : null}
@@ -239,7 +311,9 @@ export function OrganizationCustomerDetailPage() {
 
       {tab === "tickets" ? (
         <Card>
-          <h2 className="mb-4 text-sm font-semibold text-slate-800">Customer ticket history</h2>
+          <h2 className="mb-4 text-sm font-semibold text-slate-800">
+            Customer ticket history
+          </h2>
           <CustomerTicketsTable
             incidents={incidentsQuery.data?.data ?? []}
             isLoading={incidentsQuery.isLoading}
@@ -266,7 +340,11 @@ export function OrganizationCustomerDetailPage() {
         customers={customerOptions}
         fixedCustomerId={customer.id}
       />
-      <button type="button" className="hidden" onClick={() => navigate(`${CUSTOMERS_BASE}/${customer.id}`)} />
+      <button
+        type="button"
+        className="hidden"
+        onClick={() => navigate(`${CUSTOMERS_BASE}/${customer.id}`)}
+      />
     </div>
   );
 }

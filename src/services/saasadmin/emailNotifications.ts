@@ -12,16 +12,25 @@ export const emailNotificationsApi = saasadminApi.injectEndpoints({
       providesTags: ["EmailNotification"],
     }),
     createEmailProvider: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/email-notifications/providers", method: "POST", body }),
+      query: (body) => ({
+        url: "/admin/email-notifications/providers",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["EmailNotification"],
     }),
     getEmailProvider: build.query<ApiSuccess<ApiRecord>, string>({
       query: (providerId) => ({
         url: `/admin/email-notifications/providers/${encodeURIComponent(providerId)}`,
       }),
-      providesTags: (_r, _e, providerId) => [{ type: "EmailNotification", id: providerId }],
+      providesTags: (_r, _e, providerId) => [
+        { type: "EmailNotification", id: providerId },
+      ],
     }),
-    updateEmailProvider: build.mutation<ApiSuccess<ApiRecord>, { providerId: string; body: ApiRecord }>({
+    updateEmailProvider: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { providerId: string; body: ApiRecord }
+    >({
       query: ({ providerId, body }) => ({
         url: `/admin/email-notifications/providers/${encodeURIComponent(providerId)}`,
         method: "PATCH",
@@ -32,7 +41,10 @@ export const emailNotificationsApi = saasadminApi.injectEndpoints({
         { type: "EmailNotification", id: providerId },
       ],
     }),
-    testEmailProvider: build.mutation<ApiSuccess<ApiRecord>, { providerId: string; body?: ApiRecord }>({
+    testEmailProvider: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { providerId: string; body?: ApiRecord }
+    >({
       query: ({ providerId, body }) => ({
         url: `/admin/email-notifications/providers/${encodeURIComponent(providerId)}/test`,
         method: "POST",
@@ -67,16 +79,25 @@ export const emailNotificationsApi = saasadminApi.injectEndpoints({
       providesTags: ["EmailNotification"],
     }),
     createEmailTemplate: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/email-notifications/templates", method: "POST", body }),
+      query: (body) => ({
+        url: "/admin/email-notifications/templates",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["EmailNotification"],
     }),
     getEmailTemplate: build.query<ApiSuccess<ApiRecord>, string>({
       query: (templateId) => ({
         url: `/admin/email-notifications/templates/${encodeURIComponent(templateId)}`,
       }),
-      providesTags: (_r, _e, templateId) => [{ type: "EmailNotification", id: templateId }],
+      providesTags: (_r, _e, templateId) => [
+        { type: "EmailNotification", id: templateId },
+      ],
     }),
-    updateEmailTemplate: build.mutation<ApiSuccess<ApiRecord>, { templateId: string; body: ApiRecord }>({
+    updateEmailTemplate: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { templateId: string; body: ApiRecord }
+    >({
       query: ({ templateId, body }) => ({
         url: `/admin/email-notifications/templates/${encodeURIComponent(templateId)}`,
         method: "PATCH",
@@ -87,7 +108,10 @@ export const emailNotificationsApi = saasadminApi.injectEndpoints({
         { type: "EmailNotification", id: templateId },
       ],
     }),
-    previewEmailTemplate: build.mutation<ApiSuccess<ApiRecord>, { templateId: string; body?: ApiRecord }>({
+    previewEmailTemplate: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { templateId: string; body?: ApiRecord }
+    >({
       query: ({ templateId, body }) => ({
         url: `/admin/email-notifications/templates/${encodeURIComponent(templateId)}/preview`,
         method: "POST",
@@ -99,10 +123,17 @@ export const emailNotificationsApi = saasadminApi.injectEndpoints({
       providesTags: ["EmailNotification"],
     }),
     createNotificationRule: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/email-notifications/rules", method: "POST", body }),
+      query: (body) => ({
+        url: "/admin/email-notifications/rules",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["EmailNotification"],
     }),
-    updateNotificationRule: build.mutation<ApiSuccess<ApiRecord>, { ruleId: string; body: ApiRecord }>({
+    updateNotificationRule: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { ruleId: string; body: ApiRecord }
+    >({
       query: ({ ruleId, body }) => ({
         url: `/admin/email-notifications/rules/${encodeURIComponent(ruleId)}`,
         method: "PATCH",
@@ -135,7 +166,9 @@ export const emailNotificationsApi = saasadminApi.injectEndpoints({
       query: (deliveryId) => ({
         url: `/admin/email-notifications/delivery-logs/${encodeURIComponent(deliveryId)}`,
       }),
-      providesTags: (_r, _e, deliveryId) => [{ type: "EmailNotification", id: deliveryId }],
+      providesTags: (_r, _e, deliveryId) => [
+        { type: "EmailNotification", id: deliveryId },
+      ],
     }),
   }),
 });

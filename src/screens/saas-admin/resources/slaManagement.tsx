@@ -1,5 +1,16 @@
-import { ShieldCheck, Target, AlertTriangle, Activity, Power, PowerOff } from "lucide-react";
-import { asQueryHook, asMutationHook, VARIANT_FROM_STATUS } from "../components/resource/types";
+import {
+  ShieldCheck,
+  Target,
+  AlertTriangle,
+  Activity,
+  Power,
+  PowerOff,
+} from "lucide-react";
+import {
+  asQueryHook,
+  asMutationHook,
+  VARIANT_FROM_STATUS,
+} from "../components/resource/types";
 import type { ResourceListConfig } from "../components/resource/types";
 import { textCol, statusCol } from "./columns";
 import {
@@ -22,9 +33,17 @@ export const SLA_MANAGEMENT_LISTS: ResourceListConfig[] = [
     rowId: "policyId",
     source: { kind: "api", useList: asQueryHook(useListSlaPoliciesQuery) },
     columns: [
-      { key: "key", header: "Key", render: (r) => <span className="font-mono text-xs">{String(r.key ?? "—")}</span> },
+      {
+        key: "key",
+        header: "Key",
+        render: (r) => (
+          <span className="font-mono text-xs">{String(r.key ?? "—")}</span>
+        ),
+      },
       textCol("name", "Name"),
-      statusCol("status", "Status", (r) => VARIANT_FROM_STATUS(String(r.status))),
+      statusCol("status", "Status", (r) =>
+        VARIANT_FROM_STATUS(String(r.status)),
+      ),
       textCol("serviceLevels", "Service Levels"),
       textCol("_count.escalationRules", "Escalation Rules"),
     ],
@@ -57,7 +76,8 @@ export const SLA_MANAGEMENT_LISTS: ResourceListConfig[] = [
         icon: <Power className="h-3.5 w-3.5" />,
         useAction: asMutationHook(useEnableSlaPolicyMutation),
         buildArg: (row) => String(row.policyId ?? row.id),
-        confirm: (row) => `Enable SLA policy "${row.name}"? It will apply to assigned tenants.`,
+        confirm: (row) =>
+          `Enable SLA policy "${row.name}"? It will apply to assigned tenants.`,
         successMessage: "Policy enabled.",
         show: (row) => String(row.status ?? "").toUpperCase() !== "ENABLED",
       },
@@ -67,14 +87,26 @@ export const SLA_MANAGEMENT_LISTS: ResourceListConfig[] = [
         variant: "danger",
         useAction: asMutationHook(useDisableSlaPolicyMutation),
         buildArg: (row) => String(row.policyId ?? row.id),
-        confirm: (row) => `Disable SLA policy "${row.name}"? Assigned tenants will lose these targets.`,
+        confirm: (row) =>
+          `Disable SLA policy "${row.name}"? Assigned tenants will lose these targets.`,
         successMessage: "Policy disabled.",
         show: (row) => String(row.status ?? "").toUpperCase() === "ENABLED",
       },
     ],
     stats: [
-      { key: "total", label: "Policies", compute: (rows) => rows.length, icon: <ShieldCheck className="h-5 w-5" /> },
-      { key: "enabled", label: "Enabled", compute: (rows) => rows.filter((r) => r.status === "ENABLED").length, color: "success", icon: <ShieldCheck className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Policies",
+        compute: (rows) => rows.length,
+        icon: <ShieldCheck className="h-5 w-5" />,
+      },
+      {
+        key: "enabled",
+        label: "Enabled",
+        compute: (rows) => rows.filter((r) => r.status === "ENABLED").length,
+        color: "success",
+        icon: <ShieldCheck className="h-5 w-5" />,
+      },
     ],
   },
   {
@@ -86,19 +118,27 @@ export const SLA_MANAGEMENT_LISTS: ResourceListConfig[] = [
     source: { kind: "api", useList: asQueryHook(useListSlaPoliciesQuery) },
     columns: [
       textCol("name", "Policy"),
-      statusCol("status", "Status", (r) => VARIANT_FROM_STATUS(String(r.status))),
+      statusCol("status", "Status", (r) =>
+        VARIANT_FROM_STATUS(String(r.status)),
+      ),
       textCol("serviceLevels", "Targets"),
       textCol("settings", "Settings"),
     ],
     searchable: (r) => `${r.name} ${r.key}`,
     stats: [
-      { key: "total", label: "Policies", compute: (rows) => rows.length, icon: <Target className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Policies",
+        compute: (rows) => rows.length,
+        icon: <Target className="h-5 w-5" />,
+      },
     ],
   },
   {
     path: "/saas-admin/sla-management/escalation-rules",
     title: "Escalation Rules",
-    description: "Rules that escalate work items when SLA thresholds are breached.",
+    description:
+      "Rules that escalate work items when SLA thresholds are breached.",
     sectionLabel: SECTION,
     rowId: "ruleId",
     source: { kind: "api", useList: asQueryHook(useListEscalationRulesQuery) },
@@ -116,19 +156,35 @@ export const SLA_MANAGEMENT_LISTS: ResourceListConfig[] = [
       fields: [
         { key: "name", label: "Name", type: "text", required: true },
         { key: "trigger", label: "Trigger", type: "text" },
-        { key: "thresholdMinutes", label: "Threshold (minutes)", type: "number" },
+        {
+          key: "thresholdMinutes",
+          label: "Threshold (minutes)",
+          type: "number",
+        },
       ],
       useCreate: asMutationHook(useCreateEscalationRuleMutation),
     },
     stats: [
-      { key: "total", label: "Rules", compute: (rows) => rows.length, icon: <AlertTriangle className="h-5 w-5" /> },
-      { key: "enabled", label: "Enabled", compute: (rows) => rows.filter((r) => r.isEnabled).length, color: "success", icon: <AlertTriangle className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Rules",
+        compute: (rows) => rows.length,
+        icon: <AlertTriangle className="h-5 w-5" />,
+      },
+      {
+        key: "enabled",
+        label: "Enabled",
+        compute: (rows) => rows.filter((r) => r.isEnabled).length,
+        color: "success",
+        icon: <AlertTriangle className="h-5 w-5" />,
+      },
     ],
   },
   {
     path: "/saas-admin/sla-management/breaches",
     title: "SLA Breach Monitoring",
-    description: "Escalation rules drive detection and handling of SLA breaches.",
+    description:
+      "Escalation rules drive detection and handling of SLA breaches.",
     sectionLabel: SECTION,
     rowId: "ruleId",
     source: { kind: "api", useList: asQueryHook(useListEscalationRulesQuery) },
@@ -141,8 +197,19 @@ export const SLA_MANAGEMENT_LISTS: ResourceListConfig[] = [
     ],
     searchable: (r) => `${r.name} ${r.trigger}`,
     stats: [
-      { key: "total", label: "Rules", compute: (rows) => rows.length, icon: <Activity className="h-5 w-5" /> },
-      { key: "enabled", label: "Active", compute: (rows) => rows.filter((r) => r.isEnabled).length, color: "success", icon: <Activity className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Rules",
+        compute: (rows) => rows.length,
+        icon: <Activity className="h-5 w-5" />,
+      },
+      {
+        key: "enabled",
+        label: "Active",
+        compute: (rows) => rows.filter((r) => r.isEnabled).length,
+        color: "success",
+        icon: <Activity className="h-5 w-5" />,
+      },
     ],
   },
 ];

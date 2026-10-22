@@ -28,7 +28,12 @@ export function Pagination({
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
-    <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 border-t border-slate-200", className)}>
+    <div
+      className={cn(
+        "flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 border-t border-slate-200",
+        className,
+      )}
+    >
       <div className="text-sm text-slate-500">
         Showing {startItem} to {endItem} of {totalItems} results
       </div>

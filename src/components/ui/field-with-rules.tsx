@@ -38,13 +38,13 @@ export function FieldWithRules({
   if (hidden) {
     return null;
   }
-  
+
   const classes = cn(
     "mb-4",
     disabled && "opacity-50 cursor-not-allowed",
-    readOnly && "bg-slate-100"
+    readOnly && "bg-slate-100",
   );
-  
+
   const renderInput = (): JSX.Element => {
     if (type === "text") {
       return (
@@ -103,7 +103,7 @@ export function FieldWithRules({
     }
     return <span>{label}</span>;
   };
-  
+
   return (
     <div className={classes}>
       <Label htmlFor={name}>{label}</Label>

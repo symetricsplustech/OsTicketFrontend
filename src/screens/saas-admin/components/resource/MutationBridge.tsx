@@ -28,7 +28,11 @@ export function MutationBridge({
       return;
     }
     const trigger: Trigger = (body?: unknown) =>
-      (rawTrigger as unknown as (b?: unknown) => { unwrap: () => Promise<unknown> })(body).unwrap();
+      (
+        rawTrigger as unknown as (b?: unknown) => {
+          unwrap: () => Promise<unknown>;
+        }
+      )(body).unwrap();
     onReadyRef.current(trigger);
     return () => onReadyRef.current(null);
   }, [rawTrigger]);

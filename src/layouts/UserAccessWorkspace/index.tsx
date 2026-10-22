@@ -70,7 +70,8 @@ export function UserAccessWorkspace({
           <span className="text-slate-600">{email}</span>
           {role ? (
             <span className="text-slate-600">
-              Member role: <span className="font-medium text-slate-800">{role}</span>
+              Member role:{" "}
+              <span className="font-medium text-slate-800">{role}</span>
             </span>
           ) : null}
           {accessStatus ? <StatusBadge status={accessStatus} /> : null}
@@ -88,7 +89,11 @@ function UserAccessTabs({ tabs }: { tabs: AccessTabDescriptor[] }) {
   return (
     <div>
       <Tabs
-        tabs={tabs.map((tab) => ({ id: tab.id, label: tab.label, icon: tab.icon }))}
+        tabs={tabs.map((tab) => ({
+          id: tab.id,
+          label: tab.label,
+          icon: tab.icon,
+        }))}
         active={activeTab?.id ?? ""}
         onChange={setActive}
       />

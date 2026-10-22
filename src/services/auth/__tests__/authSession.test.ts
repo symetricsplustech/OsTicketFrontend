@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { authReducer, sessionSet, logout, type AuthState } from "@services/auth/authSlice";
+import {
+  authReducer,
+  sessionSet,
+  logout,
+  type AuthState,
+} from "@services/auth/authSlice";
 
 const base: AuthState = {
   token: null,
@@ -33,7 +38,10 @@ describe("auth session roles", () => {
     expect(next.roles).toEqual(["support-manager"]);
     expect(next.user?.roles).toEqual(["support-manager"]);
     expect(next.role).toBe("support-manager");
-    expect(next.permissions).toEqual(["admin.dashboard.read", "admin.tenants.read"]);
+    expect(next.permissions).toEqual([
+      "admin.dashboard.read",
+      "admin.tenants.read",
+    ]);
   });
 
   it("falls back to the user's roles when the payload omits them", () => {
@@ -41,7 +49,12 @@ describe("auth session roles", () => {
       base,
       sessionSet({
         token: "t",
-        user: { _id: "u", name: "Owner", email: "o@e.com", roles: ["platform-owner"] },
+        user: {
+          _id: "u",
+          name: "Owner",
+          email: "o@e.com",
+          roles: ["platform-owner"],
+        },
         permissions: ["*"],
       }),
     );
@@ -49,7 +62,10 @@ describe("auth session roles", () => {
   });
 
   it("clears roles on logout", () => {
-    const next = authReducer({ ...base, token: "t", roles: ["platform-owner"] }, logout());
+    const next = authReducer(
+      { ...base, token: "t", roles: ["platform-owner"] },
+      logout(),
+    );
     expect(next.roles).toEqual([]);
   });
 });

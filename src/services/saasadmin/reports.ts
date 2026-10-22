@@ -16,27 +16,43 @@ export const reportsApi = saasadminApi.injectEndpoints({
       invalidatesTags: ["Report"],
     }),
     listReportRuns: build.query<ApiSuccess<ApiRecord[]>, ListQuery | void>({
-      query: (params) => ({ url: "/admin/reports/runs", params: params ?? undefined }),
+      query: (params) => ({
+        url: "/admin/reports/runs",
+        params: params ?? undefined,
+      }),
       providesTags: ["Report"],
     }),
     getReportRun: build.query<ApiSuccess<ApiRecord>, string>({
-      query: (runId) => ({ url: `/admin/reports/runs/${encodeURIComponent(runId)}` }),
+      query: (runId) => ({
+        url: `/admin/reports/runs/${encodeURIComponent(runId)}`,
+      }),
       providesTags: (_r, _e, runId) => [{ type: "Report", id: runId }],
     }),
     downloadReportRun: build.query<ApiSuccess<ApiRecord>, string>({
-      query: (runId) => ({ url: `/admin/reports/runs/${encodeURIComponent(runId)}/download` }),
+      query: (runId) => ({
+        url: `/admin/reports/runs/${encodeURIComponent(runId)}/download`,
+      }),
       providesTags: (_r, _e, runId) => [{ type: "Report", id: runId }],
     }),
     listReportExports: build.query<ApiSuccess<ApiRecord[]>, ListQuery | void>({
-      query: (params) => ({ url: "/admin/reports/exports", params: params ?? undefined }),
+      query: (params) => ({
+        url: "/admin/reports/exports",
+        params: params ?? undefined,
+      }),
       providesTags: ["Report"],
     }),
     createReportExport: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/reports/exports", method: "POST", body }),
+      query: (body) => ({
+        url: "/admin/reports/exports",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["Report"],
     }),
     getReportExport: build.query<ApiSuccess<ApiRecord>, string>({
-      query: (exportId) => ({ url: `/admin/reports/exports/${encodeURIComponent(exportId)}` }),
+      query: (exportId) => ({
+        url: `/admin/reports/exports/${encodeURIComponent(exportId)}`,
+      }),
       providesTags: (_r, _e, exportId) => [{ type: "Report", id: exportId }],
     }),
     deleteReportExport: build.mutation<null, string>({
@@ -47,17 +63,28 @@ export const reportsApi = saasadminApi.injectEndpoints({
       invalidatesTags: ["Report"],
     }),
     tenantUsageReport: build.query<ApiSuccess<ApiRecord>, ListQuery | void>({
-      query: (params) => ({ url: "/admin/reports/tenant-usage", params: params ?? undefined }),
+      query: (params) => ({
+        url: "/admin/reports/tenant-usage",
+        params: params ?? undefined,
+      }),
       providesTags: ["Report"],
     }),
     activityReport: build.query<ApiSuccess<ApiRecord>, ListQuery | void>({
-      query: (params) => ({ url: "/admin/reports/activity", params: params ?? undefined }),
+      query: (params) => ({
+        url: "/admin/reports/activity",
+        params: params ?? undefined,
+      }),
       providesTags: ["Report"],
     }),
-    securitySummaryReport: build.query<ApiSuccess<ApiRecord>, ListQuery | void>({
-      query: (params) => ({ url: "/admin/reports/security-summary", params: params ?? undefined }),
-      providesTags: ["Report"],
-    }),
+    securitySummaryReport: build.query<ApiSuccess<ApiRecord>, ListQuery | void>(
+      {
+        query: (params) => ({
+          url: "/admin/reports/security-summary",
+          params: params ?? undefined,
+        }),
+        providesTags: ["Report"],
+      },
+    ),
   }),
 });
 
@@ -83,15 +110,21 @@ export const {
  */
 export async function downloadReportArtifact(runId: string): Promise<void> {
   const token = TokenStore.get();
-  const response = await fetch(`${API_URL}/admin/reports/runs/${encodeURIComponent(runId)}/download`, {
-    headers: token ? { authorization: `Bearer ${token}` } : {},
-  });
+  const response = await fetch(
+    `${API_URL}/admin/reports/runs/${encodeURIComponent(runId)}/download`,
+    {
+      headers: token ? { authorization: `Bearer ${token}` } : {},
+    },
+  );
   if (!response.ok) {
-    throw new Error("This export is not ready or has expired. Generate a new export.");
+    throw new Error(
+      "This export is not ready or has expired. Generate a new export.",
+    );
   }
   const blob = await response.blob();
   const disposition = response.headers.get("content-disposition") ?? "";
-  const fileName = /filename="?([^";]+)"?/.exec(disposition)?.[1] ?? `report-${runId}.csv`;
+  const fileName =
+    /filename="?([^";]+)"?/.exec(disposition)?.[1] ?? `report-${runId}.csv`;
   const objectUrl = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = objectUrl;

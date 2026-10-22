@@ -51,7 +51,9 @@ export function Modal({
         );
         if (focusableElements?.length) {
           const first = focusableElements[0] as HTMLElement;
-          const last = focusableElements[focusableElements.length - 1] as HTMLElement;
+          const last = focusableElements[
+            focusableElements.length - 1
+          ] as HTMLElement;
           if (e.shiftKey && document.activeElement === first) {
             e.preventDefault();
             last.focus();
@@ -96,10 +98,15 @@ export function Modal({
       >
         <div className="flex items-start justify-between border-b border-slate-200 px-6 py-4">
           <div>
-            <h2 id="modal-title" className="text-lg font-semibold text-slate-900">
+            <h2
+              id="modal-title"
+              className="text-lg font-semibold text-slate-900"
+            >
               {title}
             </h2>
-            {description && <p className="mt-1 text-sm text-slate-500">{description}</p>}
+            {description && (
+              <p className="mt-1 text-sm text-slate-500">{description}</p>
+            )}
           </div>
           {showCloseButton && (
             <button

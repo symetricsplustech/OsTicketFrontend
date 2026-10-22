@@ -22,9 +22,14 @@ const NON_RETURN_PATHS = new Set(["/", "/login", "/mfa", "/register"]);
  * actually open it. Prevents an org admin from being bounced back into a stale
  * `/saas-admin` URL (and vice versa) after signing in.
  */
-export function canOpenPath(pathname: string, permissions: readonly string[]): boolean {
-  if (pathname.startsWith("/saas-admin")) return canAccessSaasAdmin(permissions);
-  if (pathname.startsWith("/organization")) return canAccessOrganizationAdmin(permissions);
+export function canOpenPath(
+  pathname: string,
+  permissions: readonly string[],
+): boolean {
+  if (pathname.startsWith("/saas-admin"))
+    return canAccessSaasAdmin(permissions);
+  if (pathname.startsWith("/organization"))
+    return canAccessOrganizationAdmin(permissions);
   return true;
 }
 
@@ -39,7 +44,11 @@ export function postLoginPath(
     return `${from}${redirect?.from?.search ?? ""}`;
   }
   const returnTo = redirect?.returnTo;
-  if (returnTo && !NON_RETURN_PATHS.has(returnTo) && canOpenPath(returnTo, permissions)) {
+  if (
+    returnTo &&
+    !NON_RETURN_PATHS.has(returnTo) &&
+    canOpenPath(returnTo, permissions)
+  ) {
     return returnTo;
   }
   return postAuthDestination(permissions, instanceId);
@@ -70,7 +79,11 @@ export function LoginPage() {
         return;
       }
       navigate(
-        postLoginPath(location.state, response.permissions, auth.selectedInstance?._id),
+        postLoginPath(
+          location.state,
+          response.permissions,
+          auth.selectedInstance?._id,
+        ),
         { replace: true },
       );
     } catch (err) {
@@ -87,7 +100,10 @@ export function LoginPage() {
       footer={
         <p>
           No account yet?{" "}
-          <Link to="/register" className="font-medium text-brand-600 hover:underline">
+          <Link
+            to="/register"
+            className="font-medium text-brand-600 hover:underline"
+          >
             Create one
           </Link>
         </p>
@@ -119,7 +135,10 @@ export function LoginPage() {
 
         <div>
           <div className="mb-1 flex items-baseline justify-between">
-            <label htmlFor="password" className="text-xs font-medium text-slate-600">
+            <label
+              htmlFor="password"
+              className="text-xs font-medium text-slate-600"
+            >
               Password
             </label>
             <Link
@@ -146,15 +165,42 @@ export function LoginPage() {
         </Button>
 
         <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-relaxed text-slate-500">
-          <p className="mb-1 font-semibold uppercase tracking-wide text-slate-600">Demo & seeded accounts</p>
-          <p>
-            <span className="font-medium text-slate-700">SaaS Admin</span> — saasadmin@nexa.io / SaasAdmin@123
+          <p className="mb-1 font-semibold uppercase tracking-wide text-slate-600">
+            Seeded accounts
           </p>
           <p>
-            <span className="font-medium text-slate-700">Organization Admin</span> — admin@acmetech.io / OrgAdmin@123
+            <span className="font-medium text-slate-700">
+              Platform Owner
+            </span>{" "}
+            — platform.owner@example.com / Platform#2026Aa!
           </p>
           <p>
-            <span className="font-medium text-slate-700">Platform Owner</span> — platform.owner@example.com / Platform#2026Aa!
+            <span className="font-medium text-slate-700">Organization Admin</span>{" "}
+            — admin@acmetech.io / OrgAdmin@123
+          </p>
+          <p>
+            <span className="font-medium text-slate-700">Operations Employee</span>{" "}
+            — ops.employee@acmetech.io / ops.employee@123
+          </p>
+          <p>
+            <span className="font-medium text-slate-700">Team Lead</span>{" "}
+            — team.lead@acmetech.io / team.lead@123
+          </p>
+          <p>
+            <span className="font-medium text-slate-700">Operations Manager</span>{" "}
+            — ops.manager@acmetech.io / ops.manager@123
+          </p>
+          <p>
+            <span className="font-medium text-slate-700">Remote Engineer</span>{" "}
+            — remote.engineer@acmetech.io / remote.engineer@123
+          </p>
+          <p>
+            <span className="font-medium text-slate-700">Field Engineer</span>{" "}
+            — field.engineer@acmetech.io / field.engineer@123
+          </p>
+          <p>
+            <span className="font-medium text-slate-700">Customer Contact</span>{" "}
+            — ravi.sharma@northwind-dc.example / Customer@123
           </p>
         </div>
       </form>

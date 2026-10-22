@@ -3,7 +3,10 @@ import { Plus, Search } from "lucide-react";
 import { useAppSelector } from "@store/hooks";
 import { selectPermissions } from "@services/auth/authSlice";
 import { can } from "@services/authorization/permissions";
-import { useListCustomersQuery, useListCustomerSitesQuery } from "@services/tenantadmin";
+import {
+  useListCustomersQuery,
+  useListCustomerSitesQuery,
+} from "@services/tenantadmin";
 import { SiteFormModal } from "./customerForms";
 import { CustomerSitesTable } from "./customerTables";
 import { buttonPrimary, inputClass } from "./ui";
@@ -30,14 +33,23 @@ export function OrganizationCustomerSitesPage() {
     <div>
       <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Customers & Customer Contacts</p>
-          <h1 className="mt-1 text-2xl font-bold text-slate-900 md:text-3xl">Service Locations</h1>
+          <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">
+            Customers & Customer Contacts
+          </p>
+          <h1 className="mt-1 text-2xl font-bold text-slate-900 md:text-3xl">
+            Service Locations
+          </h1>
           <p className="mt-2 max-w-3xl text-sm text-slate-500">
-            Customer sites, offices and data center locations where support is delivered.
+            Customer sites, offices and data center locations where support is
+            delivered.
           </p>
         </div>
         {canManageSites ? (
-          <button type="button" className={buttonPrimary} onClick={() => setAdding(true)}>
+          <button
+            type="button"
+            className={buttonPrimary}
+            onClick={() => setAdding(true)}
+          >
             <Plus className="h-4 w-4" /> Add site
           </button>
         ) : null}
@@ -54,7 +66,11 @@ export function OrganizationCustomerSitesPage() {
               className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
             />
           </label>
-          <select className={`${inputClass} w-56`} value={customerId} onChange={(event) => setCustomerId(event.target.value)}>
+          <select
+            className={`${inputClass} w-56`}
+            value={customerId}
+            onChange={(event) => setCustomerId(event.target.value)}
+          >
             <option value="">All customers</option>
             {customers.map((customer) => (
               <option key={customer.id} value={customer.id}>
@@ -83,7 +99,11 @@ export function OrganizationCustomerSitesPage() {
         </div>
       </div>
 
-      <SiteFormModal open={adding} onClose={() => setAdding(false)} customers={customers} />
+      <SiteFormModal
+        open={adding}
+        onClose={() => setAdding(false)}
+        customers={customers}
+      />
     </div>
   );
 }

@@ -30,7 +30,10 @@ function grantsFor(permission: string): boolean {
   // resolves the section/item for a fixed path so assertions read clearly
   const entry = SAAS_ADMIN_NAVIGATION.flatMap((section) =>
     section.items
-      .filter((i) => i.path.split("/").length === 4 && i.path.startsWith("/saas-admin/"))
+      .filter(
+        (i) =>
+          i.path.split("/").length === 4 && i.path.startsWith("/saas-admin/"),
+      )
       .map((item) => ({ section, item })),
   ).find(({ item }) => item.path === permission);
   if (!entry) return false;
@@ -41,7 +44,10 @@ describe("saas admin access", () => {
   it("platform owner (wildcard) can view every item", () => {
     for (const section of SAAS_ADMIN_NAVIGATION) {
       for (const item of section.items) {
-        expect(canViewSaasAdminItem(OWNER, section, item), `${section.key}:${item.key}`).toBe(true);
+        expect(
+          canViewSaasAdminItem(OWNER, section, item),
+          `${section.key}:${item.key}`,
+        ).toBe(true);
       }
     }
   });
@@ -51,7 +57,8 @@ describe("saas admin access", () => {
     for (const section of SAAS_ADMIN_NAVIGATION) {
       for (const item of section.items) {
         if (item.hidden) continue;
-        if (canViewSaasAdminItem(TENANT_VIEWER, section, item)) visible.push(`${section.key}/${item.key}`);
+        if (canViewSaasAdminItem(TENANT_VIEWER, section, item))
+          visible.push(`${section.key}/${item.key}`);
       }
     }
     expect(visible.sort()).toEqual([
@@ -84,14 +91,18 @@ describe("saas admin access", () => {
     const entry = SAAS_ADMIN_NAVIGATION.flatMap((section) =>
       section.items.map((item) => ({ section, item })),
     ).find(({ item }) => item.key === "all-tenants")!;
-    expect(itemPermissionGrants(entry.section, entry.item)).toEqual(["admin.tenants.*"]);
+    expect(itemPermissionGrants(entry.section, entry.item)).toEqual([
+      "admin.tenants.*",
+    ]);
   });
 
   it("my-account is always available to any signed-in admin", () => {
     const entry = SAAS_ADMIN_NAVIGATION.flatMap((section) =>
       section.items.map((item) => ({ section, item })),
     ).find(({ item }) => item.key === "profile")!;
-    expect(canViewSaasAdminItem(TENANT_VIEWER, entry.section, entry.item)).toBe(true);
+    expect(canViewSaasAdminItem(TENANT_VIEWER, entry.section, entry.item)).toBe(
+      true,
+    );
   });
 
   it("canAccessSaasAdmin is false for ITSM-only or empty sessions", () => {
@@ -102,8 +113,12 @@ describe("saas admin access", () => {
   });
 
   it("firstAccessibleSaasAdminPath picks the first permitted item", () => {
-    expect(firstAccessibleSaasAdminPath(TENANT_VIEWER)).toBe("/saas-admin/dashboard/overview");
-    expect(firstAccessibleSaasAdminPath(["admin.staff.manage"])).toBe("/saas-admin/staff-management/staff-accounts");
+    expect(firstAccessibleSaasAdminPath(TENANT_VIEWER)).toBe(
+      "/saas-admin/dashboard/overview",
+    );
+    expect(firstAccessibleSaasAdminPath(["admin.staff.manage"])).toBe(
+      "/saas-admin/staff-management/staff-accounts",
+    );
     expect(firstAccessibleSaasAdminPath(["itsm.incident.read"])).toBeNull();
   });
 
@@ -111,8 +126,16 @@ describe("saas admin access", () => {
     const entry = SAAS_ADMIN_NAVIGATION.flatMap((section) =>
       section.items.map((item) => ({ section, item })),
     ).find(({ item }) => item.key === "audit-logs")!;
-    expect(canViewSaasAdminItem(["admin.settings.manage"], entry.section, entry.item)).toBe(false);
-    expect(canViewSaasAdminItem(["admin.audit.read"], entry.section, entry.item)).toBe(true);
+    expect(
+      canViewSaasAdminItem(
+        ["admin.settings.manage"],
+        entry.section,
+        entry.item,
+      ),
+    ).toBe(false);
+    expect(
+      canViewSaasAdminItem(["admin.audit.read"], entry.section, entry.item),
+    ).toBe(true);
   });
 
   it("grantsFor sanity (owner full access)", () => {

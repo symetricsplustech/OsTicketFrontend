@@ -25,10 +25,15 @@ function formatDate(value: string | null | undefined): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
-const thClass = "px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-400";
+const thClass =
+  "px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-400";
 const tdClass = "px-3 py-3 text-sm text-slate-600";
 
 export function CustomerContactsTable({
@@ -68,16 +73,23 @@ export function CustomerContactsTable({
 
   if (isLoading) return <LoadingState label="Loading contacts…" />;
   if (error) return <ErrorState message={apiErrorMessage(error)} />;
-  if (contacts.length === 0) return <EmptyState label={emptyLabel ?? "No contacts yet."} />;
+  if (contacts.length === 0)
+    return <EmptyState label={emptyLabel ?? "No contacts yet."} />;
 
   return (
     <div>
-      {actionError ? <div className="mb-3"><ErrorState message={actionError} /></div> : null}
+      {actionError ? (
+        <div className="mb-3">
+          <ErrorState message={actionError} />
+        </div>
+      ) : null}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-100">
           <thead className="bg-slate-50/60">
             <tr>
-              {showCustomerColumn ? <th className={thClass}>Customer</th> : null}
+              {showCustomerColumn ? (
+                <th className={thClass}>Customer</th>
+              ) : null}
               <th className={thClass}>Name</th>
               <th className={thClass}>Email</th>
               <th className={thClass}>Role</th>
@@ -96,9 +108,15 @@ export function CustomerContactsTable({
                     {contact.firstName} {contact.lastName}
                   </span>
                   {contact.isPrimary ? (
-                    <span className="ml-2 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">Primary</span>
+                    <span className="ml-2 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">
+                      Primary
+                    </span>
                   ) : null}
-                  {contact.jobTitle ? <div className="text-xs text-slate-400">{contact.jobTitle}</div> : null}
+                  {contact.jobTitle ? (
+                    <div className="text-xs text-slate-400">
+                      {contact.jobTitle}
+                    </div>
+                  ) : null}
                 </td>
                 <td className={tdClass}>{contact.email}</td>
                 <td className={tdClass}>{contact.role}</td>
@@ -108,7 +126,11 @@ export function CustomerContactsTable({
                 <td className={tdClass}>
                   <div className="flex flex-wrap items-center gap-1">
                     {canManageContacts ? (
-                      <button type="button" className={buttonGhost} onClick={() => setEditing(contact)}>
+                      <button
+                        type="button"
+                        className={buttonGhost}
+                        onClick={() => setEditing(contact)}
+                      >
                         <Pencil className="h-3.5 w-3.5" /> Edit
                       </button>
                     ) : null}
@@ -119,22 +141,32 @@ export function CustomerContactsTable({
                         disabled={inviteState.isLoading}
                         onClick={() =>
                           runAction(() =>
-                            invitePortal({ customerId: contact.customerId, contactId: contact.id }).unwrap(),
+                            invitePortal({
+                              customerId: contact.customerId,
+                              contactId: contact.id,
+                            }).unwrap(),
                           )
                         }
                       >
                         <Send className="h-3.5 w-3.5" />
-                        {contact.portalStatus === "INVITED" ? "Resend invite" : "Invite to portal"}
+                        {contact.portalStatus === "INVITED"
+                          ? "Resend invite"
+                          : "Invite to portal"}
                       </button>
                     ) : null}
-                    {canManagePortal && (contact.portalStatus === "INVITED" || contact.portalStatus === "ACTIVE") ? (
+                    {canManagePortal &&
+                    (contact.portalStatus === "INVITED" ||
+                      contact.portalStatus === "ACTIVE") ? (
                       <button
                         type="button"
                         className={buttonDanger}
                         disabled={revokeState.isLoading}
                         onClick={() =>
                           runAction(() =>
-                            revokePortal({ customerId: contact.customerId, contactId: contact.id }).unwrap(),
+                            revokePortal({
+                              customerId: contact.customerId,
+                              contactId: contact.id,
+                            }).unwrap(),
                           )
                         }
                       >
@@ -181,7 +213,8 @@ export function CustomerSitesTable({
 
   if (isLoading) return <LoadingState label="Loading sites…" />;
   if (error) return <ErrorState message={apiErrorMessage(error)} />;
-  if (sites.length === 0) return <EmptyState label="No sites registered yet." />;
+  if (sites.length === 0)
+    return <EmptyState label="No sites registered yet." />;
 
   return (
     <div>
@@ -189,7 +222,9 @@ export function CustomerSitesTable({
         <table className="min-w-full divide-y divide-slate-100">
           <thead className="bg-slate-50/60">
             <tr>
-              {showCustomerColumn ? <th className={thClass}>Customer</th> : null}
+              {showCustomerColumn ? (
+                <th className={thClass}>Customer</th>
+              ) : null}
               <th className={thClass}>Site</th>
               <th className={thClass}>Type</th>
               <th className={thClass}>Location</th>
@@ -200,23 +235,39 @@ export function CustomerSitesTable({
           <tbody className="divide-y divide-slate-50">
             {sites.map((site) => (
               <tr key={site.id} className="hover:bg-slate-50/60">
-                {showCustomerColumn ? <td className={tdClass}>{site.customer?.name ?? "—"}</td> : null}
+                {showCustomerColumn ? (
+                  <td className={tdClass}>{site.customer?.name ?? "—"}</td>
+                ) : null}
                 <td className={tdClass}>
-                  <span className="font-medium text-slate-800">{site.name}</span>
-                  {site.code ? <span className="ml-2 text-xs text-slate-400">{site.code}</span> : null}
+                  <span className="font-medium text-slate-800">
+                    {site.name}
+                  </span>
+                  {site.code ? (
+                    <span className="ml-2 text-xs text-slate-400">
+                      {site.code}
+                    </span>
+                  ) : null}
                 </td>
                 <td className={tdClass}>
                   {site.isDataCenter ? (
-                    <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700">Data center</span>
+                    <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700">
+                      Data center
+                    </span>
                   ) : (
                     site.siteType
                   )}
                 </td>
-                <td className={tdClass}>{[site.city, site.country].filter(Boolean).join(", ") || "—"}</td>
+                <td className={tdClass}>
+                  {[site.city, site.country].filter(Boolean).join(", ") || "—"}
+                </td>
                 <td className={tdClass}>{site.status}</td>
                 {canManage ? (
                   <td className={tdClass}>
-                    <button type="button" className={buttonGhost} onClick={() => setEditing(site)}>
+                    <button
+                      type="button"
+                      className={buttonGhost}
+                      onClick={() => setEditing(site)}
+                    >
                       <Pencil className="h-3.5 w-3.5" /> Edit
                     </button>
                   </td>
@@ -251,7 +302,10 @@ export function CustomerTicketsTable({
 }) {
   if (isLoading) return <LoadingState label="Loading tickets…" />;
   if (error) return <ErrorState message={apiErrorMessage(error)} />;
-  if (incidents.length === 0) return <EmptyState label={emptyLabel ?? "No tickets for this customer yet."} />;
+  if (incidents.length === 0)
+    return (
+      <EmptyState label={emptyLabel ?? "No tickets for this customer yet."} />
+    );
 
   return (
     <div className="overflow-x-auto">
@@ -269,9 +323,13 @@ export function CustomerTicketsTable({
         <tbody className="divide-y divide-slate-50">
           {incidents.map((incident) => (
             <tr key={incident.id} className="hover:bg-slate-50/60">
-              <td className={`${tdClass} font-mono text-xs`}>{incident.number}</td>
+              <td className={`${tdClass} font-mono text-xs`}>
+                {incident.number}
+              </td>
               <td className={tdClass}>
-                <span className="font-medium text-slate-800">{incident.title}</span>
+                <span className="font-medium text-slate-800">
+                  {incident.title}
+                </span>
               </td>
               <td className={tdClass}>
                 <IncidentStatusBadge status={incident.statusKey} />

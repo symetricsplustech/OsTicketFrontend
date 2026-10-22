@@ -19,23 +19,16 @@ export function LoadingEmptyError({
   emptyTitle = "No items",
   emptyDescription,
   skeleton,
-  label = "Loading…"
+  label = "Loading…",
 }: LoadingEmptyErrorProps) {
   if (loading || skeleton) {
-    return (
-      <PageLoader label={label} />
-    );
+    return <PageLoader label={label} />;
   }
-  
+
   if (empty) {
-    return (
-      <EmptyState
-        title={emptyTitle}
-        description={emptyDescription}
-      />
-    );
+    return <EmptyState title={emptyTitle} description={emptyDescription} />;
   }
-  
+
   if (error) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -43,6 +36,6 @@ export function LoadingEmptyError({
       </div>
     );
   }
-  
+
   return null;
 }

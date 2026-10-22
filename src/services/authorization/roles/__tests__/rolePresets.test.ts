@@ -20,7 +20,7 @@ describe("Role Presets", () => {
     expect(owner?.permissions).toContain("saas.*");
     expect(owner?.permissions).toContain("tenant.*");
     expect(owner?.permissions).not.toContain("*");
-    expect(owner?.permissions.some(p => p.startsWith("itsm."))).toBe(false);
+    expect(owner?.permissions.some((p) => p.startsWith("itsm."))).toBe(false);
     expect(owner?.isSystem).toBe(true);
   });
 
@@ -36,7 +36,9 @@ describe("Role Presets", () => {
   it("should have service_desk_agent role", () => {
     const agent = getRolePreset("service_desk_agent");
     expect(agent).toBeDefined();
-    expect(agent?.permissions).toContain("itsm.assignment.ui.agent_inbox.access");
+    expect(agent?.permissions).toContain(
+      "itsm.assignment.ui.agent_inbox.access",
+    );
     expect(agent?.category).toBe("itsm-fulfiller");
   });
 
@@ -44,7 +46,9 @@ describe("Role Presets", () => {
     const requester = getRolePreset("requester");
     expect(requester).toBeDefined();
     expect(requester?.category).toBe("self-service");
-    expect(requester?.permissions).toContain("itsm.request_catalog.ui.catalog_home.access");
+    expect(requester?.permissions).toContain(
+      "itsm.request_catalog.ui.catalog_home.access",
+    );
     expect(requester?.permissions).toContain("itsm.experience.portal_access");
   });
 
@@ -132,7 +136,9 @@ describe("Role Presets", () => {
     expect(engineer).toBeDefined();
     expect(engineer?.category).toBe("itsm-fulfiller");
     expect(engineer?.permissions).toContain("itsm.asset.asset.read");
-    expect(engineer?.permissions).toContain("itsm.on_call.current_on_call_read");
+    expect(engineer?.permissions).toContain(
+      "itsm.on_call.current_on_call_read",
+    );
   });
 
   it("should have change_agent role", () => {
@@ -155,7 +161,9 @@ describe("Role Presets", () => {
     const guest = getRolePreset("guest");
     expect(guest).toBeDefined();
     expect(guest?.category).toBe("self-service");
-    expect(guest?.permissions).toContain("itsm.knowledge.knowledge_article.read");
+    expect(guest?.permissions).toContain(
+      "itsm.knowledge.knowledge_article.read",
+    );
   });
 
   it("should have all categories defined", () => {
@@ -176,7 +184,9 @@ describe("Role Presets", () => {
 
     const fulfillerRoles = getRolePresetsByCategory("itsm-fulfiller");
     expect(fulfillerRoles.length).toBeGreaterThan(0);
-    expect(fulfillerRoles.every((r) => r.category === "itsm-fulfiller")).toBe(true);
+    expect(fulfillerRoles.every((r) => r.category === "itsm-fulfiller")).toBe(
+      true,
+    );
   });
 
   it("should get all role presets", () => {

@@ -40,14 +40,39 @@ export function InstanceAdminShell() {
   const sections: NavSection[] = [
     {
       title: "Organization",
-      items: [{ to: `${prefix}/admin/organization/companies`, label: "Companies", icon: <Building2 className="h-4 w-4" />, permissions: ["tenant.organization.read", "tenant.organization.update"] }],
+      items: [
+        {
+          to: `${prefix}/admin/organization/companies`,
+          label: "Companies",
+          icon: <Building2 className="h-4 w-4" />,
+          permissions: [
+            "tenant.organization.read",
+            "tenant.organization.update",
+          ],
+        },
+      ],
     },
     {
       title: "Service operations",
       items: [
-        { to: `/${instanceId}/workspace/incidents`, label: "Incidents", icon: <ClipboardList className="h-4 w-4" />, permissions: ["itsm.incident.incident.read", "itsm.incident.*"] },
-        { to: `/${instanceId}/workspace/problems`, label: "Problems", icon: <GitBranch className="h-4 w-4" />, permissions: ["itsm.problem.problem.read", "itsm.problem.*"] },
-        { to: `/${instanceId}/workspace/changes`, label: "Changes", icon: <CalendarDays className="h-4 w-4" />, permissions: ["itsm.change.change_request.read", "itsm.change.*"] },
+        {
+          to: `/${instanceId}/workspace/incidents`,
+          label: "Incidents",
+          icon: <ClipboardList className="h-4 w-4" />,
+          permissions: ["itsm.incident.incident.read", "itsm.incident.*"],
+        },
+        {
+          to: `/${instanceId}/workspace/problems`,
+          label: "Problems",
+          icon: <GitBranch className="h-4 w-4" />,
+          permissions: ["itsm.problem.problem.read", "itsm.problem.*"],
+        },
+        {
+          to: `/${instanceId}/workspace/changes`,
+          label: "Changes",
+          icon: <CalendarDays className="h-4 w-4" />,
+          permissions: ["itsm.change.change_request.read", "itsm.change.*"],
+        },
       ],
     },
     {
@@ -91,7 +116,8 @@ export function InstanceAdminShell() {
     .map((section) => ({
       ...section,
       items: section.items.filter(
-        (item) => !item.permissions || canAny(auth.permissions, item.permissions),
+        (item) =>
+          !item.permissions || canAny(auth.permissions, item.permissions),
       ),
     }))
     .filter((section) => section.items.length > 0);
@@ -153,7 +179,9 @@ export function InstanceAdminShell() {
               <p className="truncate text-xs font-medium text-slate-800">
                 {auth.user?.name ?? "Account"}
               </p>
-              <p className="truncate text-[11px] text-slate-400">{auth.role ?? "member"}</p>
+              <p className="truncate text-[11px] text-slate-400">
+                {auth.role ?? "member"}
+              </p>
             </div>
           </div>
           <button
@@ -171,7 +199,10 @@ export function InstanceAdminShell() {
         <div className="border-b border-slate-200 bg-white px-8 py-3">
           <div className="flex items-center justify-between">
             <p className="text-xs text-slate-500">
-              Instance: <span className="font-medium text-slate-700">{auth.selectedInstance?.name}</span>
+              Instance:{" "}
+              <span className="font-medium text-slate-700">
+                {auth.selectedInstance?.name}
+              </span>
             </p>
             <p className="flex items-center gap-1 text-xs text-slate-400">
               <ShieldCheck className="h-3.5 w-3.5" />

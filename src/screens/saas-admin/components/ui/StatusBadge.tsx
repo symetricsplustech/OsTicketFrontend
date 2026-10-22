@@ -1,6 +1,16 @@
 import { cn } from "@utils/cn";
 
-export type StatusVariant = "active" | "pending" | "suspended" | "archived" | "inactive" | "draft" | "published" | "disabled" | "enabled" | "default";
+export type StatusVariant =
+  | "active"
+  | "pending"
+  | "suspended"
+  | "archived"
+  | "inactive"
+  | "draft"
+  | "published"
+  | "disabled"
+  | "enabled"
+  | "default";
 
 export interface StatusBadgeProps {
   status: string;
@@ -22,7 +32,12 @@ const variantStyles: Record<StatusVariant, string> = {
   default: "bg-slate-100 text-slate-800",
 };
 
-export function StatusBadge({ status, variant = "default", size = "md", className }: StatusBadgeProps) {
+export function StatusBadge({
+  status,
+  variant = "default",
+  size = "md",
+  className,
+}: StatusBadgeProps) {
   const style = variantStyles[variant] || variantStyles.default;
 
   return (

@@ -1,6 +1,9 @@
 import { Settings, FileText } from "lucide-react";
 import { asQueryHook, asMutationHook } from "../components/resource/types";
-import type { ResourceListConfig, ConfigPanelConfig } from "../components/resource/types";
+import type {
+  ResourceListConfig,
+  ConfigPanelConfig,
+} from "../components/resource/types";
 import { textCol } from "./columns";
 import {
   useGetItsmModuleQuery,
@@ -13,7 +16,13 @@ import {
 
 const SECTION = "Global ITSM Configuration";
 
-function modulePanel(path: string, title: string, description: string, moduleKey: string, moduleName: string): ConfigPanelConfig {
+function modulePanel(
+  path: string,
+  title: string,
+  description: string,
+  moduleKey: string,
+  moduleName: string,
+): ConfigPanelConfig {
   return {
     path,
     title,
@@ -23,13 +32,26 @@ function modulePanel(path: string, title: string, description: string, moduleKey
       { key: "moduleKey", label: "Module", type: "text", readOnly: true },
       { key: "name", label: "Module Name", type: "text", readOnly: true },
       { key: "description", label: "Description", type: "textarea" },
-      { key: "isEnabled", label: "Enabled for tenants", type: "boolean", help: "Globally enable or disable this ITSM module." },
-      { key: "defaultSettings", label: "Default Settings", type: "textarea", help: "JSON default settings applied to new tenants." },
+      {
+        key: "isEnabled",
+        label: "Enabled for tenants",
+        type: "boolean",
+        help: "Globally enable or disable this ITSM module.",
+      },
+      {
+        key: "defaultSettings",
+        label: "Default Settings",
+        type: "textarea",
+        help: "JSON default settings applied to new tenants.",
+      },
     ],
     useGet: asQueryHook(() => useGetItsmModuleQuery(moduleKey)),
     useUpdate: asMutationHook(useUpdateItsmModuleMutation),
     getValues: (payload) => {
-      const value = (payload && typeof payload === "object" && (payload as { data?: unknown }).data) as Record<string, unknown> | undefined;
+      const value = (payload &&
+        typeof payload === "object" &&
+        (payload as { data?: unknown }).data) as
+        Record<string, unknown> | undefined;
       return {
         moduleKey: value?.moduleKey ?? moduleKey,
         name: value?.name ?? moduleName,
@@ -92,7 +114,13 @@ export const ITSM_CONFIGURATION_LISTS: ResourceListConfig[] = [
     rowId: "priorityId",
     source: { kind: "api", useList: asQueryHook(useListItsmPrioritiesQuery) },
     columns: [
-      { key: "key", header: "Key", render: (r) => <span className="font-mono text-xs">{String(r.key ?? "—")}</span> },
+      {
+        key: "key",
+        header: "Key",
+        render: (r) => (
+          <span className="font-mono text-xs">{String(r.key ?? "—")}</span>
+        ),
+      },
       textCol("name", "Priority"),
       textCol("rank", "Rank"),
       textCol("color", "Color"),
@@ -111,19 +139,37 @@ export const ITSM_CONFIGURATION_LISTS: ResourceListConfig[] = [
       useCreate: asMutationHook(useCreateItsmPriorityMutation),
     },
     stats: [
-      { key: "total", label: "Priorities", compute: (rows) => rows.length, icon: <Settings className="h-5 w-5" /> },
-      { key: "default", label: "Default", compute: (rows) => rows.filter((r) => r.isDefault).length, color: "success", icon: <Settings className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Priorities",
+        compute: (rows) => rows.length,
+        icon: <Settings className="h-5 w-5" />,
+      },
+      {
+        key: "default",
+        label: "Default",
+        compute: (rows) => rows.filter((r) => r.isDefault).length,
+        color: "success",
+        icon: <Settings className="h-5 w-5" />,
+      },
     ],
   },
   {
     path: "/saas-admin/itsm-configuration/custom-fields",
     title: "Custom Fields",
-    description: "Global status definitions that power per-module record fields.",
+    description:
+      "Global status definitions that power per-module record fields.",
     sectionLabel: SECTION,
     rowId: "statusId",
     source: { kind: "api", useList: asQueryHook(useListItsmStatusesQuery) },
     columns: [
-      { key: "key", header: "Key", render: (r) => <span className="font-mono text-xs">{String(r.key ?? "—")}</span> },
+      {
+        key: "key",
+        header: "Key",
+        render: (r) => (
+          <span className="font-mono text-xs">{String(r.key ?? "—")}</span>
+        ),
+      },
       textCol("name", "Status"),
       textCol("moduleKey", "Module"),
       textCol("category", "Category"),
@@ -143,7 +189,12 @@ export const ITSM_CONFIGURATION_LISTS: ResourceListConfig[] = [
       useCreate: asMutationHook(useCreateItsmStatusMutation),
     },
     stats: [
-      { key: "total", label: "Statuses", compute: (rows) => rows.length, icon: <FileText className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Statuses",
+        compute: (rows) => rows.length,
+        icon: <FileText className="h-5 w-5" />,
+      },
     ],
   },
 ];

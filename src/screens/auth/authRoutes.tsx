@@ -3,7 +3,11 @@ import type { RouteObject } from "react-router-dom";
 import { AUTH_NAVIGATION } from "@/navigation/authNavigation";
 import { LoginPage } from "./LoginPage";
 import { RegisterPage } from "./RegisterPage";
-import { ConfirmEmailPage, ForgotPasswordPage, ResetPasswordPage } from "./AccountRecoveryPages";
+import {
+  ConfirmEmailPage,
+  ForgotPasswordPage,
+  ResetPasswordPage,
+} from "./AccountRecoveryPages";
 import { MfaPage } from "./MfaPage";
 
 /** Screen name declared in `AUTH_NAVIGATION.screen` to its implementation. */

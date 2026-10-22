@@ -1,4 +1,12 @@
-import { Layers, Boxes, FileText, Globe, Rocket, Power, PowerOff } from "lucide-react";
+import {
+  Layers,
+  Boxes,
+  FileText,
+  Globe,
+  Rocket,
+  Power,
+  PowerOff,
+} from "lucide-react";
 import {
   asQueryHook,
   asMutationHook,
@@ -30,9 +38,17 @@ export const SERVICE_MANAGEMENT_LISTS: ResourceListConfig[] = [
     rowId: "serviceId",
     source: { kind: "api", useList: asQueryHook(useListServicesQuery) },
     columns: [
-      { key: "key", header: "Key", render: (r) => <span className="font-mono text-xs">{String(r.key ?? "—")}</span> },
+      {
+        key: "key",
+        header: "Key",
+        render: (r) => (
+          <span className="font-mono text-xs">{String(r.key ?? "—")}</span>
+        ),
+      },
       textCol("name", "Name"),
-      statusCol("status", "Status", (r) => VARIANT_FROM_STATUS(String(r.status))),
+      statusCol("status", "Status", (r) =>
+        VARIANT_FROM_STATUS(String(r.status)),
+      ),
       textCol("category.name", "Category"),
       textCol("owner", "Owner"),
       textCol("_count.templates", "Templates"),
@@ -52,9 +68,26 @@ export const SERVICE_MANAGEMENT_LISTS: ResourceListConfig[] = [
       },
     ],
     stats: [
-      { key: "total", label: "Total Services", compute: (rows) => rows.length, icon: <Layers className="h-5 w-5" /> },
-      { key: "enabled", label: "Enabled", compute: (rows) => rows.filter((r) => r.status === "ENABLED").length, color: "success", icon: <Layers className="h-5 w-5" /> },
-      { key: "draft", label: "Draft", compute: (rows) => rows.filter((r) => r.status === "DRAFT").length, color: "warning", icon: <Layers className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Total Services",
+        compute: (rows) => rows.length,
+        icon: <Layers className="h-5 w-5" />,
+      },
+      {
+        key: "enabled",
+        label: "Enabled",
+        compute: (rows) => rows.filter((r) => r.status === "ENABLED").length,
+        color: "success",
+        icon: <Layers className="h-5 w-5" />,
+      },
+      {
+        key: "draft",
+        label: "Draft",
+        compute: (rows) => rows.filter((r) => r.status === "DRAFT").length,
+        color: "warning",
+        icon: <Layers className="h-5 w-5" />,
+      },
     ],
     create: {
       title: "Create Service",
@@ -73,7 +106,8 @@ export const SERVICE_MANAGEMENT_LISTS: ResourceListConfig[] = [
         icon: <Power className="h-3.5 w-3.5" />,
         useAction: asMutationHook(useEnableServiceMutation),
         buildArg: (row) => String(row.serviceId ?? row.id),
-        confirm: (row) => `Enable service "${row.name}"? It becomes available in the catalog.`,
+        confirm: (row) =>
+          `Enable service "${row.name}"? It becomes available in the catalog.`,
         successMessage: "Service enabled.",
         show: (row) => String(row.status ?? "").toUpperCase() !== "ENABLED",
       },
@@ -83,7 +117,8 @@ export const SERVICE_MANAGEMENT_LISTS: ResourceListConfig[] = [
         variant: "danger",
         useAction: asMutationHook(useDisableServiceMutation),
         buildArg: (row) => String(row.serviceId ?? row.id),
-        confirm: (row) => `Disable service "${row.name}"? It will no longer be offered.`,
+        confirm: (row) =>
+          `Disable service "${row.name}"? It will no longer be offered.`,
         successMessage: "Service disabled.",
         show: (row) => String(row.status ?? "").toUpperCase() === "ENABLED",
       },
@@ -95,7 +130,10 @@ export const SERVICE_MANAGEMENT_LISTS: ResourceListConfig[] = [
     description: "Manage the global service category hierarchy.",
     sectionLabel: SECTION,
     rowId: "categoryId",
-    source: { kind: "api", useList: asQueryHook(useListServiceCategoriesQuery) },
+    source: {
+      kind: "api",
+      useList: asQueryHook(useListServiceCategoriesQuery),
+    },
     columns: [
       textCol("name", "Name"),
       textCol("description", "Description"),
@@ -115,7 +153,12 @@ export const SERVICE_MANAGEMENT_LISTS: ResourceListConfig[] = [
       useCreate: asMutationHook(useCreateServiceCategoryMutation),
     },
     stats: [
-      { key: "total", label: "Categories", compute: (rows) => rows.length, icon: <Boxes className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Categories",
+        compute: (rows) => rows.length,
+        icon: <Boxes className="h-5 w-5" />,
+      },
     ],
   },
   {
@@ -126,9 +169,17 @@ export const SERVICE_MANAGEMENT_LISTS: ResourceListConfig[] = [
     rowId: "templateId",
     source: { kind: "api", useList: asQueryHook(useListServiceTemplatesQuery) },
     columns: [
-      { key: "key", header: "Key", render: (r) => <span className="font-mono text-xs">{String(r.key ?? "—")}</span> },
+      {
+        key: "key",
+        header: "Key",
+        render: (r) => (
+          <span className="font-mono text-xs">{String(r.key ?? "—")}</span>
+        ),
+      },
       textCol("name", "Name"),
-      statusCol("status", "Status", (r) => VARIANT_FROM_STATUS(String(r.status))),
+      statusCol("status", "Status", (r) =>
+        VARIANT_FROM_STATUS(String(r.status)),
+      ),
       textCol("service.name", "Service"),
       textCol("currentVersion", "Version"),
     ],
@@ -160,20 +211,33 @@ export const SERVICE_MANAGEMENT_LISTS: ResourceListConfig[] = [
         icon: <Rocket className="h-3.5 w-3.5" />,
         useAction: asMutationHook(usePublishServiceTemplateMutation),
         buildArg: (row) => String(row.templateId ?? row.id),
-        confirm: (row) => `Publish template "${row.name}"? The latest version becomes available for provisioning.`,
+        confirm: (row) =>
+          `Publish template "${row.name}"? The latest version becomes available for provisioning.`,
         successMessage: "Template published.",
         show: (row) => String(row.status ?? "").toUpperCase() !== "PUBLISHED",
       },
     ],
     stats: [
-      { key: "total", label: "Templates", compute: (rows) => rows.length, icon: <FileText className="h-5 w-5" /> },
-      { key: "published", label: "Published", compute: (rows) => rows.filter((r) => r.status === "PUBLISHED").length, color: "success", icon: <FileText className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Templates",
+        compute: (rows) => rows.length,
+        icon: <FileText className="h-5 w-5" />,
+      },
+      {
+        key: "published",
+        label: "Published",
+        compute: (rows) => rows.filter((r) => r.status === "PUBLISHED").length,
+        color: "success",
+        icon: <FileText className="h-5 w-5" />,
+      },
     ],
   },
   {
     path: "/saas-admin/service-management/availability",
     title: "Service Availability",
-    description: "Working hours, calendars and holidays that define service availability.",
+    description:
+      "Working hours, calendars and holidays that define service availability.",
     sectionLabel: SECTION,
     rowId: "calendarId",
     source: { kind: "api", useList: asQueryHook(useListSlaCalendarsQuery) },
@@ -186,8 +250,19 @@ export const SERVICE_MANAGEMENT_LISTS: ResourceListConfig[] = [
     ],
     searchable: (r) => `${r.name} ${r.timezone}`,
     stats: [
-      { key: "total", label: "Calendars", compute: (rows) => rows.length, icon: <Globe className="h-5 w-5" /> },
-      { key: "default", label: "Default", compute: (rows) => rows.filter((r) => r.isDefault).length, color: "success", icon: <Globe className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Calendars",
+        compute: (rows) => rows.length,
+        icon: <Globe className="h-5 w-5" />,
+      },
+      {
+        key: "default",
+        label: "Default",
+        compute: (rows) => rows.filter((r) => r.isDefault).length,
+        color: "success",
+        icon: <Globe className="h-5 w-5" />,
+      },
     ],
   },
 ];

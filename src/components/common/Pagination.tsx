@@ -9,7 +9,12 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-export function Pagination({ page, totalPages, totalItems, onPageChange }: PaginationProps) {
+export function Pagination({
+  page,
+  totalPages,
+  totalItems,
+  onPageChange,
+}: PaginationProps) {
   if (totalPages <= 1) {
     if (totalItems === undefined) return null;
     return (
@@ -23,7 +28,9 @@ export function Pagination({ page, totalPages, totalItems, onPageChange }: Pagin
     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-4 py-2.5">
       <span className="text-xs text-slate-500">
         Page {page} of {totalPages}
-        {totalItems !== undefined ? ` · ${plural(totalItems, "record", "records")}` : ""}
+        {totalItems !== undefined
+          ? ` · ${plural(totalItems, "record", "records")}`
+          : ""}
       </span>
       <div className="flex items-center gap-1">
         <Button

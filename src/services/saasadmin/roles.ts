@@ -19,23 +19,36 @@ export const rolesApi = saasadminApi.injectEndpoints({
       providesTags: ["Permission"],
     }),
     getRole: build.query<ApiSuccess<ApiRecord>, string>({
-      query: (roleId) => ({ url: `/admin/roles/${encodeURIComponent(roleId)}` }),
+      query: (roleId) => ({
+        url: `/admin/roles/${encodeURIComponent(roleId)}`,
+      }),
       providesTags: (_r, _e, roleId) => [{ type: "Role", id: roleId }],
     }),
-    updateRole: build.mutation<ApiSuccess<ApiRecord>, { roleId: string; body: ApiRecord }>({
+    updateRole: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { roleId: string; body: ApiRecord }
+    >({
       query: ({ roleId, body }) => ({
         url: `/admin/roles/${encodeURIComponent(roleId)}`,
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (_r, _e, { roleId }) => ["Role", { type: "Role", id: roleId }],
+      invalidatesTags: (_r, _e, { roleId }) => [
+        "Role",
+        { type: "Role", id: roleId },
+      ],
     }),
     deleteRole: build.mutation<null, string>({
-      query: (roleId) => ({ url: `/admin/roles/${encodeURIComponent(roleId)}`, method: "DELETE" }),
+      query: (roleId) => ({
+        url: `/admin/roles/${encodeURIComponent(roleId)}`,
+        method: "DELETE",
+      }),
       invalidatesTags: ["Role"],
     }),
     getRolePermissions: build.query<ApiSuccess<ApiRecord>, string>({
-      query: (roleId) => ({ url: `/admin/roles/${encodeURIComponent(roleId)}/permissions` }),
+      query: (roleId) => ({
+        url: `/admin/roles/${encodeURIComponent(roleId)}/permissions`,
+      }),
       providesTags: (_r, _e, roleId) => [{ type: "Role", id: roleId }],
     }),
     setRolePermissions: build.mutation<
@@ -47,9 +60,15 @@ export const rolesApi = saasadminApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      invalidatesTags: (_r, _e, { roleId }) => [{ type: "Role", id: roleId }, "Permission"],
+      invalidatesTags: (_r, _e, { roleId }) => [
+        { type: "Role", id: roleId },
+        "Permission",
+      ],
     }),
-    getRoleMembers: build.query<ApiSuccess<ApiRecord[]>, { roleId: string } & ListQuery>({
+    getRoleMembers: build.query<
+      ApiSuccess<ApiRecord[]>,
+      { roleId: string } & ListQuery
+    >({
       query: ({ roleId, ...params }) => ({
         url: `/admin/roles/${encodeURIComponent(roleId)}/members`,
         params,

@@ -9,6 +9,7 @@ Project Type: React Frontend (TypeScript)
 > code + root `.opencode/memory/` over these older paths.
 
 ## Technology
+
 - Languages: TypeScript
 - Frameworks: React 18, React Router v6, Redux Toolkit
 - Styling: Tailwind CSS, Lucide React icons
@@ -16,6 +17,7 @@ Project Type: React Frontend (TypeScript)
 - Package: pnpm
 
 ## Architecture
+
 - Monorepo with pnpm-workspace
 - Feature-based module structure under `src/features/`
 - Shared components under `src/shared/components/`
@@ -24,11 +26,13 @@ Project Type: React Frontend (TypeScript)
 - API layer via RTK Query: single `saasadminApi` in `src/services/saasadmin/base.ts` + injected endpoints
 
 ## Entry Points
+
 - `src/app/App.tsx` - Root app
 - `src/app/routes/index.tsx` - Router config
 - `src/main.tsx` - Entry
 
 ## Major Areas
+
 - `src/features/auth/` - Login, Register, MFA, Account Recovery
 - `src/features/portal/` - Requester Portal (self-service)
 - `src/features/saas/` - SaaS Admin (platform control plane)
@@ -40,6 +44,7 @@ Project Type: React Frontend (TypeScript)
 - `src/page-shells/` - Reusable page layouts (EntityListPage, RecordWorkspacePage, DashboardPage)
 
 ## Important Persistent Facts
+
 - All pages use `PageHeader`, `Card`, `Badge`, `Button`, `DataTable`, `Tabs`, `Pagination`, `PermissionGate`
 - RTK Query hooks for data fetching (`useQuery`, `useMutation`)
 - Toast notifications via `react-hot-toast`
@@ -53,8 +58,8 @@ The old API clients (`services/base.ts`, `authApi.ts`, `companyApi.ts`,
 `instanceApi.ts`, `roleApi.ts`, `setupApi.ts`, `itsmTypes.ts`) were deleted.
 
 - `src/services/saasadmin/` holds the single RTK Query API for the SaaS Admin
-  control plane, split module-by-module: `base.ts` (createApi + base query +
-  401→`logout()`), `auth.ts`, `types.ts` (envelope/pagination types), one file
+  control plane, split module-by-module: `base.ts` (createApi + shared
+  `baseQueryWithAuth` from `@services/http`), `auth.ts`, `types.ts` (envelope/pagination types), one file
   per backend `/admin/*` module (dashboard, tenants, tenantDomains, staff,
   roles, permissions, accessPolicies, approvals, serviceManagement,
   slaManagement, workflowManagement, itsmConfiguration, knowledgeManagement,
@@ -139,8 +144,12 @@ surface (SaaS admin now; tenant/ITSM later) uses one implementation:
 - `src/services/http.ts` — shared transport: `API_URL` (from `VITE_API_URL`,
   default `http://localhost:3008/api/v1`), envelope types (`ApiSuccess`,
   `ApiErrorBody`, `ApiErrorDetail`, `PaginationMeta`), `baseQueryWithAuth`
-  (token attach + `401` → `TokenStore.clear()` + `logout()`), `apiErrorMessage`
-  (alias `loginErrorMessage`).
+  (token attach + `401` → one shared silent `POST /auth/refresh` with the
+  stored refresh token, retry the request; refresh impossible/failed →
+  `logout()`; `/auth/login`, `/auth/refresh`, `/auth/mfa/verify`,
+  invitation + password-reset URLs are exempt so bad credentials never
+  clear a session), `apiErrorMessage` (alias `loginErrorMessage`; unwraps
+  the RTK `{status,data}` rejection so server messages surface).
 - `src/services/auth/authApi.ts` — canonical `authApi`
   (`reducerPath: "authApi"`, `baseQuery: baseQueryWithAuth`) with all endpoints
   (`login`, `refresh`, `me`, `logout`, `acceptInvitation`, `forgotPassword`,
@@ -189,8 +198,8 @@ hooks; hardcoded/mock data and no-API panels were removed. Build + tests pass
 (`pnpm run build`, `pnpm run test` → 5 files / 59).
 
 - Static panels with no backend endpoint deleted or reduced: `resources/
-  supportManagement.tsx` (announcements/maintenanceNotices), `resources/
-  platformSettings.tsx` (fileStorageRows), `resources/systemAdministration.tsx`
+supportManagement.tsx` (announcements/maintenanceNotices), `resources/
+platformSettings.tsx` (fileStorageRows), `resources/systemAdministration.tsx`
   (appLogs/backups). Corresponding nav items removed from
   `src/navigation/saasAdminNavigation.tsx`: `announcements`,
   `maintenance-notices`, `file-storage-settings`, `application-logs`,
@@ -203,7 +212,7 @@ hooks; hardcoded/mock data and no-API panels were removed. Build + tests pass
   `AllTenantsScreen`, `CreateTenantScreen`, `TenantDetailsScreen`,
   `TenantConfigurationScreen`, `TenantStatusScreen`.
 - **Gotcha (corrected):** backend list controllers call `paginated(res, rows,
-  meta)` → `{ success:true, data: <array>, meta:{page,limit,total,...} }`. So
+meta)` → `{ success:true, data: <array>, meta:{page,limit,total,...} }`. So
   `data.data` IS the bare array and `data.meta` is the pagination meta (verified
   live). The service layer returns `{rows, meta}` internally but the controller
   flattens it. (An earlier note claimed `data` was `{rows,meta}` — that was
@@ -214,17 +223,17 @@ hooks; hardcoded/mock data and no-API panels were removed. Build + tests pass
   `apiErrorMessage` from `@services/http`. `Select` accepts `className`.
 - Key response shapes (see backend services/validators):
   - dashboard summary: `{ tenants:{total,active,suspended,provisioning,
-    archived,failed}, staff:{total,active,invited,mfaEnabled,
-    mfaAdoptionPercent}, support:{openTickets}, approvals:{pending},
-    integrations:{enabled,error}, webhooks:{active}, generatedAt }`.
+archived,failed}, staff:{total,active,invited,mfaEnabled,
+mfaAdoptionPercent}, support:{openTickets}, approvals:{pending},
+integrations:{enabled,error}, webhooks:{active}, generatedAt }`.
   - staff row: `id,email,firstName,lastName,displayName,phone,jobTitle,
-    timezone,locale,userType,status(INVITED|ACTIVE|SUSPENDED|DEACTIVATED),
-    mfaEnabled,lastLoginAt,roles[],roleIds[]`; `createStaff` always starts
+timezone,locale,userType,status(INVITED|ACTIVE|SUSPENDED|DEACTIVATED),
+mfaEnabled,lastLoginAt,roles[],roleIds[]`; `createStaff` always starts
     status `INVITED`.
   - role row: `id,key,name,description,isSystem,permissionCodes,permissions[],
-    memberCount`. Permission catalog groups by `module`.
+memberCount`. Permission catalog groups by `module`.
   - audit event: `action,resourceType,resourceId,outcome(SUCCESS|FAILURE|
-    DENIED),actorEmail,actorId,tenantId,ipAddress,metadata,createdAt`.
+DENIED),actorEmail,actorId,tenantId,ipAddress,metadata,createdAt`.
   - tenant: `status(PROVISIONING|ACTIVE|SUSPENDED|ARCHIVED|FAILED)`,
     `provisioningStatus`, `suspendedAt/suspendedReason`,
     `archivedAt/archivedReason`, `_count{memberships,domains,...}`.
@@ -234,12 +243,12 @@ hooks; hardcoded/mock data and no-API panels were removed. Build + tests pass
 - Role detail/form screens added (fixes roles list View/Edit/Create 404s):
   `staff-management/roles-management/RoleDetailsScreen.tsx` (view role meta,
   grouped permission chips, members table; delete when custom `isSystem:false`
-  + `memberCount:0`) and `RoleFormScreen.tsx` (create + edit; create POSTs
-  `createRole` with `{key,name,description,permissionCodes}`; edit PATCHes
-  `updateRole` then PUTs `setRolePermissions` only when permission set changed;
-  system-role key disabled). Routes in `saasAdminRoutes.tsx`:
-  `staff-management/roles/new`, `staff-management/roles/edit/:roleId`,
-  `staff-management/roles/:roleId`.
+  - `memberCount:0`) and `RoleFormScreen.tsx` (create + edit; create POSTs
+    `createRole` with `{key,name,description,permissionCodes}`; edit PATCHes
+    `updateRole` then PUTs `setRolePermissions` only when permission set changed;
+    system-role key disabled). Routes in `saasAdminRoutes.tsx`:
+    `staff-management/roles/new`, `staff-management/roles/edit/:roleId`,
+    `staff-management/roles/:roleId`.
 - **Fixed:** `PermissionsManagementScreen` read `getRolePermissions` as
   `string[]` and sent `{permissions}`. Backend returns
   `{roleId,roleKey,roleName,permissionCodes,permissions[]}` and expects
@@ -257,7 +266,7 @@ controllers/services `src/controllers|services/saasadmin/*`). Every one is
 Prisma-backed (no stubs/TODOs). So frontend work is wiring, not inventing
 endpoints. Notable gaps vs the ITSM spec: no modules/entitlements create-time
 input (`createTenantSchema` accepts only name/slug/contact/timezone/locale/
-industry/website/notes/metadata), no staff sessions *list* endpoint (only
+industry/website/notes/metadata), no staff sessions _list_ endpoint (only
 `revoke-sessions`), no access-reviews API, no per-tenant sessions; `reports/run`
 is synchronous. List endpoints use `parseListQuery` (`page,limit,search,sortBy,
 sortOrder` + per-resource filter fields) and return `{data, meta:{page,limit,
@@ -371,8 +380,103 @@ total,totalPages,hasNextPage,hasPreviousPage}}`.
   (prompt required reason); Email Templates — Preview (renders subject/body via
   the reveal modal, surfaces `missingVariables`).
   Backend shapes: api-key + webhook create/rotate return `{ apiKey|webhook,
-  secret }`; `rejectApprovalSchema` requires `reason` (min 4); `auditExportSchema`
+secret }`; `rejectApprovalSchema` requires `reason` (min 4); `auditExportSchema`
   requires `reason` (min 4) + `format` default CSV; ticket `replyTicketSchema`
   requires `body`, `resolveTicketSchema` optional `resolutionNote`.
 - `ResourceListScreen.runRowAction`: confirm runs first, then `promptFor`
-  (window.prompt; required-empty aborts), then optional reveal of result.
+  (modal `PromptDialog` since 2026-10-19; required-empty aborts), then optional
+  reveal of result.
+
+## Feedback + auth hardening (2026-10-19)
+
+- **Toasts now render**: `ToastContainer` (`components/common/Toast/
+  ToastContainer.tsx`) returns `<Toaster position="top-right" />` (it
+  previously returned `null`, so all 38 `toast.*`/`showSuccess`/`showConfirm`
+  calls were invisible). It is mounted **once** in `AppProviders`
+  (`src/app/providers/index.tsx`) — do NOT mount it again in screens
+  (duplicate mount = double toasts; auth-screen mounts were removed).
+- **Silent refresh**: `baseQueryWithAuth` attempts one shared in-flight
+  `POST /auth/refresh` (plain `fetch`, refresh token from `TokenStore`) on
+  401, retries the original request, `logout()` only if refresh fails.
+  Credential endpoints (login/refresh/mfa-verify/invitation/password-reset)
+  are exempt. Refresh request is deduplicated across parallel 401s.
+- `apiErrorMessage` unwraps the RTK `{status,data}` rejection before reading
+  the envelope — passing the raw error OR `.data` both work; ~15 call sites
+  no longer collapse to "Request failed".
+- Tenant suspend/reactivate (TenantDetails + TenantStatus) and role delete
+  (RolesManagementScreen) now have catch + success toasts (were
+  try/finally-without-catch / fire-and-forget).
+
+## Modal dialogs, code-splitting, org-admin honesty (2026-10-19)
+
+- **No native dialogs**: `window.prompt`/`window.confirm` are gone from `src/`
+  (only `alert`-free code remains). `ResourceListScreen` uses promise-based
+  `askConfirm`/`askPrompt` backed by `ConfirmDialog` + new
+  `resource/PromptDialog.tsx` (validates required + `promptFor.minLength`);
+  `ConfirmDialog` accepts `children` (slots for reason fields).
+- Tenant suspend reason (TenantDetails + TenantStatus) is a validated textarea
+  (min 4 chars, backend `suspendTenant` requirement) inside the `ConfirmDialog`
+  — no `window.prompt`. `RolesManagementScreen` delete uses `ConfirmDialog`.
+- **Code-split** (initial chunk 1.27 MB → ~892 kB / gzip ~212 kB):
+  `DashboardOverviewScreen` (recharts, own 346 kB async chunk),
+  `OrganizationAdminPage`, `RecordDetailPage` are `React.lazy`; `AppRoutes`
+  wraps the `useRoutes` tree in `<Suspense>` with a light "Loading…" fallback.
+- **Org-admin honesty** (approach: stop lying first): fake save/delete
+  toasts removed. `OrganizationAdminPage` form + settings and `RecordDetailPage`
+  edit show amber "Not connected yet — changes are not saved" notices; Save
+  buttons disabled; Delete fires an info toast stating nothing was removed.
+  Real API wiring landed 2026-10-19 (see next section).
+- **Config cleanup**: dangling `@features`/`@portal` aliases removed from
+  `tsconfig.json`, `vite.config.ts`, `vitest.config.ts` (dirs never existed,
+  zero imports); `permissions:generate` script removed from `package.json`
+  (`scripts/` absent; `itsmPermissions.generated.ts` kept as-is).
+- Root `AGENTS.md` corrected: `tests/setup.ts` exists (96 tests pass),
+  `permissions:generate` removed, `screenRegistry.ts` is a static array,
+  `src/app/routes/` empty, `src/features/` bullets dropped, alias table synced.
+
+## Org-admin wiring pass (2026-10-19)
+
+- **Coverage**: all 387 org-admin nav leaves are either wired to a real
+  backend screen or land on an honest "Not connected yet" fallback.
+  301 wired / 86 honest leftovers (no backend endpoint exists for them —
+  checked against `backend/src` routes/validators). Decisions: dead-code
+  purge of the sample-pool page model stays skipped per user; the honest
+  fallback pages (`OrganizationAdminPage`, `RecordDetailPage`) remain for
+  the 86.
+- **Wiring surfaces** (all under `src/screens/organization-admin/`):
+  - `resources/orgSettings.tsx` — `settingsValuePanel(key)` helper: panels
+    for UPLOAD/RETENTION/FEATURES keys via `useListSettingsQuery` +
+    `putSetting {key,value}`; config-history + reset panels removed (no
+    endpoints; config-history aliased to audit-logs, reset stays honest).
+  - New panels: knowledge publishing-rules (knowledge settings API),
+    change-password (`POST /auth/change-password` via `myAccountApi`),
+    security-overview (synthetic metric rows over `SecurityOverview`).
+  - `resources/roles.tsx` — 4 permission-list configs from
+    `useListTenantPermissionsQuery` (`/tenant-admin/permissions`).
+  - `resources/workflows.tsx` — approval review queue over
+    `useListApprovalRequestQuery` (filters: status/actionKey/resourceType).
+  - `resources/reports.tsx` — 2 more `reportCatalogConfig` entries (all 25
+    report-catalog configs are wired; factory lives in `reports.tsx`).
+  - `resources/helpSupport.tsx` — fake contact/service-status rows emptied
+    with honest copy; knowledge article reuse for docs leaves; support
+    create forms fixed to uppercase priority enums (backend zod).
+  - `pages/tenant/` — `ResourceCreateScreen` (generic standalone create
+    page wired to each list config's `create` block), `RolePermissionMatrixPage`
+    (roles × permission catalog checkbox matrix, GET/PUT role permissions),
+    `index.tsx` = `TENANT_SCREEN_ROUTES` (7 creates + matrix).
+  - `organizationAdminRoutes.tsx` — route order: lists → `/:recordId` →
+    `TENANT_RESOURCE_PANELS` (`ConfigPanelScreen`) → `TENANT_SCREEN_ROUTES`
+    → `LEAF_ALIASES` (~125 `<Navigate replace>` pairs, exported) → honest
+    `leafRoutes` → `/:recordId`. Alias rule: target must be same resource
+    or a superset view; never invent endpoints.
+- **Bug fixed**: `cmdbApi.ts` exported `useListAssetMaintenanceQuery` in the
+  API slice but not from the module — org-admin routes crashed at module
+  eval. Added it + `useCreateAssetMaintenanceMutation` to the destructure.
+- **Regression guard**: `src/screens/organization-admin/__tests__/navCoverage.test.ts`
+  — computes covered sets (lists + panels + tenant screens + customers +
+  alias sources) and fails if any nav leaf is uncovered outside the pinned
+  `HONEST_LEFTOVERS` set (86 paths). One-directional: wiring more shrinks
+  uncovered without test edits; new nav leaves must be wired or consciously
+  added to the list. `organizationAdminSidebarVisibility.test.ts` ported off
+  the deleted `pageModel` to `TENANT_SCREEN_ROUTES`.
+- Build: initial chunk 922 kB (gzip 218 kB); 11 test files / 96 tests green.

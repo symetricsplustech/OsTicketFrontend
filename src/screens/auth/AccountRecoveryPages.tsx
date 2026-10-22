@@ -16,7 +16,6 @@ import {
   useResetPasswordMutation,
   apiErrorMessage,
 } from "@services/auth";
-import { ToastContainer } from "@components/common/Toast/ToastContainer";
 
 function AuthPanel({
   title,
@@ -27,7 +26,6 @@ function AuthPanel({
 }) {
   return (
     <PublicShell>
-      <ToastContainer />
       <section className="mx-auto max-w-md rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
         <h1 className="text-xl font-bold text-slate-900">{title}</h1>
         <div className="mt-5 space-y-4 text-sm text-slate-700">{children}</div>

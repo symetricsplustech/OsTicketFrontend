@@ -11,7 +11,11 @@ export const store = configureStore({
     auth: authReducer,
   },
   middleware: (getDefault) =>
-    getDefault().concat(saasadminApi.middleware, tenantadminApi.middleware, authApi.middleware),
+    getDefault().concat(
+      saasadminApi.middleware,
+      tenantadminApi.middleware,
+      authApi.middleware,
+    ),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

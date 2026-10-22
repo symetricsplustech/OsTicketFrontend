@@ -883,7 +883,7 @@ export function getAllSaasAdminItems(): SaasAdminNavigationItem[] {
       section: section.key,
       sectionLabel: section.label,
       areas: item.areas ?? section.areas,
-    }))
+    })),
   );
 }
 
@@ -921,14 +921,18 @@ export function canViewSaasAdminItem(
  * only tenant/ITSM permissions are not part of the control plane.
  */
 export function canAccessSaasAdmin(permissions: readonly string[]): boolean {
-  return permissions.some((permission) => permission === "*" || permission.startsWith("admin."));
+  return permissions.some(
+    (permission) => permission === "*" || permission.startsWith("admin."),
+  );
 }
 
 /**
  * First non-hidden SaaS admin item the session may view, or null when the user
  * has no control-plane access. Used for post-login / redirect targets.
  */
-export function firstAccessibleSaasAdminPath(permissions: readonly string[]): string | null {
+export function firstAccessibleSaasAdminPath(
+  permissions: readonly string[],
+): string | null {
   if (!canAccessSaasAdmin(permissions)) return null;
   for (const section of SAAS_ADMIN_NAVIGATION) {
     for (const item of section.items) {

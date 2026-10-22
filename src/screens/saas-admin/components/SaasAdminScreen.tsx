@@ -37,17 +37,25 @@ export function SaasAdminScreen({
             {backLabel}
           </Link>
         ) : null}
-        <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1.5 text-sm text-slate-500">
+        <nav
+          aria-label="Breadcrumb"
+          className="mb-4 flex items-center gap-1.5 text-sm text-slate-500"
+        >
           <ol className="flex items-center gap-1.5">
             {breadcrumbs.map((crumb, i) => (
               <li key={crumb.label} className="flex items-center gap-1.5">
                 {i > 0 && <span className="text-slate-300">/</span>}
                 {crumb.href ? (
-                  <Link to={crumb.href} className="truncate hover:text-slate-700 hover:underline">
+                  <Link
+                    to={crumb.href}
+                    className="truncate hover:text-slate-700 hover:underline"
+                  >
                     {crumb.label}
                   </Link>
                 ) : (
-                  <span className="truncate font-medium text-slate-800">{crumb.label}</span>
+                  <span className="truncate font-medium text-slate-800">
+                    {crumb.label}
+                  </span>
                 )}
               </li>
             ))}
@@ -56,7 +64,9 @@ export function SaasAdminScreen({
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
-            {description && <p className="mt-1 text-sm text-slate-500">{description}</p>}
+            {description && (
+              <p className="mt-1 text-sm text-slate-500">{description}</p>
+            )}
           </div>
           {actions && <div className="shrink-0">{actions}</div>}
         </div>

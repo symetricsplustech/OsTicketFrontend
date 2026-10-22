@@ -27,11 +27,14 @@ export function PlatformShell({ children }: PlatformShellProps) {
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <span className="text-lg font-semibold text-brand-700">osTicket ITSM</span>
+          <span className="text-lg font-semibold text-brand-700">
+            osTicket ITSM
+          </span>
           <div className="flex items-center gap-3">
             {auth.user ? (
               <span className="text-sm text-slate-600">
-                {auth.user.name} <span className="text-slate-400">·</span> {auth.user.email}
+                {auth.user.name} <span className="text-slate-400">·</span>{" "}
+                {auth.user.email}
               </span>
             ) : null}
             <Button variant="outline" size="sm" onClick={handleSignOut}>
@@ -40,7 +43,9 @@ export function PlatformShell({ children }: PlatformShellProps) {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-6 py-10">{children ?? <Outlet />}</main>
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        {children ?? <Outlet />}
+      </main>
     </div>
   );
 }

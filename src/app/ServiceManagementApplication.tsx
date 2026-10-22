@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useRoutes } from "react-router-dom";
-import { ChevronRight, Menu, SearchX } from "lucide-react";
+import { ChevronRight, Lock, Menu, SearchX } from "lucide-react";
 import { RequireSession } from "@app/auth/RequireSession";
 import { AUTH_ROUTES } from "@/screens/auth/authRoutes";
 import { SAAS_ADMIN_ROUTES } from "@/screens/saas-admin/saasAdminRoutes";
@@ -8,6 +8,8 @@ import { ORGANIZATION_ADMIN_ROUTES } from "@/screens/organization-admin/organiza
 import { ScreenPlaceholder } from "@/screens/saas-admin/components/ScreenPlaceholder";
 import { useAppSelector } from "@store/hooks";
 import { selectAuth } from "@services/auth/authSlice";
+import { canAny } from "@services/authorization/permissions";
+import { requiredPermissionsForPath } from "@/navigation/routeAccess";
 import { SideNavigation } from "../navigation/SideNavigation.tsx";
 import { resolveNavigation } from "../navigation/resolveNavigation.ts";
 import {
@@ -109,6 +111,21 @@ function NotAvailable() {
       <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
         This address does not match any screen you have access to. Use the
         navigation to reach a capability you are entitled to.
+      </p>
+    </section>
+  );
+}
+
+function AccessDenied() {
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white p-10 text-center">
+      <Lock className="mx-auto h-8 w-8 text-slate-300" />
+      <h1 className="mt-4 text-lg font-semibold text-slate-800">
+        Access denied
+      </h1>
+      <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
+        You do not have permission to view this screen. Use the navigation to
+        reach a capability you are entitled to.
       </p>
     </section>
   );
@@ -250,6 +267,10 @@ function SurfaceBody({
   const location = useLocation();
   const screen = findScreen(location.pathname, instanceId);
   if (screen) {
+    const required = requiredPermissionsForPath(location.pathname);
+    if (required !== null && !canAny(permissions, required)) {
+      return <AccessDenied />;
+    }
     const areas = resolveNavigation(permissions, instanceId);
     const here = locateScreen(areas, screen);
     return (
@@ -286,7 +307,7 @@ function SurfaceBody({
 }
 
 function AppRoutes({ instanceId }: { instanceId: string }) {
-  return useRoutes([
+  const routes = useRoutes([
     { path: "/", element: <Navigate to="/login" replace /> },
     ...AUTH_ROUTES,
     ...SAAS_ADMIN_ROUTES,
@@ -297,6 +318,17 @@ function AppRoutes({ instanceId }: { instanceId: string }) {
     },
     { path: "*", element: <NotAvailable /> },
   ]);
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[40vh] items-center justify-center">
+          <span className="text-sm text-slate-500">Loading…</span>
+        </div>
+      }
+    >
+      {routes}
+    </Suspense>
+  );
 }
 
 export function ServiceManagementApplication() {

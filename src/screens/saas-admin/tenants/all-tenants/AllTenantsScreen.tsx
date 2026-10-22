@@ -1,8 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Plus, Eye, Settings, PauseCircle, PlayCircle, Archive, Building2, CheckCircle, AlertCircle, XCircle } from "lucide-react";
+import {
+  Plus,
+  Eye,
+  Settings,
+  PauseCircle,
+  PlayCircle,
+  Archive,
+  Building2,
+  CheckCircle,
+  AlertCircle,
+  XCircle,
+} from "lucide-react";
 import { SaasAdminScreen } from "@/screens/saas-admin/components/SaasAdminScreen";
-import { DataTable, SearchFilters, Pagination, ConfirmDialog, StatusBadge, StatCard } from "@/screens/saas-admin/components/ui";
+import {
+  DataTable,
+  SearchFilters,
+  Pagination,
+  ConfirmDialog,
+  StatusBadge,
+  StatCard,
+} from "@/screens/saas-admin/components/ui";
 import { Button, ErrorState } from "@components/common/ui";
 import { toast } from "react-hot-toast";
 import {
@@ -56,11 +74,16 @@ const provisioningVariant: Record<string, StatusVariant> = {
 
 function mapStatus(raw: unknown): TenantStatus {
   switch (String(raw ?? "").toUpperCase()) {
-    case "ACTIVE": return "active";
-    case "SUSPENDED": return "suspended";
-    case "ARCHIVED": return "archived";
-    case "FAILED": return "failed";
-    default: return "pending";
+    case "ACTIVE":
+      return "active";
+    case "SUSPENDED":
+      return "suspended";
+    case "ARCHIVED":
+      return "archived";
+    case "FAILED":
+      return "failed";
+    default:
+      return "pending";
   }
 }
 
@@ -91,7 +114,9 @@ export function AllTenantsScreen() {
   const search = searchParams.get("q") ?? "";
   const status = searchParams.get("status") ?? "";
   const sortBy = searchParams.get("sortBy") ?? "createdAt";
-  const sortOrder = (searchParams.get("sortOrder") === "asc" ? "asc" : "desc") as "asc" | "desc";
+  const sortOrder = (
+    searchParams.get("sortOrder") === "asc" ? "asc" : "desc"
+  ) as "asc" | "desc";
 
   const [searchInput, setSearchInput] = useState(search);
 
@@ -99,10 +124,13 @@ export function AllTenantsScreen() {
     setSearchInput(search);
   }, [search]);
 
-  const patchParams = (patch: Record<string, string | number | undefined>, resetPage = false) => {
+  const patchParams = (
+    patch: Record<string, string | number | undefined>,
+    resetPage = false,
+  ) => {
     const next = new URLSearchParams(searchParams);
     for (const [key, value] of Object.entries(patch)) {
-      if (value === undefined || value === "" ) next.delete(key);
+      if (value === undefined || value === "") next.delete(key);
       else next.set(key, String(value));
     }
     if (resetPage) next.set("page", "1");
@@ -111,26 +139,39 @@ export function AllTenantsScreen() {
 
   useEffect(() => {
     const handle = setTimeout(() => {
-      if (searchInput !== search) patchParams({ q: searchInput.trim() || undefined }, true);
+      if (searchInput !== search)
+        patchParams({ q: searchInput.trim() || undefined }, true);
     }, 350);
     return () => clearTimeout(handle);
   }, [searchInput]);
 
   const listArg = useMemo(
-    () => ({ page, limit, search: search || undefined, status: status || undefined, sortBy, sortOrder }),
+    () => ({
+      page,
+      limit,
+      search: search || undefined,
+      status: status || undefined,
+      sortBy,
+      sortOrder,
+    }),
     [page, limit, search, status, sortBy, sortOrder],
   );
 
-  const { data, isLoading, isFetching, isError, refetch } = useListTenantsQuery(listArg);
+  const { data, isLoading, isFetching, isError, refetch } =
+    useListTenantsQuery(listArg);
   const statusAgg = useDashboardTenantStatusQuery();
   const [suspendTenant] = useSuspendTenantMutation();
   const [reactivateTenant] = useReactivateTenantMutation();
   const [archiveTenant] = useArchiveTenantMutation();
 
-  const tenants = useMemo(() => ((data?.data ?? []) as ApiRecord[]).map(mapTenant), [data]);
+  const tenants = useMemo(
+    () => ((data?.data ?? []) as ApiRecord[]).map(mapTenant),
+    [data],
+  );
   const meta = data?.meta as PaginationMeta | undefined;
   const totalItems = meta?.total ?? tenants.length;
-  const totalPages = meta?.totalPages ?? Math.max(1, Math.ceil(totalItems / limit));
+  const totalPages =
+    meta?.totalPages ?? Math.max(1, Math.ceil(totalItems / limit));
 
   const hasProvisioningOnPage = tenants.some((t) => t.status === "pending");
   useEffect(() => {
@@ -140,18 +181,28 @@ export function AllTenantsScreen() {
   }, [hasProvisioningOnPage]);
 
   const counts = useMemo(() => {
-    const byStatus = (((statusAgg.data?.data as ApiRecord | undefined)?.byStatus ?? []) as ApiRecord[]);
-    const countFor = (key: string) => Number(byStatus.find((row) => String(row.status) === key)?.count ?? 0);
+    const byStatus = ((statusAgg.data?.data as ApiRecord | undefined)
+      ?.byStatus ?? []) as ApiRecord[];
+    const countFor = (key: string) =>
+      Number(byStatus.find((row) => String(row.status) === key)?.count ?? 0);
     const active = countFor("ACTIVE");
     const provisioning = countFor("PROVISIONING");
     const suspended = countFor("SUSPENDED");
     const archived = countFor("ARCHIVED");
     const failed = countFor("FAILED");
-    return { total: active + provisioning + suspended + archived + failed, active, provisioning, suspended };
+    return {
+      total: active + provisioning + suspended + archived + failed,
+      active,
+      provisioning,
+      suspended,
+    };
   }, [statusAgg.data]);
 
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
-  const [dialog, setDialog] = useState<{ tenants: Tenant[]; action: BulkAction } | null>(null);
+  const [dialog, setDialog] = useState<{
+    tenants: Tenant[];
+    action: BulkAction;
+  } | null>(null);
   const [dialogBusy, setDialogBusy] = useState(false);
 
   const columns = [
@@ -166,12 +217,27 @@ export function AllTenantsScreen() {
       ),
       sortable: true,
     },
-    { key: "status", header: "Status", render: (row: Tenant) => <StatusBadge status={row.status} variant={statusVariant[row.status]} size="sm" />, sortable: true },
+    {
+      key: "status",
+      header: "Status",
+      render: (row: Tenant) => (
+        <StatusBadge
+          status={row.status}
+          variant={statusVariant[row.status]}
+          size="sm"
+        />
+      ),
+      sortable: true,
+    },
     {
       key: "provisioningStatus",
       header: "Provisioning",
       render: (row: Tenant) => (
-        <StatusBadge status={row.provisioningStatus} variant={provisioningVariant[row.provisioningStatus] ?? "default"} size="sm" />
+        <StatusBadge
+          status={row.provisioningStatus}
+          variant={provisioningVariant[row.provisioningStatus] ?? "default"}
+          size="sm"
+        />
       ),
       sortable: true,
     },
@@ -180,48 +246,96 @@ export function AllTenantsScreen() {
       header: "Primary Contact",
       render: (row: Tenant) => (
         <div>
-          <p className="text-sm font-medium text-slate-900">{row.primaryContactName || "—"}</p>
-          {row.primaryContactEmail ? <p className="text-xs text-slate-500">{row.primaryContactEmail}</p> : null}
+          <p className="text-sm font-medium text-slate-900">
+            {row.primaryContactName || "—"}
+          </p>
+          {row.primaryContactEmail ? (
+            <p className="text-xs text-slate-500">{row.primaryContactEmail}</p>
+          ) : null}
         </div>
       ),
       sortable: true,
     },
-    { key: "userCount", header: "Users", render: (row: Tenant) => <span className="text-sm text-slate-700">{row.userCount.toLocaleString()}</span> },
-    { key: "domainCount", header: "Domains", render: (row: Tenant) => <span className="text-sm text-slate-700">{row.domainCount}</span> },
-    { key: "createdAt", header: "Created", render: (row: Tenant) => <span className="text-sm text-slate-700">{row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "—"}</span>, sortable: true },
+    {
+      key: "userCount",
+      header: "Users",
+      render: (row: Tenant) => (
+        <span className="text-sm text-slate-700">
+          {row.userCount.toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      key: "domainCount",
+      header: "Domains",
+      render: (row: Tenant) => (
+        <span className="text-sm text-slate-700">{row.domainCount}</span>
+      ),
+    },
+    {
+      key: "createdAt",
+      header: "Created",
+      render: (row: Tenant) => (
+        <span className="text-sm text-slate-700">
+          {row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "—"}
+        </span>
+      ),
+      sortable: true,
+    },
   ];
 
   const handleSort = (key: string) => {
-    if (sortBy === key) patchParams({ sortBy: key, sortOrder: sortOrder === "asc" ? "desc" : "asc" }, true);
+    if (sortBy === key)
+      patchParams(
+        { sortBy: key, sortOrder: sortOrder === "asc" ? "desc" : "asc" },
+        true,
+      );
     else patchParams({ sortBy: key, sortOrder: "asc" }, true);
   };
 
   const actions = [
-    { label: "View", icon: <Eye className="h-3.5 w-3.5" />, onClick: (row: Tenant) => navigate(`/saas-admin/tenants/details/${row.id}`) },
-    { label: "Configure", icon: <Settings className="h-3.5 w-3.5" />, onClick: (row: Tenant) => navigate(`/saas-admin/tenants/configuration/${row.id}`) },
+    {
+      label: "View",
+      icon: <Eye className="h-3.5 w-3.5" />,
+      onClick: (row: Tenant) =>
+        navigate(`/saas-admin/tenants/details/${row.id}`),
+    },
+    {
+      label: "Configure",
+      icon: <Settings className="h-3.5 w-3.5" />,
+      onClick: (row: Tenant) =>
+        navigate(`/saas-admin/tenants/configuration/${row.id}`),
+    },
     {
       label: "Suspend",
       icon: <PauseCircle className="h-3.5 w-3.5" />,
       variant: "danger" as const,
-      show: (row: Tenant) => row.status === "active" || row.status === "pending",
-      onClick: (row: Tenant) => setDialog({ tenants: [row], action: "suspend" }),
+      show: (row: Tenant) =>
+        row.status === "active" || row.status === "pending",
+      onClick: (row: Tenant) =>
+        setDialog({ tenants: [row], action: "suspend" }),
     },
     {
       label: "Reactivate",
       icon: <PlayCircle className="h-3.5 w-3.5" />,
       show: (row: Tenant) => row.status === "suspended",
-      onClick: (row: Tenant) => setDialog({ tenants: [row], action: "reactivate" }),
+      onClick: (row: Tenant) =>
+        setDialog({ tenants: [row], action: "reactivate" }),
     },
     {
       label: "Archive",
       icon: <Archive className="h-3.5 w-3.5" />,
       variant: "danger" as const,
       show: (row: Tenant) => row.status === "suspended",
-      onClick: (row: Tenant) => setDialog({ tenants: [row], action: "archive" }),
+      onClick: (row: Tenant) =>
+        setDialog({ tenants: [row], action: "archive" }),
     },
   ];
 
-  const selectedTenants = useMemo(() => tenants.filter((t) => selectedKeys.has(t.id)), [tenants, selectedKeys]);
+  const selectedTenants = useMemo(
+    () => tenants.filter((t) => selectedKeys.has(t.id)),
+    [tenants, selectedKeys],
+  );
 
   const runBulk = (action: BulkAction) => {
     if (selectedTenants.length === 0) return;
@@ -236,11 +350,17 @@ export function AllTenantsScreen() {
     for (const tenant of dialog.tenants) {
       try {
         if (dialog.action === "suspend") {
-          await suspendTenant({ tenantId: tenant.id, body: { reason: "Suspended from the platform admin console." } }).unwrap();
+          await suspendTenant({
+            tenantId: tenant.id,
+            body: { reason: "Suspended from the platform admin console." },
+          }).unwrap();
         } else if (dialog.action === "reactivate") {
           await reactivateTenant(tenant.id).unwrap();
         } else {
-          await archiveTenant({ tenantId: tenant.id, body: { reason: "Archived from the platform admin console." } }).unwrap();
+          await archiveTenant({
+            tenantId: tenant.id,
+            body: { reason: "Archived from the platform admin console." },
+          }).unwrap();
         }
         ok += 1;
       } catch (cause) {
@@ -255,30 +375,41 @@ export function AllTenantsScreen() {
     if (failed === 0) refetch();
   };
 
-  const dialogCopy: Record<BulkAction, { title: string; verb: string; message: (n: number) => string; variant: "danger" | "info" }> = {
+  const dialogCopy: Record<
+    BulkAction,
+    {
+      title: string;
+      verb: string;
+      message: (n: number) => string;
+      variant: "danger" | "info";
+    }
+  > = {
     suspend: {
       title: "Suspend Tenant",
       verb: "Suspend",
       variant: "danger",
-      message: (n) => (n === 1
-        ? `Are you sure you want to suspend "${dialog?.tenants[0]?.name}"? This will block user sign-in and new work creation.`
-        : `Are you sure you want to suspend ${n} tenants? This will block user sign-in and new work creation for each.`),
+      message: (n) =>
+        n === 1
+          ? `Are you sure you want to suspend "${dialog?.tenants[0]?.name}"? This will block user sign-in and new work creation.`
+          : `Are you sure you want to suspend ${n} tenants? This will block user sign-in and new work creation for each.`,
     },
     reactivate: {
       title: "Reactivate Tenant",
       verb: "Reactivate",
       variant: "info",
-      message: (n) => (n === 1
-        ? `Are you sure you want to reactivate "${dialog?.tenants[0]?.name}"? This will restore tenant capabilities per platform policy.`
-        : `Are you sure you want to reactivate ${n} tenants?`),
+      message: (n) =>
+        n === 1
+          ? `Are you sure you want to reactivate "${dialog?.tenants[0]?.name}"? This will restore tenant capabilities per platform policy.`
+          : `Are you sure you want to reactivate ${n} tenants?`,
     },
     archive: {
       title: "Archive Tenant",
       verb: "Archive",
       variant: "danger",
-      message: (n) => (n === 1
-        ? `Archive "${dialog?.tenants[0]?.name}"? Archived tenants are read-only and retain their data per retention policy.`
-        : `Archive ${n} tenants? Archived tenants are read-only and retain their data per retention policy.`),
+      message: (n) =>
+        n === 1
+          ? `Archive "${dialog?.tenants[0]?.name}"? Archived tenants are read-only and retain their data per retention policy.`
+          : `Archive ${n} tenants? Archived tenants are read-only and retain their data per retention policy.`,
     },
   };
 
@@ -299,10 +430,30 @@ export function AllTenantsScreen() {
       }
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard label="Total Tenants" value={counts.total} color="info" icon={<Building2 className="h-6 w-6" />} />
-        <StatCard label="Active" value={counts.active} color="success" icon={<CheckCircle className="h-6 w-6" />} />
-        <StatCard label="Provisioning" value={counts.provisioning} color="warning" icon={<AlertCircle className="h-6 w-6" />} />
-        <StatCard label="Suspended" value={counts.suspended} color="danger" icon={<XCircle className="h-6 w-6" />} />
+        <StatCard
+          label="Total Tenants"
+          value={counts.total}
+          color="info"
+          icon={<Building2 className="h-6 w-6" />}
+        />
+        <StatCard
+          label="Active"
+          value={counts.active}
+          color="success"
+          icon={<CheckCircle className="h-6 w-6" />}
+        />
+        <StatCard
+          label="Provisioning"
+          value={counts.provisioning}
+          color="warning"
+          icon={<AlertCircle className="h-6 w-6" />}
+        />
+        <StatCard
+          label="Suspended"
+          value={counts.suspended}
+          color="danger"
+          icon={<XCircle className="h-6 w-6" />}
+        />
       </div>
 
       <SearchFilters
@@ -310,11 +461,17 @@ export function AllTenantsScreen() {
         onSearchChange={setSearchInput}
         placeholder="Search by name, slug, or primary contact email..."
         filters={[
-          { key: "status", label: "Status", type: "select", options: statusOptions },
+          {
+            key: "status",
+            label: "Status",
+            type: "select",
+            options: statusOptions,
+          },
         ]}
         filterValues={{ status }}
         onFilterChange={(key, value) => {
-          if (key === "status") patchParams({ status: (value as string) || undefined }, true);
+          if (key === "status")
+            patchParams({ status: (value as string) || undefined }, true);
         }}
         onClearFilters={() => patchParams({ status: undefined }, true)}
       />
@@ -322,10 +479,22 @@ export function AllTenantsScreen() {
       {selectedKeys.size > 0 ? (
         <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
           <span className="text-slate-600">{selectedKeys.size} selected</span>
-          <Button variant="ghost" onClick={() => runBulk("suspend")}><PauseCircle className="h-4 w-4 mr-1" /> Suspend</Button>
-          <Button variant="ghost" onClick={() => runBulk("reactivate")}><PlayCircle className="h-4 w-4 mr-1" /> Reactivate</Button>
-          <Button variant="ghost" onClick={() => runBulk("archive")} className="text-red-600 hover:bg-red-50"><Archive className="h-4 w-4 mr-1" /> Archive</Button>
-          <Button variant="ghost" onClick={() => setSelectedKeys(new Set())}>Clear</Button>
+          <Button variant="ghost" onClick={() => runBulk("suspend")}>
+            <PauseCircle className="h-4 w-4 mr-1" /> Suspend
+          </Button>
+          <Button variant="ghost" onClick={() => runBulk("reactivate")}>
+            <PlayCircle className="h-4 w-4 mr-1" /> Reactivate
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => runBulk("archive")}
+            className="text-red-600 hover:bg-red-50"
+          >
+            <Archive className="h-4 w-4 mr-1" /> Archive
+          </Button>
+          <Button variant="ghost" onClick={() => setSelectedKeys(new Set())}>
+            Clear
+          </Button>
         </div>
       ) : null}
 
@@ -337,12 +506,18 @@ export function AllTenantsScreen() {
             columns={columns}
             rows={tenants}
             rowKey={(row) => row.id}
-            onRowClick={(row) => navigate(`/saas-admin/tenants/details/${row.id}`)}
+            onRowClick={(row) =>
+              navigate(`/saas-admin/tenants/details/${row.id}`)
+            }
             loading={isLoading || isFetching}
             sortBy={sortBy}
             sortOrder={sortOrder}
             onSort={handleSort}
-            selection={{ selectedKeys, onChange: setSelectedKeys, getKey: (row) => row.id }}
+            selection={{
+              selectedKeys,
+              onChange: setSelectedKeys,
+              getKey: (row) => row.id,
+            }}
             actions={actions}
             emptyTitle="No tenants found"
             emptyDescription="Try adjusting your search or filters"
@@ -365,7 +540,9 @@ export function AllTenantsScreen() {
         onConfirm={handleConfirm}
         loading={dialogBusy}
         title={dialog ? dialogCopy[dialog.action].title : ""}
-        message={dialog ? dialogCopy[dialog.action].message(dialog.tenants.length) : ""}
+        message={
+          dialog ? dialogCopy[dialog.action].message(dialog.tenants.length) : ""
+        }
         confirmLabel={dialog ? dialogCopy[dialog.action].verb : ""}
         variant={dialog ? dialogCopy[dialog.action].variant : "info"}
       />

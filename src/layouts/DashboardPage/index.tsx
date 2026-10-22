@@ -51,52 +51,58 @@ export function DashboardPage({
     onFilterChange?.(value);
   };
 
-  const kpiCards = kpiCounts?.map((kpi) => (
-    <div
-      key={kpi.label}
-      className={cn(
-        "flex-1",
-        "py-3",
-        "px-4",
-        "border-r border-slate-200",
-        kpi.trend === "up" && "bg-green-50",
-        kpi.trend === "down" && "bg-red-50",
-        kpi.trend === "neutral" && "bg-slate-50",
-      )}
-    >
-      <div className="flex justify-between items-start">
-        <div>
-          <p className="text-sm text-slate-500">{kpi.label}</p>
-          <p className="text-2xl font-medium text-slate-900">{kpi.value}</p>
-        </div>
-        {kpi.trendValue && (
-          <span className={cn(
-            "ml-2",
-            kpi.trend === "up" && "text-green-500",
-            kpi.trend === "down" && "text-red-500",
-            kpi.trend === "neutral" && "text-slate-500",
-          )}>
-            {kpi.trendValue}
-          </span>
+  const kpiCards =
+    kpiCounts?.map((kpi) => (
+      <div
+        key={kpi.label}
+        className={cn(
+          "flex-1",
+          "py-3",
+          "px-4",
+          "border-r border-slate-200",
+          kpi.trend === "up" && "bg-green-50",
+          kpi.trend === "down" && "bg-red-50",
+          kpi.trend === "neutral" && "bg-slate-50",
         )}
-      </div>
-    </div>
-  )) || [];
-
-  const dashboardWidgets = widgets?.map((widget) => (
-    <Card key={widget.id} className="mb-4">
-      <CardHeader title={widget.title} description={widget.description} />
-      <CardBody>
-        {loading ? (
-          <div className="h-48 flex items-center justify-center text-slate-500">
-            <Spinner className="h-4 w-4" /> Loading…
+      >
+        <div className="flex justify-between items-start">
+          <div>
+            <p className="text-sm text-slate-500">{kpi.label}</p>
+            <p className="text-2xl font-medium text-slate-900">{kpi.value}</p>
           </div>
-        ) : (
-          <p className="text-slate-400">{widget.description || "No data available"}</p>
-        )}
-      </CardBody>
-    </Card>
-  )) || [];
+          {kpi.trendValue && (
+            <span
+              className={cn(
+                "ml-2",
+                kpi.trend === "up" && "text-green-500",
+                kpi.trend === "down" && "text-red-500",
+                kpi.trend === "neutral" && "text-slate-500",
+              )}
+            >
+              {kpi.trendValue}
+            </span>
+          )}
+        </div>
+      </div>
+    )) || [];
+
+  const dashboardWidgets =
+    widgets?.map((widget) => (
+      <Card key={widget.id} className="mb-4">
+        <CardHeader title={widget.title} description={widget.description} />
+        <CardBody>
+          {loading ? (
+            <div className="h-48 flex items-center justify-center text-slate-500">
+              <Spinner className="h-4 w-4" /> Loading…
+            </div>
+          ) : (
+            <p className="text-slate-400">
+              {widget.description || "No data available"}
+            </p>
+          )}
+        </CardBody>
+      </Card>
+    )) || [];
 
   return (
     <div className="space-y-6">

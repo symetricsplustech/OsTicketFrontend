@@ -10,8 +10,14 @@ export const dashboardApi = saasadminApi.injectEndpoints({
       query: () => ({ url: "/admin/dashboard/summary" }),
       providesTags: ["Dashboard"],
     }),
-    dashboardTenantGrowth: build.query<ApiSuccess<ApiRecord[]>, ListQuery | void>({
-      query: (params) => ({ url: "/admin/dashboard/tenant-growth", params: params ?? undefined }),
+    dashboardTenantGrowth: build.query<
+      ApiSuccess<ApiRecord[]>,
+      ListQuery | void
+    >({
+      query: (params) => ({
+        url: "/admin/dashboard/tenant-growth",
+        params: params ?? undefined,
+      }),
       providesTags: ["Dashboard"],
     }),
     dashboardTenantStatus: build.query<ApiSuccess<ApiRecord>, void>({
@@ -22,8 +28,14 @@ export const dashboardApi = saasadminApi.injectEndpoints({
       query: () => ({ url: "/admin/dashboard/platform-health" }),
       providesTags: ["Dashboard"],
     }),
-    dashboardRecentActivity: build.query<ApiSuccess<ApiRecord[]>, ListQuery | void>({
-      query: (params) => ({ url: "/admin/dashboard/recent-activity", params: params ?? undefined }),
+    dashboardRecentActivity: build.query<
+      ApiSuccess<ApiRecord[]>,
+      ListQuery | void
+    >({
+      query: (params) => ({
+        url: "/admin/dashboard/recent-activity",
+        params: params ?? undefined,
+      }),
       providesTags: ["Dashboard"],
     }),
     dashboardAlerts: build.query<ApiSuccess<ApiRecord[]>, void>({
@@ -31,7 +43,10 @@ export const dashboardApi = saasadminApi.injectEndpoints({
       providesTags: ["Dashboard"],
     }),
     dashboardWorkQueue: build.query<ApiSuccess<ApiRecord[]>, ListQuery | void>({
-      query: (params) => ({ url: "/admin/dashboard/work-queue", params: params ?? undefined }),
+      query: (params) => ({
+        url: "/admin/dashboard/work-queue",
+        params: params ?? undefined,
+      }),
       providesTags: ["Dashboard"],
     }),
   }),

@@ -19,35 +19,48 @@ export const systemAdministrationApi = saasadminApi.injectEndpoints({
       query: (serviceKey) => ({
         url: `/admin/system-administration/services/${encodeURIComponent(serviceKey)}`,
       }),
-      providesTags: (_r, _e, serviceKey) => [{ type: "SystemAdministration", id: serviceKey }],
+      providesTags: (_r, _e, serviceKey) => [
+        { type: "SystemAdministration", id: serviceKey },
+      ],
     }),
     listSystemQueues: build.query<ApiSuccess<ApiRecord[]>, void>({
       query: () => ({ url: "/admin/system-administration/queues" }),
       providesTags: ["SystemAdministration"],
     }),
     listSystemJobs: build.query<ApiSuccess<ApiRecord[]>, ListQuery | void>({
-      query: (params) => ({ url: "/admin/system-administration/jobs", params: params ?? undefined }),
+      query: (params) => ({
+        url: "/admin/system-administration/jobs",
+        params: params ?? undefined,
+      }),
       providesTags: ["SystemAdministration"],
     }),
     getSystemJob: build.query<ApiSuccess<ApiRecord>, string>({
       query: (jobId) => ({
         url: `/admin/system-administration/jobs/${encodeURIComponent(jobId)}`,
       }),
-      providesTags: (_r, _e, jobId) => [{ type: "SystemAdministration", id: jobId }],
+      providesTags: (_r, _e, jobId) => [
+        { type: "SystemAdministration", id: jobId },
+      ],
     }),
     retrySystemJob: build.mutation<ApiSuccess<ApiRecord>, string>({
       query: (jobId) => ({
         url: `/admin/system-administration/jobs/${encodeURIComponent(jobId)}/retry`,
         method: "POST",
       }),
-      invalidatesTags: (_r, _e, jobId) => ["SystemAdministration", { type: "SystemAdministration", id: jobId }],
+      invalidatesTags: (_r, _e, jobId) => [
+        "SystemAdministration",
+        { type: "SystemAdministration", id: jobId },
+      ],
     }),
     cancelSystemJob: build.mutation<ApiSuccess<ApiRecord>, string>({
       query: (jobId) => ({
         url: `/admin/system-administration/jobs/${encodeURIComponent(jobId)}/cancel`,
         method: "POST",
       }),
-      invalidatesTags: (_r, _e, jobId) => ["SystemAdministration", { type: "SystemAdministration", id: jobId }],
+      invalidatesTags: (_r, _e, jobId) => [
+        "SystemAdministration",
+        { type: "SystemAdministration", id: jobId },
+      ],
     }),
     getMaintenance: build.query<ApiSuccess<ApiRecord>, void>({
       query: () => ({ url: "/admin/system-administration/maintenance" }),

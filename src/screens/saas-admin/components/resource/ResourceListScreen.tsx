@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { AlertCircle } from "lucide-react";
 import { SaasAdminScreen } from "../SaasAdminScreen";
@@ -9,13 +10,27 @@ import { SearchFilters } from "../ui/SearchFilters";
 import { Pagination } from "../ui/Pagination";
 import { StatusBadge } from "../ui/StatusBadge";
 import { Modal } from "../ui/Modal";
+import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { Button } from "@components/common/ui";
 import { apiErrorMessage } from "@services/saasadmin";
-import type { ResourceListConfig, ResourceListState, ResourceRow, RevealPayload } from "./types";
-import { extractRows, extractTotal, rowText, getField, comparable, matchFilter } from "./helpers";
+import type {
+  ResourceListConfig,
+  ResourceListState,
+  ResourceRow,
+  RevealPayload,
+} from "./types";
+import {
+  extractRows,
+  extractTotal,
+  rowText,
+  getField,
+  comparable,
+  matchFilter,
+} from "./helpers";
 import { FormGrid, validateRequiredFields } from "./FormFields";
 import { MutationBridge } from "./MutationBridge";
 import { RevealModal } from "./RevealModal";
+import { PromptDialog, type PromptOptions } from "./PromptDialog";
 
 interface ResourceListScreenProps {
   config: ResourceListConfig;
@@ -23,20 +38,52 @@ interface ResourceListScreenProps {
 
 function useResourceListState(config: ResourceListConfig) {
   const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState<Record<string, string | number | boolean>>({});
+  const [filters, setFilters] = useState<
+    Record<string, string | number | boolean>
+  >({});
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(config.pageSize ?? 10);
   const [sortBy, setSortBy] = useState<string | undefined>();
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [createOpen, setCreateOpen] = useState(false);
 
-  const state: ResourceListState = { search, filters, page, pageSize, sortBy, sortOrder };
+  const state: ResourceListState = {
+    search,
+    filters,
+    page,
+    pageSize,
+    sortBy,
+    sortOrder,
+  };
 
+  // Debounce the search term so server-paginated lists don't refetch per keystroke.
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Server-paginated sources without a custom buildParams still need search,
+  // pagination and active filters sent to the API — the server performs the
+  // filtering, so passing them is required for the list to react at all.
+  const queryState: ResourceListState = { ...state, search: debouncedSearch };
   const queryArgs =
-    config.source.kind === "api" && config.source.buildParams ? config.source.buildParams(state) : undefined;
-  const apiResult = config.source.kind === "api" ? config.source.useList(queryArgs) : undefined;
+    config.source.kind === "api"
+      ? (config.source.buildParams?.(queryState) ??
+        (config.source.serverPagination
+          ? {
+              search: debouncedSearch.trim() || undefined,
+              page: state.page,
+              limit: state.pageSize,
+              ...filters,
+            }
+          : undefined))
+      : undefined;
+  const apiResult =
+    config.source.kind === "api" ? config.source.useList(queryArgs) : undefined;
 
-  const serverPagination = config.source.kind === "api" && config.source.serverPagination === true;
+  const serverPagination =
+    config.source.kind === "api" && config.source.serverPagination === true;
 
   const rawRows: ResourceRow[] = useMemo(() => {
     if (config.source.kind === "static") return config.source.rows;
@@ -53,14 +100,23 @@ function useResourceListState(config: ResourceListConfig) {
     const term = search.trim().toLowerCase();
     if (term) {
       out = out.filter((row) => {
-        const hay = config.searchable ? config.searchable(row).toLowerCase() : rowText(row).toLowerCase();
+        const hay = config.searchable
+          ? config.searchable(row).toLowerCase()
+          : rowText(row).toLowerCase();
         return hay.includes(term);
       });
     }
     for (const f of filterConfigs) {
       const expected = filters[f.key];
       if (expected === "" || expected === undefined) continue;
-      out = out.filter((row) => matchFilter(row, f.key, f.type === "daterange" ? "date" : f.type, expected));
+      out = out.filter((row) =>
+        matchFilter(
+          row,
+          f.key,
+          f.type === "daterange" ? "date" : f.type,
+          expected,
+        ),
+      );
     }
     return out;
   }, [rawRows, search, filters, config, filterConfigs, serverPagination]);
@@ -86,14 +142,19 @@ function useResourceListState(config: ResourceListConfig) {
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const safePage = Math.min(page, totalPages);
-  const paged = serverPagination ? sorted : sorted.slice((safePage - 1) * pageSize, safePage * pageSize);
+  const paged = serverPagination
+    ? sorted
+    : sorted.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
     setPage(1);
   };
 
-  const handleFilterChange = (key: string, value: string | number | boolean) => {
+  const handleFilterChange = (
+    key: string,
+    value: string | number | boolean,
+  ) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
     setPage(1);
   };
@@ -134,10 +195,23 @@ function useResourceListState(config: ResourceListConfig) {
   };
 }
 
-function resolveConfirm(confirm: string | ((row: ResourceRow) => string) | undefined, row: ResourceRow): boolean {
-  if (!confirm) return true;
-  const message = typeof confirm === "function" ? confirm(row) : confirm;
-  return window.confirm(message);
+const DANGER_WORDS =
+  /delete|revoke|rotate|reject|cancel|disable|retire|suspend|archive|remove|stop|blacklist|purge/i;
+
+function confirmVariant(message: string): "danger" | "info" {
+  return DANGER_WORDS.test(message) ? "danger" : "info";
+}
+
+interface ConfirmState {
+  title: string;
+  message: string;
+  variant: "danger" | "info";
+  resolve: (ok: boolean) => void;
+}
+
+interface PromptState extends PromptOptions {
+  title: string;
+  resolve: (value: string | null) => void;
 }
 
 export function ResourceListScreen({ config }: ResourceListScreenProps) {
@@ -172,29 +246,64 @@ function ResourceListContent({ config }: ResourceListScreenProps) {
     handleClearFilters,
   } = useResourceListState(config);
 
+  const navigate = useNavigate();
+
   const [form, setForm] = useState<Record<string, unknown>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [quickBusy, setQuickBusy] = useState<string | null>(null);
   const [actionBusy, setActionBusy] = useState<string | null>(null);
   const [reveal, setReveal] = useState<RevealPayload | null>(null);
+  const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
+  const [promptState, setPromptState] = useState<PromptState | null>(null);
+
+  const askConfirm = (
+    title: string,
+    message: string,
+  ): Promise<boolean> =>
+    new Promise<boolean>((resolve) =>
+      setConfirmState({ title, message, variant: confirmVariant(message), resolve }),
+    );
+
+  const askPrompt = (
+    title: string,
+    options: PromptOptions,
+  ): Promise<string | null> =>
+    new Promise<string | null>((resolve) =>
+      setPromptState({ title, ...options, resolve }),
+    );
 
   const create = config.create;
   const quick = config.quickAction;
   const actions = config.actions ?? [];
 
-  const createTriggerRef = useRef<((body?: unknown) => Promise<unknown>) | null>(null);
-  const quickTriggerRef = useRef<((body?: unknown) => Promise<unknown>) | null>(null);
-  const actionTriggerRefs = useRef<Record<string, (body?: unknown) => Promise<unknown>>>({});
+  const createTriggerRef = useRef<
+    ((body?: unknown) => Promise<unknown>) | null
+  >(null);
+  const quickTriggerRef = useRef<((body?: unknown) => Promise<unknown>) | null>(
+    null,
+  );
+  const actionTriggerRefs = useRef<
+    Record<string, (body?: unknown) => Promise<unknown>>
+  >({});
 
   const runQuickAction = async (row: ResourceRow) => {
     const trigger = quickTriggerRef.current;
     if (!quick || !trigger) return;
-    if (!resolveConfirm(quick.confirm, row)) return;
+    if (quick.confirm) {
+      const message =
+        typeof quick.confirm === "function" ? quick.confirm(row) : quick.confirm;
+      const ok = await askConfirm(quick.label, message);
+      if (!ok) return;
+    }
     setQuickBusy(String(row[config.rowId] ?? "row"));
     try {
       await trigger(quick.buildArg(row));
-      toast.success(quick.successMessage ? quick.successMessage(row) : `${quick.label} saved.`);
+      toast.success(
+        quick.successMessage
+          ? quick.successMessage(row)
+          : `${quick.label} saved.`,
+      );
       apiResult?.refetch?.();
     } catch (cause) {
       toast.error(apiErrorMessage((cause as { data?: unknown }).data));
@@ -203,8 +312,18 @@ function ResourceListContent({ config }: ResourceListScreenProps) {
     }
   };
 
-  const runRowAction = async (action: NonNullable<ResourceListConfig["actions"]>[number], row: ResourceRow) => {
-    if (!resolveConfirm(action.confirm, row)) return;
+  const runRowAction = async (
+    action: NonNullable<ResourceListConfig["actions"]>[number],
+    row: ResourceRow,
+  ) => {
+    if (action.confirm) {
+      const message =
+        typeof action.confirm === "function"
+          ? action.confirm(row)
+          : action.confirm;
+      const ok = await askConfirm(action.label, message);
+      if (!ok) return;
+    }
     if (!action.useAction) {
       action.onClick?.(row);
       return;
@@ -213,20 +332,19 @@ function ResourceListContent({ config }: ResourceListScreenProps) {
     if (!trigger) return;
     let input: string | undefined;
     if (action.promptFor) {
-      const value = window.prompt(action.promptFor.label, action.promptFor.default ?? "");
+      const value = await askPrompt(action.label, action.promptFor);
       if (value === null) return;
-      if (action.promptFor.required && value.trim().length === 0) {
-        toast.error(action.promptFor.label);
-        return;
-      }
       input = value;
     }
     setActionBusy(action.label);
     try {
-      const result = await trigger(action.buildArg ? action.buildArg(row, input) : row);
-      const message = typeof action.successMessage === "function"
-        ? action.successMessage(row)
-        : action.successMessage ?? `${action.label} completed.`;
+      const result = await trigger(
+        action.buildArg ? action.buildArg(row, input) : row,
+      );
+      const message =
+        typeof action.successMessage === "function"
+          ? action.successMessage(row)
+          : (action.successMessage ?? `${action.label} completed.`);
       toast.success(message);
       if (action.reveal) setReveal(action.reveal(result));
       apiResult?.refetch?.();
@@ -269,10 +387,20 @@ function ResourceListContent({ config }: ResourceListScreenProps) {
     }
   };
 
-  const breadcrumbs = [{ label: "SaaS Admin" }, { label: config.sectionLabel }, { label: config.title }];
+  const breadcrumbs = [
+    { label: "SaaS Admin" },
+    { label: config.sectionLabel },
+    { label: config.title },
+  ];
 
   const statsNodes = config.stats?.map((stat) => (
-    <StatCard key={stat.key} label={stat.label} value={stat.compute(rows)} color={stat.color} icon={stat.icon} />
+    <StatCard
+      key={stat.key}
+      label={stat.label}
+      value={stat.compute(rows)}
+      color={stat.color}
+      icon={stat.icon}
+    />
   ));
 
   const renderCell = (row: ResourceRow, key: string) => {
@@ -299,13 +427,24 @@ function ResourceListContent({ config }: ResourceListScreenProps) {
         create ? (
           <Button onClick={openCreate}>
             <span className="mr-1">+</span>
-            {create.buttonLabel ?? `Create ${config.title.replace(/\s*s$/, "")}`}
+            {create.buttonLabel ??
+              `Create ${config.title.replace(/\s*s$/, "")}`}
           </Button>
         ) : undefined
       }
     >
-      {create ? <MutationBridge hook={create.useCreate} onReady={(t) => (createTriggerRef.current = t)} /> : null}
-      {quick ? <MutationBridge hook={quick.useAction} onReady={(t) => (quickTriggerRef.current = t)} /> : null}
+      {create ? (
+        <MutationBridge
+          hook={create.useCreate}
+          onReady={(t) => (createTriggerRef.current = t)}
+        />
+      ) : null}
+      {quick ? (
+        <MutationBridge
+          hook={quick.useAction}
+          onReady={(t) => (quickTriggerRef.current = t)}
+        />
+      ) : null}
       {actions.map((action) =>
         action.useAction ? (
           <MutationBridge
@@ -320,7 +459,9 @@ function ResourceListContent({ config }: ResourceListScreenProps) {
       )}
 
       {statsNodes && statsNodes.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">{statsNodes}</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {statsNodes}
+        </div>
       )}
 
       <div className="rounded-xl border border-slate-200 bg-white">
@@ -340,7 +481,10 @@ function ResourceListContent({ config }: ResourceListScreenProps) {
           <div className="mx-4 mb-3 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>
-              Failed to load {config.title.toLowerCase()}: {apiErrorMessage(((apiResult?.error as { data?: unknown } | undefined)?.data))}
+              Failed to load {config.title.toLowerCase()}:{" "}
+              {apiErrorMessage(
+                (apiResult?.error as { data?: unknown } | undefined)?.data,
+              )}
             </span>
           </div>
         )}
@@ -348,10 +492,19 @@ function ResourceListContent({ config }: ResourceListScreenProps) {
         <DataTable
           columns={config.columns.map((col) => ({
             ...col,
-            render: col.render ?? ((row: ResourceRow) => renderCell(row, col.key)),
+            render:
+              col.render ?? ((row: ResourceRow) => renderCell(row, col.key)),
           }))}
           rows={rows}
           rowKey={(row) => String(row[config.rowId] ?? rowText(row))}
+          onRowClick={
+            config.detailPath
+              ? (row: ResourceRow) => {
+                  const target = config.detailPath?.(row);
+                  if (target) navigate(target, { state: { row } });
+                }
+              : undefined
+          }
           loading={apiResult?.isLoading}
           emptyTitle={config.emptyTitle ?? "No records found"}
           emptyDescription={config.emptyDescription}
@@ -364,7 +517,8 @@ function ResourceListContent({ config }: ResourceListScreenProps) {
               label: actionBusy === action.label ? "Working…" : action.label,
               onClick: (row: ResourceRow) => void runRowAction(action, row),
               show: action.show
-                ? (row: ResourceRow) => actionBusy !== action.label && action.show!(row)
+                ? (row: ResourceRow) =>
+                    actionBusy !== action.label && action.show!(row)
                 : () => actionBusy !== action.label,
             })),
             ...(quick
@@ -374,7 +528,8 @@ function ResourceListContent({ config }: ResourceListScreenProps) {
                     icon: quick.icon,
                     variant: "ghost" as const,
                     onClick: (row: ResourceRow) => runQuickAction(row),
-                    show: (row: ResourceRow) => quickBusy !== String(row[config.rowId] ?? "row"),
+                    show: (row: ResourceRow) =>
+                      quickBusy !== String(row[config.rowId] ?? "row"),
                   },
                 ]
               : []),
@@ -402,7 +557,11 @@ function ResourceListContent({ config }: ResourceListScreenProps) {
           description={create.description}
           footer={
             <>
-              <Button variant="ghost" onClick={() => setCreateOpen(false)} disabled={submitting}>
+              <Button
+                variant="ghost"
+                onClick={() => setCreateOpen(false)}
+                disabled={submitting}
+              >
                 Cancel
               </Button>
               <Button onClick={submitCreate} disabled={submitting}>
@@ -429,6 +588,35 @@ function ResourceListContent({ config }: ResourceListScreenProps) {
       )}
 
       <RevealModal payload={reveal} onClose={() => setReveal(null)} />
+
+      <ConfirmDialog
+        isOpen={confirmState !== null}
+        onClose={() => {
+          confirmState?.resolve(false);
+          setConfirmState(null);
+        }}
+        onConfirm={() => {
+          confirmState?.resolve(true);
+          setConfirmState(null);
+        }}
+        title={confirmState?.title ?? "Confirm action"}
+        message={confirmState?.message ?? ""}
+        variant={confirmState?.variant ?? "danger"}
+      />
+
+      <PromptDialog
+        isOpen={promptState !== null}
+        title={promptState?.title ?? ""}
+        options={promptState}
+        onCancel={() => {
+          promptState?.resolve(null);
+          setPromptState(null);
+        }}
+        onConfirm={(value) => {
+          promptState?.resolve(value);
+          setPromptState(null);
+        }}
+      />
     </SaasAdminScreen>
   );
 }
@@ -436,10 +624,12 @@ function ResourceListContent({ config }: ResourceListScreenProps) {
 function formatCell(value: unknown): ReactNode {
   if (value === null || value === undefined) return "—";
   if (typeof value === "boolean") return value ? "Yes" : "No";
-  if (typeof value === "string" || typeof value === "number") return String(value);
+  if (typeof value === "string" || typeof value === "number")
+    return String(value);
   if (Array.isArray(value)) {
     if (value.length === 0) return "—";
-    if (typeof value[0] === "object") return `${value.length} item${value.length === 1 ? "" : "s"}`;
+    if (typeof value[0] === "object")
+      return `${value.length} item${value.length === 1 ? "" : "s"}`;
     return value.join(", ");
   }
   if (typeof value === "object") {

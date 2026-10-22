@@ -1,7 +1,16 @@
 import { useState } from "react";
 import {
-  Paperclip, Image, FileText, Download, Trash2,
-  Upload, Eye, File, X, Loader2, AlertCircle,
+  Paperclip,
+  Image,
+  FileText,
+  Download,
+  Trash2,
+  Upload,
+  Eye,
+  File,
+  X,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { Input } from "@components/common/ui";
 import { Button } from "@components/common/ui";
@@ -48,8 +57,15 @@ const typeColors = {
 };
 
 export function AttachmentPanel({
-  attachments, onUpload, onRemove, onDownload, onPreview,
-  loading, maxSize, allowedTypes, disabled,
+  attachments,
+  onUpload,
+  onRemove,
+  onDownload,
+  onPreview,
+  loading,
+  maxSize,
+  allowedTypes,
+  disabled,
 }: AttachmentPanelProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +89,9 @@ export function AttachmentPanel({
       for (const file of files) {
         const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
         if (!allowedTypes.some((t) => file.type.includes(t) || ext === t)) {
-          setError(`File type not allowed. Allowed: ${allowedTypes.join(", ")}`);
+          setError(
+            `File type not allowed. Allowed: ${allowedTypes.join(", ")}`,
+          );
           setTimeout(() => setError(null), 5000);
           return;
         }
@@ -87,7 +105,13 @@ export function AttachmentPanel({
   };
 
   if (loading) {
-    return <Card><CardBody className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-brand-500" /></CardBody></Card>;
+    return (
+      <Card>
+        <CardBody className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-brand-500" />
+        </CardBody>
+      </Card>
+    );
   }
 
   return (
@@ -98,9 +122,21 @@ export function AttachmentPanel({
         actions={
           onUpload ? (
             <label className="cursor-pointer">
-              <input type="file" multiple className="hidden" onChange={handleFileChange} disabled={disabled || isUploading} />
-              <Button variant="outline" size="sm" as="span" disabled={disabled || isUploading}>
-                <Upload className="h-3.5 w-3.5" /> {isUploading ? "Uploading…" : "Upload"}
+              <input
+                type="file"
+                multiple
+                className="hidden"
+                onChange={handleFileChange}
+                disabled={disabled || isUploading}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                as="span"
+                disabled={disabled || isUploading}
+              >
+                <Upload className="h-3.5 w-3.5" />{" "}
+                {isUploading ? "Uploading…" : "Upload"}
               </Button>
             </label>
           ) : null
@@ -113,24 +149,63 @@ export function AttachmentPanel({
           </div>
         ) : null}
         {attachments.length === 0 ? (
-          <div className="py-6 text-center text-sm text-slate-500">No attachments yet</div>
+          <div className="py-6 text-center text-sm text-slate-500">
+            No attachments yet
+          </div>
         ) : (
           <div className="space-y-2">
             {attachments.map((att) => {
               const Icon = typeIcons[att.type] ?? Paperclip;
               return (
-                <div key={att.id} className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-3">
-                  <div className={cn("flex h-9 w-9 items-center justify-center rounded-md", typeColors[att.type])}>
+                <div
+                  key={att.id}
+                  className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-3"
+                >
+                  <div
+                    className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-md",
+                      typeColors[att.type],
+                    )}
+                  >
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="truncate text-sm font-medium text-slate-800">{att.name}</p>
-                    <p className="text-[10px] text-slate-500">{att.size} · {att.uploadedAt} · {att.uploadedBy}</p>
+                    <p className="truncate text-sm font-medium text-slate-800">
+                      {att.name}
+                    </p>
+                    <p className="text-[10px] text-slate-500">
+                      {att.size} · {att.uploadedAt} · {att.uploadedBy}
+                    </p>
                   </div>
                   <div className="flex items-center gap-1">
-                    {onPreview ? <Button variant="ghost" size="sm" onClick={() => onPreview(att.id)}><Eye className="h-3 w-3" /></Button> : null}
-                    {onDownload ? <Button variant="ghost" size="sm" onClick={() => onDownload(att.id)}><Download className="h-3 w-3" /></Button> : null}
-                    {onRemove ? <Button variant="ghost" size="sm" onClick={() => onRemove(att.id)} className="text-red-500"><Trash2 className="h-3 w-3" /></Button> : null}
+                    {onPreview ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onPreview(att.id)}
+                      >
+                        <Eye className="h-3 w-3" />
+                      </Button>
+                    ) : null}
+                    {onDownload ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onDownload(att.id)}
+                      >
+                        <Download className="h-3 w-3" />
+                      </Button>
+                    ) : null}
+                    {onRemove ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onRemove(att.id)}
+                        className="text-red-500"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    ) : null}
                   </div>
                 </div>
               );

@@ -9,7 +9,11 @@ interface PermissionGateProps {
   fallback?: ReactNode;
 }
 
-export function PermissionGate({ permissions, children, fallback = null }: PermissionGateProps) {
+export function PermissionGate({
+  permissions,
+  children,
+  fallback = null,
+}: PermissionGateProps) {
   const perms = useAppSelector(selectPermissions);
   const permArray = Array.isArray(permissions) ? permissions : [permissions];
   const hasPermission = permArray.every((p) => can(perms, p));

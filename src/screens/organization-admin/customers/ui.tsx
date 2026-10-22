@@ -19,8 +19,23 @@ export const buttonGhost =
 export const buttonDanger =
   "inline-flex items-center justify-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50";
 
-export function Card({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("rounded-xl border border-slate-200 bg-white p-5", className)}>{children}</div>;
+export function Card({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-xl border border-slate-200 bg-white p-5",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
 }
 
 const BADGE_TONES: Record<string, string> = {
@@ -32,22 +47,40 @@ const BADGE_TONES: Record<string, string> = {
   purple: "bg-purple-50 text-purple-700 border-purple-200",
 };
 
-export function Badge({ tone = "slate", children }: { tone?: keyof typeof BADGE_TONES; children: ReactNode }) {
+export function Badge({
+  tone = "slate",
+  children,
+}: {
+  tone?: keyof typeof BADGE_TONES;
+  children: ReactNode;
+}) {
   return (
-    <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium", BADGE_TONES[tone])}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
+        BADGE_TONES[tone],
+      )}
+    >
       {children}
     </span>
   );
 }
 
 export function CustomerStatusBadge({ status }: { status: string }) {
-  const tone = status === "ACTIVE" ? "green" : status === "PROSPECT" ? "blue" : "slate";
+  const tone =
+    status === "ACTIVE" ? "green" : status === "PROSPECT" ? "blue" : "slate";
   return <Badge tone={tone}>{status}</Badge>;
 }
 
 export function PortalStatusBadge({ status }: { status: string }) {
   const tone =
-    status === "ACTIVE" ? "green" : status === "INVITED" ? "amber" : status === "REVOKED" ? "red" : "slate";
+    status === "ACTIVE"
+      ? "green"
+      : status === "INVITED"
+        ? "amber"
+        : status === "REVOKED"
+          ? "red"
+          : "slate";
   return <Badge tone={tone}>{status === "NONE" ? "No access" : status}</Badge>;
 }
 
@@ -65,7 +98,13 @@ export function IncidentStatusBadge({ status }: { status: string }) {
 
 export function PriorityBadge({ priority }: { priority: string }) {
   const tone =
-    priority === "critical" ? "red" : priority === "high" ? "amber" : priority === "medium" ? "blue" : "slate";
+    priority === "critical"
+      ? "red"
+      : priority === "high"
+        ? "amber"
+        : priority === "medium"
+          ? "blue"
+          : "slate";
   return <Badge tone={tone}>{priority}</Badge>;
 }
 
@@ -89,7 +128,10 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={cn("w-full rounded-xl border border-slate-200 bg-white shadow-2xl", wide ? "max-w-3xl" : "max-w-xl")}
+        className={cn(
+          "w-full rounded-xl border border-slate-200 bg-white shadow-2xl",
+          wide ? "max-w-3xl" : "max-w-xl",
+        )}
       >
         <header className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
           <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
@@ -126,7 +168,11 @@ export function ErrorState({ message }: { message: string }) {
   );
 }
 
-export function EmptyState({ label = "Nothing here yet." }: { label?: string }) {
+export function EmptyState({
+  label = "Nothing here yet.",
+}: {
+  label?: string;
+}) {
   return (
     <div className="flex flex-col items-center gap-2 py-10 text-center text-sm text-slate-400">
       <Inbox className="h-6 w-6" />
@@ -135,7 +181,15 @@ export function EmptyState({ label = "Nothing here yet." }: { label?: string }) 
   );
 }
 
-export function Field({ label, htmlFor, children }: { label: string; htmlFor?: string; children: ReactNode }) {
+export function Field({
+  label,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  htmlFor?: string;
+  children: ReactNode;
+}) {
   return (
     <div>
       <label htmlFor={htmlFor} className={labelClass}>

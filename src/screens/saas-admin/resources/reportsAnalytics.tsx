@@ -1,7 +1,24 @@
 import { toast } from "react-hot-toast";
-import { BarChart3, Users, CreditCard, DollarSign, Activity, ClipboardList, Play, Download, XCircle } from "lucide-react";
-import { asQueryHook, asMutationHook, VARIANT_FROM_STATUS } from "../components/resource/types";
-import type { ResourceListConfig, ResourceRowAction } from "../components/resource/types";
+import {
+  BarChart3,
+  Users,
+  CreditCard,
+  DollarSign,
+  Activity,
+  ClipboardList,
+  Play,
+  Download,
+  XCircle,
+} from "lucide-react";
+import {
+  asQueryHook,
+  asMutationHook,
+  VARIANT_FROM_STATUS,
+} from "../components/resource/types";
+import type {
+  ResourceListConfig,
+  ResourceRowAction,
+} from "../components/resource/types";
 import { textCol, statusCol, dateCol } from "./columns";
 import {
   useReportCatalogQuery,
@@ -27,8 +44,16 @@ const runExportAction: ResourceRowAction = {
   label: "Export CSV",
   icon: <Download className="h-3.5 w-3.5" />,
   useAction: asMutationHook(useCreateReportExportMutation),
-  promptFor: { label: "Reason for export (required, min 4 chars)", required: true },
-  buildArg: (row, input) => ({ reportKey: String(row.reportKey ?? ""), format: "CSV", reason: input ?? "" }),
+  promptFor: {
+    label: "Reason for export",
+    required: true,
+    minLength: 4,
+  },
+  buildArg: (row, input) => ({
+    reportKey: String(row.reportKey ?? ""),
+    format: "CSV",
+    reason: input ?? "",
+  }),
   successMessage: "Export queued. See Exports for status.",
 };
 
@@ -41,7 +66,13 @@ export const REPORTS_ANALYTICS_LISTS: ResourceListConfig[] = [
     rowId: "key",
     source: { kind: "api", useList: asQueryHook(useReportCatalogQuery) },
     columns: [
-      { key: "key", header: "Key", render: (r) => <span className="font-mono text-xs">{String(r.key ?? "—")}</span> },
+      {
+        key: "key",
+        header: "Key",
+        render: (r) => (
+          <span className="font-mono text-xs">{String(r.key ?? "—")}</span>
+        ),
+      },
       textCol("name", "Report"),
       textCol("description", "Description"),
       textCol("category", "Category"),
@@ -58,7 +89,12 @@ export const REPORTS_ANALYTICS_LISTS: ResourceListConfig[] = [
       },
     ],
     stats: [
-      { key: "total", label: "Reports", compute: (rows) => rows.length, icon: <BarChart3 className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Reports",
+        compute: (rows) => rows.length,
+        icon: <BarChart3 className="h-5 w-5" />,
+      },
     ],
   },
   {
@@ -69,19 +105,49 @@ export const REPORTS_ANALYTICS_LISTS: ResourceListConfig[] = [
     rowId: "runId",
     source: { kind: "api", useList: asQueryHook(useListReportRunsQuery) },
     columns: [
-      { key: "reportKey", header: "Report", render: (r) => <span className="font-mono text-xs">{String(r.reportKey ?? "—")}</span> },
+      {
+        key: "reportKey",
+        header: "Report",
+        render: (r) => (
+          <span className="font-mono text-xs">
+            {String(r.reportKey ?? "—")}
+          </span>
+        ),
+      },
       textCol("format", "Format"),
-      statusCol("status", "Status", (r) => VARIANT_FROM_STATUS(String(r.status))),
+      statusCol("status", "Status", (r) =>
+        VARIANT_FROM_STATUS(String(r.status)),
+      ),
       textCol("rowCount", "Rows"),
       textCol("requestedBy.email", "Requested By"),
       dateCol("createdAt", "Created"),
     ],
-    searchable: (r) => `${r.reportKey} ${(r.requestedBy as { email?: string } | undefined)?.email ?? ""}`,
-    filters: [{ key: "status", label: "Status", type: "select", options: RUN_STATUS, placeholder: "All statuses" }],
+    searchable: (r) =>
+      `${r.reportKey} ${(r.requestedBy as { email?: string } | undefined)?.email ?? ""}`,
+    filters: [
+      {
+        key: "status",
+        label: "Status",
+        type: "select",
+        options: RUN_STATUS,
+        placeholder: "All statuses",
+      },
+    ],
     actions: [runExportAction],
     stats: [
-      { key: "total", label: "Runs", compute: (rows) => rows.length, icon: <Users className="h-5 w-5" /> },
-      { key: "completed", label: "Completed", compute: (rows) => rows.filter((r) => r.status === "COMPLETED").length, color: "success", icon: <Users className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Runs",
+        compute: (rows) => rows.length,
+        icon: <Users className="h-5 w-5" />,
+      },
+      {
+        key: "completed",
+        label: "Completed",
+        compute: (rows) => rows.filter((r) => r.status === "COMPLETED").length,
+        color: "success",
+        icon: <Users className="h-5 w-5" />,
+      },
     ],
   },
   {
@@ -92,17 +158,31 @@ export const REPORTS_ANALYTICS_LISTS: ResourceListConfig[] = [
     rowId: "runId",
     source: { kind: "api", useList: asQueryHook(useListReportRunsQuery) },
     columns: [
-      { key: "reportKey", header: "Report", render: (r) => <span className="font-mono text-xs">{String(r.reportKey ?? "—")}</span> },
+      {
+        key: "reportKey",
+        header: "Report",
+        render: (r) => (
+          <span className="font-mono text-xs">
+            {String(r.reportKey ?? "—")}
+          </span>
+        ),
+      },
       textCol("format", "Format"),
-      statusCol("status", "Status", (r) => VARIANT_FROM_STATUS(String(r.status))),
+      statusCol("status", "Status", (r) =>
+        VARIANT_FROM_STATUS(String(r.status)),
+      ),
       textCol("rowCount", "Rows"),
       dateCol("createdAt", "Created"),
     ],
     searchable: (r) => `${r.reportKey}`,
     actions: [runExportAction],
     stats: [
-
-      { key: "total", label: "Runs", compute: (rows) => rows.length, icon: <CreditCard className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Runs",
+        compute: (rows) => rows.length,
+        icon: <CreditCard className="h-5 w-5" />,
+      },
     ],
   },
   {
@@ -113,17 +193,31 @@ export const REPORTS_ANALYTICS_LISTS: ResourceListConfig[] = [
     rowId: "runId",
     source: { kind: "api", useList: asQueryHook(useListReportRunsQuery) },
     columns: [
-      { key: "reportKey", header: "Report", render: (r) => <span className="font-mono text-xs">{String(r.reportKey ?? "—")}</span> },
+      {
+        key: "reportKey",
+        header: "Report",
+        render: (r) => (
+          <span className="font-mono text-xs">
+            {String(r.reportKey ?? "—")}
+          </span>
+        ),
+      },
       textCol("format", "Format"),
-      statusCol("status", "Status", (r) => VARIANT_FROM_STATUS(String(r.status))),
+      statusCol("status", "Status", (r) =>
+        VARIANT_FROM_STATUS(String(r.status)),
+      ),
       textCol("rowCount", "Rows"),
       dateCol("createdAt", "Created"),
     ],
     searchable: (r) => `${r.reportKey}`,
     actions: [runExportAction],
     stats: [
-
-      { key: "total", label: "Runs", compute: (rows) => rows.length, icon: <DollarSign className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Runs",
+        compute: (rows) => rows.length,
+        icon: <DollarSign className="h-5 w-5" />,
+      },
     ],
   },
   {
@@ -134,17 +228,31 @@ export const REPORTS_ANALYTICS_LISTS: ResourceListConfig[] = [
     rowId: "runId",
     source: { kind: "api", useList: asQueryHook(useListReportRunsQuery) },
     columns: [
-      { key: "reportKey", header: "Report", render: (r) => <span className="font-mono text-xs">{String(r.reportKey ?? "—")}</span> },
+      {
+        key: "reportKey",
+        header: "Report",
+        render: (r) => (
+          <span className="font-mono text-xs">
+            {String(r.reportKey ?? "—")}
+          </span>
+        ),
+      },
       textCol("format", "Format"),
-      statusCol("status", "Status", (r) => VARIANT_FROM_STATUS(String(r.status))),
+      statusCol("status", "Status", (r) =>
+        VARIANT_FROM_STATUS(String(r.status)),
+      ),
       textCol("rowCount", "Rows"),
       dateCol("createdAt", "Created"),
     ],
     searchable: (r) => `${r.reportKey}`,
     actions: [runExportAction],
     stats: [
-
-      { key: "total", label: "Runs", compute: (rows) => rows.length, icon: <Activity className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Runs",
+        compute: (rows) => rows.length,
+        icon: <Activity className="h-5 w-5" />,
+      },
     ],
   },
   {
@@ -155,17 +263,31 @@ export const REPORTS_ANALYTICS_LISTS: ResourceListConfig[] = [
     rowId: "runId",
     source: { kind: "api", useList: asQueryHook(useListReportRunsQuery) },
     columns: [
-      { key: "reportKey", header: "Report", render: (r) => <span className="font-mono text-xs">{String(r.reportKey ?? "—")}</span> },
+      {
+        key: "reportKey",
+        header: "Report",
+        render: (r) => (
+          <span className="font-mono text-xs">
+            {String(r.reportKey ?? "—")}
+          </span>
+        ),
+      },
       textCol("format", "Format"),
-      statusCol("status", "Status", (r) => VARIANT_FROM_STATUS(String(r.status))),
+      statusCol("status", "Status", (r) =>
+        VARIANT_FROM_STATUS(String(r.status)),
+      ),
       textCol("rowCount", "Rows"),
       dateCol("createdAt", "Created"),
     ],
     searchable: (r) => `${r.reportKey}`,
     actions: [runExportAction],
     stats: [
-
-      { key: "total", label: "Runs", compute: (rows) => rows.length, icon: <ClipboardList className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Runs",
+        compute: (rows) => rows.length,
+        icon: <ClipboardList className="h-5 w-5" />,
+      },
     ],
   },
   {
@@ -176,20 +298,36 @@ export const REPORTS_ANALYTICS_LISTS: ResourceListConfig[] = [
     rowId: "id",
     source: { kind: "api", useList: asQueryHook(useListReportExportsQuery) },
     columns: [
-      { key: "reportKey", header: "Report", render: (r) => <span className="font-mono text-xs">{String(r.reportKey ?? "—")}</span> },
+      {
+        key: "reportKey",
+        header: "Report",
+        render: (r) => (
+          <span className="font-mono text-xs">
+            {String(r.reportKey ?? "—")}
+          </span>
+        ),
+      },
       textCol("format", "Format"),
-      statusCol("status", "Status", (r) => VARIANT_FROM_STATUS(String(r.status))),
+      statusCol("status", "Status", (r) =>
+        VARIANT_FROM_STATUS(String(r.status)),
+      ),
       textCol("rowCount", "Rows"),
       {
         key: "downloadable",
         header: "Availability",
-        render: (r) => <span className="text-xs">{r.downloadable ? "Ready" : r.expired ? "Expired" : "—"}</span>,
+        render: (r) => (
+          <span className="text-xs">
+            {r.downloadable ? "Ready" : r.expired ? "Expired" : "—"}
+          </span>
+        ),
       },
       dateCol("createdAt", "Created"),
       dateCol("expiresAt", "Expires"),
     ],
     searchable: (r) => `${r.reportKey ?? ""}`,
-    filters: [{ key: "status", label: "Status", type: "select", options: RUN_STATUS }],
+    filters: [
+      { key: "status", label: "Status", type: "select", options: RUN_STATUS },
+    ],
     actions: [
       {
         label: "Download",
@@ -198,7 +336,11 @@ export const REPORTS_ANALYTICS_LISTS: ResourceListConfig[] = [
         onClick: (r) => {
           downloadReportArtifact(String(r.id))
             .then(() => toast.success("Export downloaded."))
-            .catch((error: unknown) => toast.error(error instanceof Error ? error.message : "Download failed."));
+            .catch((error: unknown) =>
+              toast.error(
+                error instanceof Error ? error.message : "Download failed.",
+              ),
+            );
         },
       },
       {
@@ -213,8 +355,18 @@ export const REPORTS_ANALYTICS_LISTS: ResourceListConfig[] = [
       },
     ],
     stats: [
-      { key: "total", label: "Exports", compute: (rows) => rows.length, icon: <ClipboardList className="h-5 w-5" /> },
-      { key: "ready", label: "Ready", compute: (rows) => rows.filter((r) => r.downloadable).length, icon: <Download className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Exports",
+        compute: (rows) => rows.length,
+        icon: <ClipboardList className="h-5 w-5" />,
+      },
+      {
+        key: "ready",
+        label: "Ready",
+        compute: (rows) => rows.filter((r) => r.downloadable).length,
+        icon: <Download className="h-5 w-5" />,
+      },
     ],
   },
 ];

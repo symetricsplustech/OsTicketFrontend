@@ -20,15 +20,26 @@ export const platformSettingsApi = saasadminApi.injectEndpoints({
       providesTags: ["PlatformSettings"],
     }),
     updateBrandingSettings: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/platform-settings/branding", method: "PATCH", body }),
+      query: (body) => ({
+        url: "/admin/platform-settings/branding",
+        method: "PATCH",
+        body,
+      }),
       invalidatesTags: ["PlatformSettings"],
     }),
     getLocalizationSettings: build.query<ApiSuccess<ApiRecord>, void>({
       query: () => ({ url: "/admin/platform-settings/localization" }),
       providesTags: ["PlatformSettings"],
     }),
-    updateLocalizationSettings: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/platform-settings/localization", method: "PATCH", body }),
+    updateLocalizationSettings: build.mutation<
+      ApiSuccess<ApiRecord>,
+      ApiRecord
+    >({
+      query: (body) => ({
+        url: "/admin/platform-settings/localization",
+        method: "PATCH",
+        body,
+      }),
       invalidatesTags: ["PlatformSettings"],
     }),
     getSecuritySettings: build.query<ApiSuccess<ApiRecord>, void>({
@@ -36,7 +47,11 @@ export const platformSettingsApi = saasadminApi.injectEndpoints({
       providesTags: ["PlatformSettings"],
     }),
     updateSecuritySettings: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/platform-settings/security", method: "PATCH", body }),
+      query: (body) => ({
+        url: "/admin/platform-settings/security",
+        method: "PATCH",
+        body,
+      }),
       invalidatesTags: ["PlatformSettings"],
     }),
     getRetentionSettings: build.query<ApiSuccess<ApiRecord>, void>({
@@ -44,14 +59,21 @@ export const platformSettingsApi = saasadminApi.injectEndpoints({
       providesTags: ["PlatformSettings"],
     }),
     updateRetentionSettings: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/platform-settings/retention", method: "PATCH", body }),
+      query: (body) => ({
+        url: "/admin/platform-settings/retention",
+        method: "PATCH",
+        body,
+      }),
       invalidatesTags: ["PlatformSettings"],
     }),
     listFeatureFlags: build.query<ApiSuccess<ApiRecord[]>, void>({
       query: () => ({ url: "/admin/platform-settings/feature-flags" }),
       providesTags: ["PlatformSettings"],
     }),
-    updateFeatureFlag: build.mutation<ApiSuccess<ApiRecord>, { flagKey: string; body: ApiRecord }>({
+    updateFeatureFlag: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { flagKey: string; body: ApiRecord }
+    >({
       query: ({ flagKey, body }) => ({
         url: `/admin/platform-settings/feature-flags/${encodeURIComponent(flagKey)}`,
         method: "PATCH",
@@ -60,10 +82,15 @@ export const platformSettingsApi = saasadminApi.injectEndpoints({
       invalidatesTags: ["PlatformSettings"],
     }),
     getPlatformSetting: build.query<ApiSuccess<ApiRecord>, string>({
-      query: (key) => ({ url: `/admin/platform-settings/${encodeURIComponent(key)}` }),
+      query: (key) => ({
+        url: `/admin/platform-settings/${encodeURIComponent(key)}`,
+      }),
       providesTags: ["PlatformSettings"],
     }),
-    updatePlatformSetting: build.mutation<ApiSuccess<ApiRecord>, { key: string; body: ApiRecord }>({
+    updatePlatformSetting: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { key: string; body: ApiRecord }
+    >({
       query: ({ key, body }) => ({
         url: `/admin/platform-settings/${encodeURIComponent(key)}`,
         method: "PATCH",

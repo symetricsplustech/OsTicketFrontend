@@ -62,7 +62,12 @@ export function EntityListPage<T>({
 }: EntityListPageProps<T>) {
   return (
     <div>
-      <PageHeader title={title} description={description} breadcrumbs={breadcrumbs} actions={actions} />
+      <PageHeader
+        title={title}
+        description={description}
+        breadcrumbs={breadcrumbs}
+        actions={actions}
+      />
       <Card>
         <div className="flex flex-wrap items-center gap-3 border-b border-slate-200 px-4 py-3">
           <div className="relative w-full max-w-xs">

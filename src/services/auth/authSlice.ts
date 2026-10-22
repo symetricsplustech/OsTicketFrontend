@@ -50,7 +50,8 @@ const authSlice = createSlice({
         moduleKeys?: string[];
       }>,
     ) {
-      const { token, user, role, roles, permissions, moduleKeys } = action.payload;
+      const { token, user, role, roles, permissions, moduleKeys } =
+        action.payload;
       state.token = token;
       state.user = user;
       state.role = role ?? user.role ?? null;

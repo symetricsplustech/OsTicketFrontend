@@ -12,10 +12,17 @@ export const knowledgeManagementApi = saasadminApi.injectEndpoints({
       providesTags: ["Knowledge"],
     }),
     createKnowledgePolicy: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/knowledge-management/policies", method: "POST", body }),
+      query: (body) => ({
+        url: "/admin/knowledge-management/policies",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["Knowledge"],
     }),
-    updateKnowledgePolicy: build.mutation<ApiSuccess<ApiRecord>, { policyId: string; body: ApiRecord }>({
+    updateKnowledgePolicy: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { policyId: string; body: ApiRecord }
+    >({
       query: ({ policyId, body }) => ({
         url: `/admin/knowledge-management/policies/${encodeURIComponent(policyId)}`,
         method: "PATCH",
@@ -28,7 +35,11 @@ export const knowledgeManagementApi = saasadminApi.injectEndpoints({
       providesTags: ["Knowledge"],
     }),
     createKnowledgeCategory: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/knowledge-management/categories", method: "POST", body }),
+      query: (body) => ({
+        url: "/admin/knowledge-management/categories",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["Knowledge"],
     }),
     updateKnowledgeCategory: build.mutation<
@@ -47,7 +58,11 @@ export const knowledgeManagementApi = saasadminApi.injectEndpoints({
       providesTags: ["Knowledge"],
     }),
     createKnowledgeTemplate: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/knowledge-management/templates", method: "POST", body }),
+      query: (body) => ({
+        url: "/admin/knowledge-management/templates",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["Knowledge"],
     }),
     updateKnowledgeTemplate: build.mutation<
@@ -65,11 +80,20 @@ export const knowledgeManagementApi = saasadminApi.injectEndpoints({
       query: () => ({ url: "/admin/knowledge-management/review-rules" }),
       providesTags: ["Knowledge"],
     }),
-    createKnowledgeReviewRule: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/knowledge-management/review-rules", method: "POST", body }),
-      invalidatesTags: ["Knowledge"],
-    }),
-    updateKnowledgeReviewRule: build.mutation<ApiSuccess<ApiRecord>, { ruleId: string; body: ApiRecord }>({
+    createKnowledgeReviewRule: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>(
+      {
+        query: (body) => ({
+          url: "/admin/knowledge-management/review-rules",
+          method: "POST",
+          body,
+        }),
+        invalidatesTags: ["Knowledge"],
+      },
+    ),
+    updateKnowledgeReviewRule: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { ruleId: string; body: ApiRecord }
+    >({
       query: ({ ruleId, body }) => ({
         url: `/admin/knowledge-management/review-rules/${encodeURIComponent(ruleId)}`,
         method: "PATCH",
@@ -92,7 +116,10 @@ export const knowledgeManagementApi = saasadminApi.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (_r, _e, { tenantId }) => ["Knowledge", { type: "Knowledge", id: tenantId }],
+      invalidatesTags: (_r, _e, { tenantId }) => [
+        "Knowledge",
+        { type: "Knowledge", id: tenantId },
+      ],
     }),
   }),
 });

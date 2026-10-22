@@ -177,7 +177,15 @@ const SECTION_SEEDS: SectionSeed[] = [
     label: "Organization & Users",
     description: "Employees and the organization's internal structure",
     icon: Building2,
-    permissions: ["organization.read", "users.read", "departments.read", "locations.read", "cost_centers.read", "organization_structure.read", "access_reviews.read"],
+    permissions: [
+      "organization.read",
+      "users.read",
+      "departments.read",
+      "locations.read",
+      "cost_centers.read",
+      "organization_structure.read",
+      "access_reviews.read",
+    ],
     items: [
       [
         "Organization Profile",
@@ -217,7 +225,13 @@ const SECTION_SEEDS: SectionSeed[] = [
       ],
       [
         "User Lifecycle",
-        ["Onboarding", "Offboarding", "Access Review", "Pending Invitations", "Deprovisioning Tasks"],
+        [
+          "Onboarding",
+          "Offboarding",
+          "Access Review",
+          "Pending Invitations",
+          "Deprovisioning Tasks",
+        ],
       ],
       ["External Users", ["Contractors", "Vendors", "Guest Users"]],
     ],
@@ -227,7 +241,13 @@ const SECTION_SEEDS: SectionSeed[] = [
     label: "Roles & Access Control",
     description: "Tenant-scoped roles, permissions and access governance",
     icon: ShieldCheck,
-    permissions: ["roles.read", "permissions.read", "access_policies.read", "delegations.read", "access_reviews.read"],
+    permissions: [
+      "roles.read",
+      "permissions.read",
+      "access_policies.read",
+      "delegations.read",
+      "access_reviews.read",
+    ],
     items: [
       [
         "Roles",
@@ -272,14 +292,19 @@ const SECTION_SEEDS: SectionSeed[] = [
       ],
       [
         "Access Governance",
-        ["Access Review Campaigns", "Privileged Access Review", "Permission Change History"],
+        [
+          "Access Review Campaigns",
+          "Privileged Access Review",
+          "Permission Change History",
+        ],
       ],
     ],
   },
   {
     key: "customers",
     label: "Customers & Customer Contacts",
-    description: "Customer directory, contacts, sites, portal access and ticket history",
+    description:
+      "Customer directory, contacts, sites, portal access and ticket history",
     icon: Building,
     permissions: ["customers.read"],
     items: [
@@ -313,6 +338,7 @@ const SECTION_SEEDS: SectionSeed[] = [
       "Unassigned Tickets",
       "Overdue Tickets",
       "Service Desk Activity History",
+      "Create Ticket",
     ],
   },
   {
@@ -320,7 +346,11 @@ const SECTION_SEEDS: SectionSeed[] = [
     label: "Incident Management",
     description: "Incident configuration and operational oversight",
     icon: AlertTriangle,
-    permissions: ["incidents.read", "incident_configuration.read", "major_incidents.read"],
+    permissions: [
+      "incidents.read",
+      "incident_configuration.read",
+      "major_incidents.read",
+    ],
     items: [
       "Incident Overview",
       "All Incidents",
@@ -346,7 +376,11 @@ const SECTION_SEEDS: SectionSeed[] = [
     label: "Problem Management",
     description: "Root cause analysis, known errors and workarounds",
     icon: GitBranch,
-    permissions: ["problems.read", "problem_configuration.read", "known_errors.read"],
+    permissions: [
+      "problems.read",
+      "problem_configuration.read",
+      "known_errors.read",
+    ],
     items: [
       "Problem Overview",
       "All Problems",
@@ -367,7 +401,11 @@ const SECTION_SEEDS: SectionSeed[] = [
     label: "Change Management",
     description: "Change models, risk, approvals and the change calendar",
     icon: CalendarDays,
-    permissions: ["changes.read", "change_configuration.read", "change_calendar.read"],
+    permissions: [
+      "changes.read",
+      "change_configuration.read",
+      "change_calendar.read",
+    ],
     items: [
       "Change Overview",
       "All Change Requests",
@@ -517,7 +555,12 @@ const SECTION_SEEDS: SectionSeed[] = [
     label: "CMDB & Assets",
     description: "Configuration items, assets and discovery",
     icon: Database,
-    permissions: ["cmdb.read", "assets.read", "asset_configuration.read", "discovery.read"],
+    permissions: [
+      "cmdb.read",
+      "assets.read",
+      "asset_configuration.read",
+      "discovery.read",
+    ],
     items: [
       [
         "CMDB",
@@ -808,7 +851,10 @@ function buildItem(
   seed: ItemSeed,
   icon: LucideIcon,
 ): OrganizationAdminNavigationItem {
-  if (typeof seed === "string" || typeof seed === "object" && !Array.isArray(seed)) {
+  if (
+    typeof seed === "string" ||
+    (typeof seed === "object" && !Array.isArray(seed))
+  ) {
     const label = leafLabel(seed);
     const itemSlug = slug(label);
     return {
@@ -879,10 +925,14 @@ export function canViewOrganizationAdminItem(
  * the backend tenant permission catalog; `*` (platform owner) and the legacy
  * `org.*` demo scope also qualify.
  */
-export function canAccessOrganizationAdmin(permissions: readonly string[]): boolean {
+export function canAccessOrganizationAdmin(
+  permissions: readonly string[],
+): boolean {
   return permissions.some(
     (permission) =>
-      permission === "*" || permission.startsWith("org.") || TENANT_READ_SET.has(permission),
+      permission === "*" ||
+      permission.startsWith("org.") ||
+      TENANT_READ_SET.has(permission),
   );
 }
 
@@ -915,12 +965,26 @@ export function locateOrganizationAdminScreen(
 ): OrganizationAdminLocation | null {
   for (const section of ORGANIZATION_ADMIN_NAVIGATION) {
     for (const item of section.items) {
-      if (item.path && (pathname === item.path || pathname.startsWith(`${item.path}/`))) {
-        return { section, item, label: item.label, entryPath: organizationItemEntryPath(item) };
+      if (
+        item.path &&
+        (pathname === item.path || pathname.startsWith(`${item.path}/`))
+      ) {
+        return {
+          section,
+          item,
+          label: item.label,
+          entryPath: organizationItemEntryPath(item),
+        };
       }
       for (const child of item.children ?? []) {
         if (pathname === child.path || pathname.startsWith(`${child.path}/`)) {
-          return { section, item, child, label: child.label, entryPath: organizationItemEntryPath(item) };
+          return {
+            section,
+            item,
+            child,
+            label: child.label,
+            entryPath: organizationItemEntryPath(item),
+          };
         }
       }
     }
@@ -931,10 +995,19 @@ export function locateOrganizationAdminScreen(
   // so breadcrumbs and the permission gate keep working.
   const customerPrefix = `${ORGANIZATION_ADMIN_BASE_PATH}/customers/`;
   if (pathname.startsWith(customerPrefix)) {
-    const section = ORGANIZATION_ADMIN_NAVIGATION.find((entry) => entry.key === "customers");
-    const item = section?.items.find((entry) => entry.key === "customer-directory") ?? section?.items[0];
+    const section = ORGANIZATION_ADMIN_NAVIGATION.find(
+      (entry) => entry.key === "customers",
+    );
+    const item =
+      section?.items.find((entry) => entry.key === "customer-directory") ??
+      section?.items[0];
     if (section && item) {
-      return { section, item, label: item.label, entryPath: organizationItemEntryPath(item) };
+      return {
+        section,
+        item,
+        label: item.label,
+        entryPath: organizationItemEntryPath(item),
+      };
     }
   }
 
@@ -943,5 +1016,8 @@ export function locateOrganizationAdminScreen(
 
 export const ORGANIZATION_ADMIN_HOME_PATH = (() => {
   const first = ORGANIZATION_ADMIN_NAVIGATION[0]?.items[0];
-  return (first && organizationItemEntryPath(first)) ?? `${ORGANIZATION_ADMIN_BASE_PATH}/dashboard/organization-overview`;
+  return (
+    (first && organizationItemEntryPath(first)) ??
+    `${ORGANIZATION_ADMIN_BASE_PATH}/dashboard/organization-overview`
+  );
 })();

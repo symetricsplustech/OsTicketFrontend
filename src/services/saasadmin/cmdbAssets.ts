@@ -12,27 +12,43 @@ export const cmdbAssetsApi = saasadminApi.injectEndpoints({
       providesTags: ["Cmdb"],
     }),
     createCiType: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/cmdb-assets/ci-types", method: "POST", body }),
+      query: (body) => ({
+        url: "/admin/cmdb-assets/ci-types",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["Cmdb"],
     }),
     getCiType: build.query<ApiSuccess<ApiRecord>, string>({
-      query: (typeId) => ({ url: `/admin/cmdb-assets/ci-types/${encodeURIComponent(typeId)}` }),
+      query: (typeId) => ({
+        url: `/admin/cmdb-assets/ci-types/${encodeURIComponent(typeId)}`,
+      }),
       providesTags: (_r, _e, typeId) => [{ type: "Cmdb", id: typeId }],
     }),
-    updateCiType: build.mutation<ApiSuccess<ApiRecord>, { typeId: string; body: ApiRecord }>({
+    updateCiType: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { typeId: string; body: ApiRecord }
+    >({
       query: ({ typeId, body }) => ({
         url: `/admin/cmdb-assets/ci-types/${encodeURIComponent(typeId)}`,
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (_r, _e, { typeId }) => ["Cmdb", { type: "Cmdb", id: typeId }],
+      invalidatesTags: (_r, _e, { typeId }) => [
+        "Cmdb",
+        { type: "Cmdb", id: typeId },
+      ],
     }),
     listRelationshipTypes: build.query<ApiSuccess<ApiRecord[]>, void>({
       query: () => ({ url: "/admin/cmdb-assets/relationship-types" }),
       providesTags: ["Cmdb"],
     }),
     createRelationshipType: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/cmdb-assets/relationship-types", method: "POST", body }),
+      query: (body) => ({
+        url: "/admin/cmdb-assets/relationship-types",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["Cmdb"],
     }),
     updateRelationshipType: build.mutation<
@@ -51,10 +67,17 @@ export const cmdbAssetsApi = saasadminApi.injectEndpoints({
       providesTags: ["Cmdb"],
     }),
     createAssetCategory: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/cmdb-assets/asset-categories", method: "POST", body }),
+      query: (body) => ({
+        url: "/admin/cmdb-assets/asset-categories",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["Cmdb"],
     }),
-    updateAssetCategory: build.mutation<ApiSuccess<ApiRecord>, { categoryId: string; body: ApiRecord }>({
+    updateAssetCategory: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { categoryId: string; body: ApiRecord }
+    >({
       query: ({ categoryId, body }) => ({
         url: `/admin/cmdb-assets/asset-categories/${encodeURIComponent(categoryId)}`,
         method: "PATCH",
@@ -67,10 +90,17 @@ export const cmdbAssetsApi = saasadminApi.injectEndpoints({
       providesTags: ["Cmdb"],
     }),
     createDiscoveryProfile: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/cmdb-assets/discovery-profiles", method: "POST", body }),
+      query: (body) => ({
+        url: "/admin/cmdb-assets/discovery-profiles",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["Cmdb"],
     }),
-    updateDiscoveryProfile: build.mutation<ApiSuccess<ApiRecord>, { profileId: string; body: ApiRecord }>({
+    updateDiscoveryProfile: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { profileId: string; body: ApiRecord }
+    >({
       query: ({ profileId, body }) => ({
         url: `/admin/cmdb-assets/discovery-profiles/${encodeURIComponent(profileId)}`,
         method: "PATCH",
@@ -93,7 +123,10 @@ export const cmdbAssetsApi = saasadminApi.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (_r, _e, { tenantId }) => ["Cmdb", { type: "Cmdb", id: tenantId }],
+      invalidatesTags: (_r, _e, { tenantId }) => [
+        "Cmdb",
+        { type: "Cmdb", id: tenantId },
+      ],
     }),
   }),
 });

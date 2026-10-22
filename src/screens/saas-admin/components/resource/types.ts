@@ -48,7 +48,8 @@ export type ResourceDataSource =
       rows: ResourceRow[];
     };
 
-export type FieldType = "text" | "textarea" | "number" | "select" | "boolean" | "password";
+export type FieldType =
+  "text" | "textarea" | "number" | "select" | "boolean" | "password";
 
 export interface FormField {
   key: string;
@@ -67,7 +68,9 @@ export interface FormField {
   readOnly?: boolean;
 }
 
-export type ResourceMutationHook = (...args: unknown[]) => ResourceMutationResult;
+export type ResourceMutationHook = (
+  ...args: unknown[]
+) => ResourceMutationResult;
 
 /**
  * One-time secret/material surfaced after a create or an action (e.g. an API
@@ -102,7 +105,12 @@ export interface ResourceRowAction {
   useAction?: ResourceMutationHook;
   buildArg?: (row: ResourceRow, input?: string) => unknown;
   /** Collect a single line of text from the operator before running the action. */
-  promptFor?: { label: string; default?: string; required?: boolean };
+  promptFor?: {
+    label: string;
+    default?: string;
+    required?: boolean;
+    minLength?: number;
+  };
   successMessage?: string | ((row: ResourceRow) => string);
   /** Return a payload to show a one-time reveal modal after a successful action. */
   reveal?: (result: unknown) => RevealPayload | null;
@@ -164,14 +172,22 @@ export interface ConfigPanelConfig {
   buildBody: (values: Record<string, unknown>) => unknown;
   saveLabel?: string;
   savedMessage?: string;
-  stats?: (value: unknown) => Array<{ label: string; value: string | number; color?: StatCardProps["color"] }>;
+  stats?: (
+    value: unknown,
+  ) => Array<{
+    label: string;
+    value: string | number;
+    color?: StatCardProps["color"];
+  }>;
   /** Reads the current configuration version from the payload, when versioned. */
   getVersion?: (payload: unknown) => string | number | undefined;
   backTo?: string;
   backLabel?: string;
 }
 
-export function asQueryHook(fn: unknown): (args: unknown) => ResourceQueryResult {
+export function asQueryHook(
+  fn: unknown,
+): (args: unknown) => ResourceQueryResult {
   return fn as (args: unknown) => ResourceQueryResult;
 }
 
@@ -183,9 +199,48 @@ export type StatusVariantFor = (status: string | undefined) => StatusVariant;
 
 export const VARIANT_FROM_STATUS: StatusVariantFor = (status) => {
   const s = String(status ?? "").toLowerCase();
-  if (s === "active" || s === "enabled" || s === "published" || s === "completed" || s === "sent" || s === "success" || s === "ok" || s === "running") return "active";
-  if (s === "pending" || s === "queued" || s === "draft" || s === "in_progress" || s === "unconfigured" || s === "unverified" || s === "cancelled") return "pending";
-  if (s === "suspended" || s === "disabled" || s === "retired" || s === "failed" || s === "error" || s === "denied" || s === "degraded" || s === "down" || s === "bounced" || s === "suppressed" || s === "rejected") return "suspended";
-  if (s === "closed" || s === "archived" || s === "expired" || s === "revoked" || s === "inactive") return "archived";
+  if (
+    s === "active" ||
+    s === "enabled" ||
+    s === "published" ||
+    s === "completed" ||
+    s === "sent" ||
+    s === "success" ||
+    s === "ok" ||
+    s === "running"
+  )
+    return "active";
+  if (
+    s === "pending" ||
+    s === "queued" ||
+    s === "draft" ||
+    s === "in_progress" ||
+    s === "unconfigured" ||
+    s === "unverified" ||
+    s === "cancelled"
+  )
+    return "pending";
+  if (
+    s === "suspended" ||
+    s === "disabled" ||
+    s === "retired" ||
+    s === "failed" ||
+    s === "error" ||
+    s === "denied" ||
+    s === "degraded" ||
+    s === "down" ||
+    s === "bounced" ||
+    s === "suppressed" ||
+    s === "rejected"
+  )
+    return "suspended";
+  if (
+    s === "closed" ||
+    s === "archived" ||
+    s === "expired" ||
+    s === "revoked" ||
+    s === "inactive"
+  )
+    return "archived";
   return "default";
 };

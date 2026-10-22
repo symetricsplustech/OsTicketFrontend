@@ -6,7 +6,9 @@ export function extractRows(payload: unknown): ResourceRow[] {
   const data = (payload as { data?: unknown }).data;
   if (Array.isArray(data)) return data as ResourceRow[];
   if (data && typeof data === "object") {
-    const items = (data as { items?: unknown; results?: unknown }).items ?? (data as { results?: unknown }).results;
+    const items =
+      (data as { items?: unknown; results?: unknown }).items ??
+      (data as { results?: unknown }).results;
     if (Array.isArray(items)) return items as ResourceRow[];
   }
   return [];
@@ -29,13 +31,18 @@ export function extractTotal(payload: unknown): number | undefined {
     (record.data as Record<string, unknown> | undefined)?.total,
   ];
   for (const candidate of candidates) {
-    if (typeof candidate === "number" && Number.isFinite(candidate)) return candidate;
+    if (typeof candidate === "number" && Number.isFinite(candidate))
+      return candidate;
   }
   return undefined;
 }
 
 export function extractValue(payload: unknown): unknown {
-  if (payload && typeof payload === "object" && "data" in (payload as Record<string, unknown>)) {
+  if (
+    payload &&
+    typeof payload === "object" &&
+    "data" in (payload as Record<string, unknown>)
+  ) {
     return (payload as { data: unknown }).data;
   }
   return payload;
@@ -49,7 +56,11 @@ export function extractValue(payload: unknown): unknown {
 export function mutationBody(result: unknown): ResourceRow {
   let current: unknown = result;
   for (let depth = 0; depth < 4; depth += 1) {
-    if (current && typeof current === "object" && "data" in (current as Record<string, unknown>)) {
+    if (
+      current &&
+      typeof current === "object" &&
+      "data" in (current as Record<string, unknown>)
+    ) {
       const next = (current as { data: unknown }).data;
       if (next && typeof next === "object") {
         current = next;
@@ -84,10 +95,12 @@ export function formatValue(row: ResourceRow, key: string): string {
 export function displayValue(value: unknown): string {
   if (value === null || value === undefined) return "—";
   if (typeof value === "string") return value || "—";
-  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (typeof value === "number" || typeof value === "boolean")
+    return String(value);
   if (Array.isArray(value)) {
     if (value.length === 0) return "—";
-    if (typeof value[0] === "object") return `${value.length} item${value.length === 1 ? "" : "s"}`;
+    if (typeof value[0] === "object")
+      return `${value.length} item${value.length === 1 ? "" : "s"}`;
     return value.join(", ");
   }
   if (typeof value === "object") {
@@ -105,7 +118,10 @@ export function truncate(value: unknown, max = 60): string {
 export function comparable(value: unknown): string | number {
   if (typeof value === "number") return value;
   if (value && typeof value === "object") {
-    const name = (value as { name?: unknown; key?: unknown; label?: unknown }).name ?? (value as { key?: unknown }).key ?? (value as { label?: unknown }).label;
+    const name =
+      (value as { name?: unknown; key?: unknown; label?: unknown }).name ??
+      (value as { key?: unknown }).key ??
+      (value as { label?: unknown }).label;
     if (name !== undefined) return String(name);
     return "";
   }
@@ -119,11 +135,19 @@ export function formatDate(value: unknown): string {
   return date.toLocaleString();
 }
 
-export function matchFilter(row: ResourceRow, key: string, kind: "select" | "boolean" | "date" | "text", expected: string | number | boolean): boolean {
+export function matchFilter(
+  row: ResourceRow,
+  key: string,
+  kind: "select" | "boolean" | "date" | "text",
+  expected: string | number | boolean,
+): boolean {
   const actual = getField(row, key);
   if (expected === "" || expected === undefined) return true;
   if (kind === "boolean") return Boolean(actual) === Boolean(expected);
-  return comparable(actual).toString().toLowerCase().includes(String(expected).toLowerCase());
+  return comparable(actual)
+    .toString()
+    .toLowerCase()
+    .includes(String(expected).toLowerCase());
 }
 
 export function emailTemplateVariant(status: string | undefined) {

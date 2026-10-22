@@ -7,18 +7,36 @@ describe("grant matching", () => {
   });
 
   it("accepts an exact leaf key", () => {
-    expect(matchesGrant(["itsm.incident.incident.read"], "itsm.incident.incident.read")).toBe(true);
-    expect(matchesGrant(["itsm.incident.incident.read"], "itsm.incident.incident.create")).toBe(false);
+    expect(
+      matchesGrant(
+        ["itsm.incident.incident.read"],
+        "itsm.incident.incident.read",
+      ),
+    ).toBe(true);
+    expect(
+      matchesGrant(
+        ["itsm.incident.incident.read"],
+        "itsm.incident.incident.create",
+      ),
+    ).toBe(false);
   });
 
   it("accepts a namespace wildcard the way the backend does", () => {
-    expect(matchesGrant(["itsm.incident.*"], "itsm.incident.incident.read")).toBe(true);
-    expect(matchesGrant(["itsm.incident.*"], "itsm.problem.problem.read")).toBe(false);
-    expect(matchesGrant(["itsm.*"], "itsm.reporting_admin.audit_read")).toBe(true);
+    expect(
+      matchesGrant(["itsm.incident.*"], "itsm.incident.incident.read"),
+    ).toBe(true);
+    expect(matchesGrant(["itsm.incident.*"], "itsm.problem.problem.read")).toBe(
+      false,
+    );
+    expect(matchesGrant(["itsm.*"], "itsm.reporting_admin.audit_read")).toBe(
+      true,
+    );
   });
 
   it("does not let a sibling namespace leak", () => {
-    expect(matchesGrant(["itsm.incident.*"], "itsm.incidentX.read")).toBe(false);
+    expect(matchesGrant(["itsm.incident.*"], "itsm.incidentX.read")).toBe(
+      false,
+    );
   });
 
   it("keeps the single-permission helper consistent", () => {
@@ -28,7 +46,12 @@ describe("grant matching", () => {
 
 describe("any-of matching", () => {
   it("is satisfied by one grant out of many", () => {
-    expect(canAny(["itsm.sla.definition_read"], ["itsm.change.*", "itsm.sla.definition_read"])).toBe(true);
+    expect(
+      canAny(
+        ["itsm.sla.definition_read"],
+        ["itsm.change.*", "itsm.sla.definition_read"],
+      ),
+    ).toBe(true);
   });
 
   it("treats a wildcard requirement as a namespace", () => {
@@ -38,7 +61,9 @@ describe("any-of matching", () => {
   });
 
   it("is false when nothing matches", () => {
-    expect(canAny(["itsm.sla.definition_read"], ["itsm.change.*", "itsm.asset.*"])).toBe(false);
+    expect(
+      canAny(["itsm.sla.definition_read"], ["itsm.change.*", "itsm.asset.*"]),
+    ).toBe(false);
   });
 
   it("treats an empty requirement as open", () => {

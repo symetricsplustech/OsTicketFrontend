@@ -8,7 +8,13 @@ export interface RolePreset {
   id: string;
   name: string;
   description: string;
-  category: "platform" | "itsm-admin" | "itsm-fulfiller" | "module-manager" | "module-admin" | "self-service";
+  category:
+    | "platform"
+    | "itsm-admin"
+    | "itsm-fulfiller"
+    | "module-manager"
+    | "module-admin"
+    | "self-service";
   permissions: string[];
   moduleKeys?: string[];
   isSystem?: boolean;

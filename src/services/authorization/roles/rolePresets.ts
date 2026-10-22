@@ -4,7 +4,13 @@ export interface RolePreset {
   id: string;
   name: string;
   description: string;
-  category: "platform" | "itsm-admin" | "itsm-fulfiller" | "module-manager" | "module-admin" | "self-service";
+  category:
+    | "platform"
+    | "itsm-admin"
+    | "itsm-fulfiller"
+    | "module-manager"
+    | "module-admin"
+    | "self-service";
   permissions: string[];
   moduleKeys?: string[];
   isSystem?: boolean;
@@ -21,31 +27,28 @@ export const FALLBACK_ROLE_PRESETS: RolePreset[] = [
   {
     id: "platform_owner",
     name: "Platform Owner",
-    description: "Full platform access including SaaS administration, billing, and cross-tenant operations. Does NOT include ITSM module access.",
+    description:
+      "Full platform access including SaaS administration, billing, and cross-tenant operations. Does NOT include ITSM module access.",
     category: "platform",
-    permissions: [
-      "saas.*",
-      "tenant.*",
-    ],
+    permissions: ["saas.*", "tenant.*"],
     moduleKeys: ["settings"],
     isSystem: true,
   },
   {
     id: "platform_admin",
     name: "Platform Administrator",
-    description: "Platform-wide administration except break-glass security operations. Does NOT include ITSM module access.",
+    description:
+      "Platform-wide administration except break-glass security operations. Does NOT include ITSM module access.",
     category: "platform",
-    permissions: [
-      "saas.*",
-      "tenant.*",
-    ],
+    permissions: ["saas.*", "tenant.*"],
     moduleKeys: ["settings"],
     isSystem: true,
   },
   {
     id: "instance_admin",
     name: "Instance Administrator",
-    description: "Full instance administration including users, groups, roles, and ITSM configuration",
+    description:
+      "Full instance administration including users, groups, roles, and ITSM configuration",
     category: "itsm-admin",
     permissions: [
       "tenant.user.read",
@@ -117,7 +120,8 @@ export const FALLBACK_ROLE_PRESETS: RolePreset[] = [
   {
     id: "itil",
     name: "IT Support Engineer / Service Desk Agent",
-    description: "Standard ITSM fulfiller - works with incidents, problems, changes, requests, tasks",
+    description:
+      "Standard ITSM fulfiller - works with incidents, problems, changes, requests, tasks",
     category: "itsm-fulfiller",
     permissions: [
       "itsm.incident.incident.read",
@@ -170,7 +174,8 @@ export const FALLBACK_ROLE_PRESETS: RolePreset[] = [
   {
     id: "incident_manager",
     name: "Incident Manager",
-    description: "Oversees incident process, manages queues, escalations, and major incidents",
+    description:
+      "Oversees incident process, manages queues, escalations, and major incidents",
     category: "module-manager",
     permissions: [
       "itsm.incident.*",
@@ -192,7 +197,8 @@ export const FALLBACK_ROLE_PRESETS: RolePreset[] = [
   {
     id: "problem_manager",
     name: "Problem Manager",
-    description: "Manages problems, root cause analysis, known errors, and workarounds",
+    description:
+      "Manages problems, root cause analysis, known errors, and workarounds",
     category: "module-manager",
     permissions: [
       "itsm.problem.*",
@@ -209,7 +215,8 @@ export const FALLBACK_ROLE_PRESETS: RolePreset[] = [
   {
     id: "change_manager",
     name: "Change Manager",
-    description: "Manages changes, CAB, scheduling, risk assessment, and implementation",
+    description:
+      "Manages changes, CAB, scheduling, risk assessment, and implementation",
     category: "module-manager",
     permissions: [
       "itsm.change.*",
@@ -229,16 +236,14 @@ export const FALLBACK_ROLE_PRESETS: RolePreset[] = [
     name: "Knowledge Manager",
     description: "Creates, reviews, approves, and publishes knowledge articles",
     category: "module-manager",
-    permissions: [
-      "itsm.knowledge.*",
-      "itsm.core.audit_read",
-    ],
+    permissions: ["itsm.knowledge.*", "itsm.core.audit_read"],
     moduleKeys: ["helpdesk"],
   },
   {
     id: "catalog_manager",
     name: "Catalog Manager",
-    description: "Designs and manages service catalog items, categories, and workflows",
+    description:
+      "Designs and manages service catalog items, categories, and workflows",
     category: "module-manager",
     permissions: [
       "itsm.request_catalog.*",
@@ -250,7 +255,8 @@ export const FALLBACK_ROLE_PRESETS: RolePreset[] = [
   {
     id: "sla_manager",
     name: "SLA Manager",
-    description: "Manages SLA definitions, schedules, escalations, and reporting",
+    description:
+      "Manages SLA definitions, schedules, escalations, and reporting",
     category: "module-manager",
     permissions: [
       "itsm.sla.*",
@@ -262,7 +268,8 @@ export const FALLBACK_ROLE_PRESETS: RolePreset[] = [
   {
     id: "cmdb_manager",
     name: "CMDB Manager",
-    description: "Manages CI data quality, reconciliation, lifecycle, and health",
+    description:
+      "Manages CI data quality, reconciliation, lifecycle, and health",
     category: "module-manager",
     permissions: [
       "itsm.service_cmdb.*",
@@ -287,12 +294,10 @@ export const FALLBACK_ROLE_PRESETS: RolePreset[] = [
   {
     id: "report_manager",
     name: "Report Manager",
-    description: "Creates and manages reports, dashboards, and scheduled reporting",
+    description:
+      "Creates and manages reports, dashboards, and scheduled reporting",
     category: "module-manager",
-    permissions: [
-      "itsm.reporting_admin.*",
-      "itsm.core.audit_read",
-    ],
+    permissions: ["itsm.reporting_admin.*", "itsm.core.audit_read"],
     moduleKeys: ["helpdesk", "analytics"],
   },
   {
@@ -328,7 +333,8 @@ export const FALLBACK_ROLE_PRESETS: RolePreset[] = [
   {
     id: "security_admin",
     name: "Security Administrator",
-    description: "Manages security policies, ACLs, authentication, and encryption",
+    description:
+      "Manages security policies, ACLs, authentication, and encryption",
     category: "platform",
     permissions: [
       "tenant.security.*",
@@ -341,7 +347,8 @@ export const FALLBACK_ROLE_PRESETS: RolePreset[] = [
   {
     id: "service_desk_agent",
     name: "Service Desk Agent",
-    description: "Front-line support - handles interactions, incidents, and basic requests",
+    description:
+      "Front-line support - handles interactions, incidents, and basic requests",
     category: "itsm-fulfiller",
     permissions: [
       "itsm.core.task_read",
@@ -373,7 +380,8 @@ export const FALLBACK_ROLE_PRESETS: RolePreset[] = [
   {
     id: "field_engineer",
     name: "Field Engineer",
-    description: "On-site support - handles assigned tasks, incidents, and asset interactions",
+    description:
+      "On-site support - handles assigned tasks, incidents, and asset interactions",
     category: "itsm-fulfiller",
     permissions: [
       "itsm.core.task_read",
@@ -411,7 +419,8 @@ export const FALLBACK_ROLE_PRESETS: RolePreset[] = [
   {
     id: "requester",
     name: "Requester / Employee",
-    description: "Self-service user - browses catalog, submits requests, views knowledge",
+    description:
+      "Self-service user - browses catalog, submits requests, views knowledge",
     category: "self-service",
     permissions: [
       "itsm.request_catalog.ui.catalog_home.access",
@@ -444,7 +453,8 @@ export const FALLBACK_ROLE_PRESETS: RolePreset[] = [
   {
     id: "guest",
     name: "Guest / Public",
-    description: "Unauthenticated or minimal access - knowledge base browsing only",
+    description:
+      "Unauthenticated or minimal access - knowledge base browsing only",
     category: "self-service",
     permissions: [
       "itsm.knowledge.knowledge_article.read",
@@ -468,7 +478,9 @@ export function getRolePreset(id: string): RolePreset | undefined {
   return FALLBACK_ROLE_PRESETS.find((r) => r.id === id);
 }
 
-export function getRolePresetsByCategory(category: RolePreset["category"]): RolePreset[] {
+export function getRolePresetsByCategory(
+  category: RolePreset["category"],
+): RolePreset[] {
   return FALLBACK_ROLE_PRESETS.filter((r) => r.category === category);
 }
 
@@ -485,24 +497,36 @@ export function computeEffectiveRoleSync(permissions: string[]): string | null {
   if (!permissions) return null;
 
   // Check for platform_owner (has saas.* and tenant.* but NOT itsm.*)
-  const hasSaas = permissions.some(p => p === "saas.*" || p.startsWith("saas."));
-  const hasTenant = permissions.some(p => p === "tenant.*" || p.startsWith("tenant."));
-  const hasItsm = permissions.some(p => p === "itsm.*" || p.startsWith("itsm."));
-  
+  const hasSaas = permissions.some(
+    (p) => p === "saas.*" || p.startsWith("saas."),
+  );
+  const hasTenant = permissions.some(
+    (p) => p === "tenant.*" || p.startsWith("tenant."),
+  );
+  const hasItsm = permissions.some(
+    (p) => p === "itsm.*" || p.startsWith("itsm."),
+  );
+
   if (hasSaas && hasTenant && !hasItsm) return "platform_owner";
   if (hasSaas && hasTenant && hasItsm) return "platform_admin"; // legacy/platform_admin with ITSM
 
-  const roleScores = FALLBACK_ROLE_PRESETS
-    .filter((role) => !role.isSystem)
-    .map((role) => {
+  const roleScores = FALLBACK_ROLE_PRESETS.filter((role) => !role.isSystem).map(
+    (role) => {
       let matches = 0;
       for (const perm of role.permissions) {
-        if (permissions.some((p) => p === perm || (perm.endsWith(".*") && p.startsWith(perm.slice(0, -1))))) {
+        if (
+          permissions.some(
+            (p) =>
+              p === perm ||
+              (perm.endsWith(".*") && p.startsWith(perm.slice(0, -1))),
+          )
+        ) {
           matches++;
         }
       }
       return { role: role.id, score: matches };
-    });
+    },
+  );
 
   roleScores.sort((a, b) => b.score - a.score);
   return roleScores[0]?.score > 0 ? roleScores[0].role : null;

@@ -1,4 +1,5 @@
-export type ClassValue = string | number | false | null | undefined | ClassValue[];
+export type ClassValue =
+  string | number | false | null | undefined | ClassValue[];
 
 export function cn(...values: ClassValue[]): string {
   const parts: string[] = [];

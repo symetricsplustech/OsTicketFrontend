@@ -15,9 +15,14 @@ export const itsmConfigurationApi = saasadminApi.injectEndpoints({
       query: (moduleKey) => ({
         url: `/admin/itsm-configuration/modules/${encodeURIComponent(moduleKey)}`,
       }),
-      providesTags: (_r, _e, moduleKey) => [{ type: "ItsmConfiguration", id: moduleKey }],
+      providesTags: (_r, _e, moduleKey) => [
+        { type: "ItsmConfiguration", id: moduleKey },
+      ],
     }),
-    updateItsmModule: build.mutation<ApiSuccess<ApiRecord>, { moduleKey: string; body: ApiRecord }>({
+    updateItsmModule: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { moduleKey: string; body: ApiRecord }
+    >({
       query: ({ moduleKey, body }) => ({
         url: `/admin/itsm-configuration/modules/${encodeURIComponent(moduleKey)}`,
         method: "PATCH",
@@ -33,10 +38,17 @@ export const itsmConfigurationApi = saasadminApi.injectEndpoints({
       providesTags: ["ItsmConfiguration"],
     }),
     createItsmPriority: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/itsm-configuration/priorities", method: "POST", body }),
+      query: (body) => ({
+        url: "/admin/itsm-configuration/priorities",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["ItsmConfiguration"],
     }),
-    updateItsmPriority: build.mutation<ApiSuccess<ApiRecord>, { priorityId: string; body: ApiRecord }>({
+    updateItsmPriority: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { priorityId: string; body: ApiRecord }
+    >({
       query: ({ priorityId, body }) => ({
         url: `/admin/itsm-configuration/priorities/${encodeURIComponent(priorityId)}`,
         method: "PATCH",
@@ -49,10 +61,17 @@ export const itsmConfigurationApi = saasadminApi.injectEndpoints({
       providesTags: ["ItsmConfiguration"],
     }),
     createItsmStatus: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/itsm-configuration/statuses", method: "POST", body }),
+      query: (body) => ({
+        url: "/admin/itsm-configuration/statuses",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["ItsmConfiguration"],
     }),
-    updateItsmStatus: build.mutation<ApiSuccess<ApiRecord>, { statusId: string; body: ApiRecord }>({
+    updateItsmStatus: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { statusId: string; body: ApiRecord }
+    >({
       query: ({ statusId, body }) => ({
         url: `/admin/itsm-configuration/statuses/${encodeURIComponent(statusId)}`,
         method: "PATCH",
@@ -65,10 +84,17 @@ export const itsmConfigurationApi = saasadminApi.injectEndpoints({
       providesTags: ["ItsmConfiguration"],
     }),
     createItsmCategory: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
-      query: (body) => ({ url: "/admin/itsm-configuration/categories", method: "POST", body }),
+      query: (body) => ({
+        url: "/admin/itsm-configuration/categories",
+        method: "POST",
+        body,
+      }),
       invalidatesTags: ["ItsmConfiguration"],
     }),
-    updateItsmCategory: build.mutation<ApiSuccess<ApiRecord>, { categoryId: string; body: ApiRecord }>({
+    updateItsmCategory: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { categoryId: string; body: ApiRecord }
+    >({
       query: ({ categoryId, body }) => ({
         url: `/admin/itsm-configuration/categories/${encodeURIComponent(categoryId)}`,
         method: "PATCH",
@@ -80,7 +106,10 @@ export const itsmConfigurationApi = saasadminApi.injectEndpoints({
       query: () => ({ url: "/admin/itsm-configuration/numbering-rules" }),
       providesTags: ["ItsmConfiguration"],
     }),
-    updateNumberingRule: build.mutation<ApiSuccess<ApiRecord>, { ruleId: string; body: ApiRecord }>({
+    updateNumberingRule: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { ruleId: string; body: ApiRecord }
+    >({
       query: ({ ruleId, body }) => ({
         url: `/admin/itsm-configuration/numbering-rules/${encodeURIComponent(ruleId)}`,
         method: "PATCH",
@@ -92,7 +121,9 @@ export const itsmConfigurationApi = saasadminApi.injectEndpoints({
       query: (tenantId) => ({
         url: `/admin/itsm-configuration/tenants/${encodeURIComponent(tenantId)}/configuration`,
       }),
-      providesTags: (_r, _e, tenantId) => [{ type: "ItsmConfiguration", id: tenantId }],
+      providesTags: (_r, _e, tenantId) => [
+        { type: "ItsmConfiguration", id: tenantId },
+      ],
     }),
     setTenantItsmConfiguration: build.mutation<
       ApiSuccess<ApiRecord>,

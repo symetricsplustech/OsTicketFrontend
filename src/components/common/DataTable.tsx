@@ -41,7 +41,9 @@ export function DataTable<T>({
     return (
       <div className="rounded-lg border border-dashed border-slate-300 px-6 py-12 text-center">
         <p className="text-sm font-medium text-slate-700">{emptyTitle}</p>
-        {emptyDescription ? <p className="mt-1 text-xs text-slate-500">{emptyDescription}</p> : null}
+        {emptyDescription ? (
+          <p className="mt-1 text-xs text-slate-500">{emptyDescription}</p>
+        ) : null}
       </div>
     );
   }
@@ -72,7 +74,13 @@ export function DataTable<T>({
               className={cn(onRowClick && "cursor-pointer hover:bg-brand-50")}
             >
               {columns.map((col) => (
-                <td key={col.key} className={cn("px-4 py-3 text-sm text-slate-800", col.className)}>
+                <td
+                  key={col.key}
+                  className={cn(
+                    "px-4 py-3 text-sm text-slate-800",
+                    col.className,
+                  )}
+                >
                   {col.render(row)}
                 </td>
               ))}

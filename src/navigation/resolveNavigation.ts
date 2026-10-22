@@ -1,5 +1,9 @@
 import { canAny } from "@services/authorization/permissions";
-import { NAVIGATION_AREAS, type NavigationArea, type NavigationItem } from "./navigationModel.ts";
+import {
+  NAVIGATION_AREAS,
+  type NavigationArea,
+  type NavigationItem,
+} from "./navigationModel.ts";
 import type { ScreenRoute } from "./screenRegistry.ts";
 
 export interface ResolvedNavigationItem extends NavigationItem {
@@ -40,7 +44,10 @@ export function resolveNavigation(
           item.hint.toLowerCase().includes(needle) ||
           area.label.toLowerCase().includes(needle),
       )
-      .map((item) => ({ ...item, href: item.path.replace(":instanceId", instanceId) })),
+      .map((item) => ({
+        ...item,
+        href: item.path.replace(":instanceId", instanceId),
+      })),
   })).filter((area) => area.items.length > 0);
 }
 

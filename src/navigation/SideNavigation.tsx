@@ -4,7 +4,10 @@ import { ChevronDown, Home, LogOut, Search, X } from "lucide-react";
 import { logout, selectAuth } from "@services/auth/authSlice";
 import { useAppDispatch, useAppSelector } from "@store/hooks";
 import { cn } from "@utils/cn";
-import { resolveNavigation, type ResolvedNavigationArea } from "./resolveNavigation.ts";
+import {
+  resolveNavigation,
+  type ResolvedNavigationArea,
+} from "./resolveNavigation.ts";
 
 const WORK_HOME_PATH = "/instances/:instanceId/work";
 
@@ -20,7 +23,12 @@ export interface SideNavigationProps {
  * Primary product navigation. Shows one row per business capability, grouped by
  * area, and only the capabilities the current session is entitled to.
  */
-export function SideNavigation({ instanceId, open, onClose, className }: SideNavigationProps) {
+export function SideNavigation({
+  instanceId,
+  open,
+  onClose,
+  className,
+}: SideNavigationProps) {
   const auth = useAppSelector(selectAuth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -41,7 +49,9 @@ export function SideNavigation({ instanceId, open, onClose, className }: SideNav
   const isItemActive = (href: string) =>
     location.pathname === href || location.pathname.startsWith(`${href}/`);
 
-  const activeAreaKey = areas.find((area) => area.items.some((item) => isItemActive(item.href)))?.key;
+  const activeAreaKey = areas.find((area) =>
+    area.items.some((item) => isItemActive(item.href)),
+  )?.key;
 
   const handleSignOut = () => {
     dispatch(logout());
@@ -63,7 +73,9 @@ export function SideNavigation({ instanceId, open, onClose, className }: SideNav
           N
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-slate-900">Nexa ITSM</p>
+          <p className="truncate text-sm font-semibold text-slate-900">
+            Nexa ITSM
+          </p>
           <p className="truncate text-xs text-slate-500">
             {auth.selectedInstance?.name ?? instanceId}
           </p>
@@ -85,7 +97,9 @@ export function SideNavigation({ instanceId, open, onClose, className }: SideNav
           className={({ isActive }) =>
             cn(
               "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors",
-              isActive ? "bg-brand-50 text-brand-700" : "text-slate-600 hover:bg-slate-100",
+              isActive
+                ? "bg-brand-50 text-brand-700"
+                : "text-slate-600 hover:bg-slate-100",
             )
           }
         >
@@ -107,10 +121,15 @@ export function SideNavigation({ instanceId, open, onClose, className }: SideNav
         </label>
       </div>
 
-      <nav aria-label="Primary" className="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
+      <nav
+        aria-label="Primary"
+        className="min-h-0 flex-1 overflow-y-auto px-3 pb-4"
+      >
         {areas.length === 0 ? (
           <p className="px-2 py-6 text-center text-xs text-slate-400">
-            {searching ? "No capability matches your search." : "No capabilities assigned to you yet."}
+            {searching
+              ? "No capability matches your search."
+              : "No capabilities assigned to you yet."}
           </p>
         ) : (
           areas.map((area) => (
@@ -120,7 +139,10 @@ export function SideNavigation({ instanceId, open, onClose, className }: SideNav
               searching={searching}
               expanded={expanded[area.key]}
               onToggle={() =>
-                setExpanded((value) => ({ ...value, [area.key]: !(value[area.key] ?? true) }))
+                setExpanded((value) => ({
+                  ...value,
+                  [area.key]: !(value[area.key] ?? true),
+                }))
               }
               onNavigate={onClose}
               isItemActive={isItemActive}
@@ -132,11 +154,17 @@ export function SideNavigation({ instanceId, open, onClose, className }: SideNav
       <footer className="shrink-0 border-t border-slate-200 p-3">
         <div className="flex items-center gap-2 px-2.5 py-1.5">
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">
-            {(auth.user?.name ?? auth.user?.email ?? "?").charAt(0).toUpperCase()}
+            {(auth.user?.name ?? auth.user?.email ?? "?")
+              .charAt(0)
+              .toUpperCase()}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-slate-700">{auth.user?.name ?? "Signed in"}</p>
-            <p className="truncate text-xs text-slate-400">{auth.role ?? "—"}</p>
+            <p className="truncate text-sm font-medium text-slate-700">
+              {auth.user?.name ?? "Signed in"}
+            </p>
+            <p className="truncate text-xs text-slate-400">
+              {auth.role ?? "—"}
+            </p>
           </div>
         </div>
         <button
@@ -180,13 +208,18 @@ function AreaSection({
         onClick={onToggle}
         className={cn(
           "flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm font-semibold transition-colors",
-          hasActiveChild ? "text-slate-900" : "text-slate-600 hover:bg-slate-50",
+          hasActiveChild
+            ? "text-slate-900"
+            : "text-slate-600 hover:bg-slate-50",
         )}
       >
         <Icon className="h-4 w-4 shrink-0" />
         <span className="min-w-0 flex-1 truncate">{area.label}</span>
         <ChevronDown
-          className={cn("h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform", expanded && "rotate-180")}
+          className={cn(
+            "h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform",
+            expanded && "rotate-180",
+          )}
         />
       </button>
       {expanded ? (

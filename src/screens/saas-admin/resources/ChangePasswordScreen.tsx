@@ -46,12 +46,19 @@ export function ChangePasswordScreen() {
     <SaasAdminScreen
       title="Change Password"
       description="Update the password you use to sign in to the platform."
-      breadcrumbs={[{ label: "SaaS Admin" }, { label: "My Account" }, { label: "Change Password" }]}
+      breadcrumbs={[
+        { label: "SaaS Admin" },
+        { label: "My Account" },
+        { label: "Change Password" },
+      ]}
     >
       <div className="max-w-lg rounded-xl border border-slate-200 bg-white p-6">
         <form onSubmit={submit} className="space-y-4">
           <div>
-            <label htmlFor="current-password" className="mb-1 block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="current-password"
+              className="mb-1 block text-sm font-medium text-slate-700"
+            >
               Current Password
             </label>
             <input
@@ -65,7 +72,10 @@ export function ChangePasswordScreen() {
             />
           </div>
           <div>
-            <label htmlFor="new-password" className="mb-1 block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="new-password"
+              className="mb-1 block text-sm font-medium text-slate-700"
+            >
               New Password
             </label>
             <input
@@ -79,7 +89,10 @@ export function ChangePasswordScreen() {
             />
           </div>
           <div>
-            <label htmlFor="confirm-password" className="mb-1 block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="confirm-password"
+              className="mb-1 block text-sm font-medium text-slate-700"
+            >
               Confirm New Password
             </label>
             <input

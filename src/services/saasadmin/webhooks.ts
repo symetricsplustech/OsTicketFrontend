@@ -7,7 +7,10 @@ import type { ApiSuccess, ApiRecord, ListQuery } from "./types";
 export const webhooksApi = saasadminApi.injectEndpoints({
   endpoints: (build) => ({
     listWebhooks: build.query<ApiSuccess<ApiRecord[]>, ListQuery | void>({
-      query: (params) => ({ url: "/admin/webhooks", params: params ?? undefined }),
+      query: (params) => ({
+        url: "/admin/webhooks",
+        params: params ?? undefined,
+      }),
       providesTags: ["Webhook"],
     }),
     createWebhook: build.mutation<ApiSuccess<ApiRecord>, ApiRecord>({
@@ -15,16 +18,24 @@ export const webhooksApi = saasadminApi.injectEndpoints({
       invalidatesTags: ["Webhook"],
     }),
     getWebhook: build.query<ApiSuccess<ApiRecord>, string>({
-      query: (webhookId) => ({ url: `/admin/webhooks/${encodeURIComponent(webhookId)}` }),
+      query: (webhookId) => ({
+        url: `/admin/webhooks/${encodeURIComponent(webhookId)}`,
+      }),
       providesTags: (_r, _e, webhookId) => [{ type: "Webhook", id: webhookId }],
     }),
-    updateWebhook: build.mutation<ApiSuccess<ApiRecord>, { webhookId: string; body: ApiRecord }>({
+    updateWebhook: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { webhookId: string; body: ApiRecord }
+    >({
       query: ({ webhookId, body }) => ({
         url: `/admin/webhooks/${encodeURIComponent(webhookId)}`,
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (_r, _e, { webhookId }) => ["Webhook", { type: "Webhook", id: webhookId }],
+      invalidatesTags: (_r, _e, { webhookId }) => [
+        "Webhook",
+        { type: "Webhook", id: webhookId },
+      ],
     }),
     testWebhook: build.mutation<ApiSuccess<ApiRecord>, string>({
       query: (webhookId) => ({
@@ -37,36 +48,55 @@ export const webhooksApi = saasadminApi.injectEndpoints({
         url: `/admin/webhooks/${encodeURIComponent(webhookId)}/enable`,
         method: "POST",
       }),
-      invalidatesTags: (_r, _e, webhookId) => ["Webhook", { type: "Webhook", id: webhookId }],
+      invalidatesTags: (_r, _e, webhookId) => [
+        "Webhook",
+        { type: "Webhook", id: webhookId },
+      ],
     }),
     disableWebhook: build.mutation<ApiSuccess<ApiRecord>, string>({
       query: (webhookId) => ({
         url: `/admin/webhooks/${encodeURIComponent(webhookId)}/disable`,
         method: "POST",
       }),
-      invalidatesTags: (_r, _e, webhookId) => ["Webhook", { type: "Webhook", id: webhookId }],
+      invalidatesTags: (_r, _e, webhookId) => [
+        "Webhook",
+        { type: "Webhook", id: webhookId },
+      ],
     }),
     rotateWebhookSecret: build.mutation<ApiSuccess<ApiRecord>, string>({
       query: (webhookId) => ({
         url: `/admin/webhooks/${encodeURIComponent(webhookId)}/rotate-secret`,
         method: "POST",
       }),
-      invalidatesTags: (_r, _e, webhookId) => [{ type: "Webhook", id: webhookId }],
+      invalidatesTags: (_r, _e, webhookId) => [
+        { type: "Webhook", id: webhookId },
+      ],
     }),
-    listWebhookDeliveries: build.query<ApiSuccess<ApiRecord[]>, { webhookId: string } & ListQuery>({
+    listWebhookDeliveries: build.query<
+      ApiSuccess<ApiRecord[]>,
+      { webhookId: string } & ListQuery
+    >({
       query: ({ webhookId, ...params }) => ({
         url: `/admin/webhooks/${encodeURIComponent(webhookId)}/deliveries`,
         params,
       }),
-      providesTags: (_r, _e, { webhookId }) => [{ type: "Webhook", id: webhookId }],
+      providesTags: (_r, _e, { webhookId }) => [
+        { type: "Webhook", id: webhookId },
+      ],
     }),
-    getWebhookDelivery: build.query<ApiSuccess<ApiRecord>, { webhookId: string; deliveryId: string }>({
+    getWebhookDelivery: build.query<
+      ApiSuccess<ApiRecord>,
+      { webhookId: string; deliveryId: string }
+    >({
       query: ({ webhookId, deliveryId }) => ({
         url: `/admin/webhooks/${encodeURIComponent(webhookId)}/deliveries/${encodeURIComponent(deliveryId)}`,
       }),
       providesTags: ["Webhook"],
     }),
-    retryWebhookDelivery: build.mutation<ApiSuccess<ApiRecord>, { webhookId: string; deliveryId: string }>({
+    retryWebhookDelivery: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { webhookId: string; deliveryId: string }
+    >({
       query: ({ webhookId, deliveryId }) => ({
         url: `/admin/webhooks/${encodeURIComponent(webhookId)}/deliveries/${encodeURIComponent(deliveryId)}/retry`,
         method: "POST",

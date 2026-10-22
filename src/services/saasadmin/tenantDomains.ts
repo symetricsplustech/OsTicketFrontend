@@ -9,52 +9,81 @@ import type { ApiSuccess, ApiRecord, ListQuery } from "./types";
  */
 export const tenantDomainsApi = saasadminApi.injectEndpoints({
   endpoints: (build) => ({
-    listAllTenantDomains: build.query<ApiSuccess<ApiRecord[]>, ListQuery | void>({
-      query: (params) => ({ url: "/admin/tenants/domains", params: params ?? undefined }),
+    listAllTenantDomains: build.query<
+      ApiSuccess<ApiRecord[]>,
+      ListQuery | void
+    >({
+      query: (params) => ({
+        url: "/admin/tenants/domains",
+        params: params ?? undefined,
+      }),
       providesTags: ["TenantDomain"],
     }),
     listTenantDomains: build.query<ApiSuccess<ApiRecord[]>, string>({
       query: (tenantId) => ({
         url: `/admin/tenants/${encodeURIComponent(tenantId)}/domains`,
       }),
-      providesTags: (_r, _e, tenantId) => [{ type: "TenantDomain", id: tenantId }],
+      providesTags: (_r, _e, tenantId) => [
+        { type: "TenantDomain", id: tenantId },
+      ],
     }),
-    createTenantDomain: build.mutation<ApiSuccess<ApiRecord>, { tenantId: string; body: ApiRecord }>({
+    createTenantDomain: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { tenantId: string; body: ApiRecord }
+    >({
       query: ({ tenantId, body }) => ({
         url: `/admin/tenants/${encodeURIComponent(tenantId)}/domains`,
         method: "POST",
         body,
       }),
-      invalidatesTags: (_r, _e, { tenantId }) => ["TenantDomain", { type: "TenantDomain", id: tenantId }],
+      invalidatesTags: (_r, _e, { tenantId }) => [
+        "TenantDomain",
+        { type: "TenantDomain", id: tenantId },
+      ],
     }),
-    getTenantDomain: build.query<ApiSuccess<ApiRecord>, { tenantId: string; domainId: string }>({
+    getTenantDomain: build.query<
+      ApiSuccess<ApiRecord>,
+      { tenantId: string; domainId: string }
+    >({
       query: ({ tenantId, domainId }) => ({
         url: `/admin/tenants/${encodeURIComponent(tenantId)}/domains/${encodeURIComponent(domainId)}`,
       }),
       providesTags: ["TenantDomain"],
     }),
-    verifyTenantDomain: build.mutation<ApiSuccess<ApiRecord>, { tenantId: string; domainId: string }>({
+    verifyTenantDomain: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { tenantId: string; domainId: string }
+    >({
       query: ({ tenantId, domainId }) => ({
         url: `/admin/tenants/${encodeURIComponent(tenantId)}/domains/${encodeURIComponent(domainId)}/verify`,
         method: "POST",
       }),
       invalidatesTags: ["TenantDomain"],
     }),
-    activateTenantDomain: build.mutation<ApiSuccess<ApiRecord>, { tenantId: string; domainId: string }>({
+    activateTenantDomain: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { tenantId: string; domainId: string }
+    >({
       query: ({ tenantId, domainId }) => ({
         url: `/admin/tenants/${encodeURIComponent(tenantId)}/domains/${encodeURIComponent(domainId)}/activate`,
         method: "POST",
       }),
       invalidatesTags: ["TenantDomain"],
     }),
-    disableTenantDomain: build.mutation<ApiSuccess<ApiRecord>, { tenantId: string; domainId: string }>({
+    disableTenantDomain: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { tenantId: string; domainId: string }
+    >({
       query: ({ tenantId, domainId }) => ({
         url: `/admin/tenants/${encodeURIComponent(tenantId)}/domains/${encodeURIComponent(domainId)}/disable`,
         method: "POST",
       }),
       invalidatesTags: ["TenantDomain"],
     }),
-    deleteTenantDomain: build.mutation<null, { tenantId: string; domainId: string }>({
+    deleteTenantDomain: build.mutation<
+      null,
+      { tenantId: string; domainId: string }
+    >({
       query: ({ tenantId, domainId }) => ({
         url: `/admin/tenants/${encodeURIComponent(tenantId)}/domains/${encodeURIComponent(domainId)}`,
         method: "DELETE",

@@ -1,5 +1,12 @@
 import type { LucideIcon } from "lucide-react";
-import { KeyRound, LogIn, MailCheck, RotateCcw, ShieldCheck, UserPlus } from "lucide-react";
+import {
+  KeyRound,
+  LogIn,
+  MailCheck,
+  RotateCcw,
+  ShieldCheck,
+  UserPlus,
+} from "lucide-react";
 
 export interface AuthNavigationItem {
   key: string;
@@ -68,8 +75,12 @@ export const AUTH_NAVIGATION: AuthNavigationItem[] = [
 ];
 
 /** Paths reachable without a session. */
-export const AUTH_PUBLIC_PATHS: readonly string[] = AUTH_NAVIGATION.map((item) => item.path);
+export const AUTH_PUBLIC_PATHS: readonly string[] = AUTH_NAVIGATION.map(
+  (item) => item.path,
+);
 
-export function getAuthNavigationItem(path: string): AuthNavigationItem | undefined {
+export function getAuthNavigationItem(
+  path: string,
+): AuthNavigationItem | undefined {
   return AUTH_NAVIGATION.find((item) => item.path === path);
 }

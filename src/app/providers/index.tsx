@@ -7,7 +7,9 @@ import { ErrorBoundary } from "@app/layouts/ErrorBoundary";
 import { Unauthorized } from "@app/layouts/Unauthorized";
 import { NotFound } from "@app/layouts/NotFound";
 
-interface Props { children: ReactNode; }
+interface Props {
+  children: ReactNode;
+}
 
 export function AppProviders({ children }: Props) {
   return (

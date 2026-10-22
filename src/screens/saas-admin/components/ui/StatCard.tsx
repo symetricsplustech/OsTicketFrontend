@@ -44,14 +44,31 @@ export function StatCard({
   };
 
   return (
-    <div className={cn("rounded-xl border p-6 transition-colors", colorClasses[color], className)}>
+    <div
+      className={cn(
+        "rounded-xl border p-6 transition-colors",
+        colorClasses[color],
+        className,
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
-          <p className={cn("mt-2 text-3xl font-bold", valueColorClasses[color])}>{value}</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            {label}
+          </p>
+          <p
+            className={cn("mt-2 text-3xl font-bold", valueColorClasses[color])}
+          >
+            {value}
+          </p>
           {trend && (
             <div className="mt-2 flex items-center gap-1 text-sm">
-              <span className={cn("font-medium", trend.up ? "text-emerald-600" : "text-red-600")}>
+              <span
+                className={cn(
+                  "font-medium",
+                  trend.up ? "text-emerald-600" : "text-red-600",
+                )}
+              >
                 {trend.value}
               </span>
               <span className="text-slate-500">{trend.label}</span>
@@ -62,7 +79,10 @@ export function StatCard({
       </div>
       {link && linkLabel && (
         <div className="mt-4 pt-4 border-t border-slate-100">
-          <Link to={link} className="inline-flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700">
+          <Link
+            to={link}
+            className="inline-flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700"
+          >
             {linkLabel}
             <span aria-hidden>→</span>
           </Link>

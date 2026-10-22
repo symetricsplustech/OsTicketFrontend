@@ -21,8 +21,6 @@
       "@app/*": ["./src/app/*"],
       "@layouts": ["./src/layouts"],
       "@layouts/*": ["./src/layouts/*"],
-      "@features": ["./src/features"],
-      "@features/*": ["./src/features/*"],
       "@components": ["./src/components"],
       "@components/*": ["./src/components/*"],
       "@hooks": ["./src/hooks"],
@@ -39,8 +37,6 @@
       "@constants/*": ["./src/constants/*"],
       "@styles": ["./src/styles"],
       "@styles/*": ["./src/styles/*"],
-      "@portal": ["./src/portal"],
-      "@portal/*": ["./src/portal/*"],
       "@/*": ["./src/*"]
     }
   },

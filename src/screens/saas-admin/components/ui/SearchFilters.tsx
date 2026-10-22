@@ -49,7 +49,9 @@ export function SearchFilters({
             id="global-search"
             type="search"
             value={searchValue}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              onSearchChange(e.target.value)
+            }
             onKeyDown={(e) => e.key === "Enter" && onSearchSubmit?.()}
             placeholder={placeholder}
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 placeholder:text-slate-400 focus:border-brand-400 focus:ring-1 focus:ring-brand-200 outline-none"
@@ -69,7 +71,9 @@ export function SearchFilters({
               onChange={(e) => onFilterChange(filter.key, e.target.value)}
               className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 focus:border-brand-400 focus:ring-1 focus:ring-brand-200 outline-none"
             >
-              <option value="">{filter.placeholder || `All ${filter.label}`}</option>
+              <option value="">
+                {filter.placeholder || `All ${filter.label}`}
+              </option>
               {filter.options?.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}

@@ -14,15 +14,19 @@ import {
   canAccessSaasAdmin,
   firstAccessibleSaasAdminPath,
 } from "@/navigation/saasAdminNavigation.tsx";
+import { NotificationBell } from "@/components/common/NotificationBell";
 
 function NotAvailable({ label }: { label: string }) {
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-10 text-center">
       <SearchX className="mx-auto h-8 w-8 text-slate-300" />
-      <h1 className="mt-4 text-lg font-semibold text-slate-800">Access restricted</h1>
+      <h1 className="mt-4 text-lg font-semibold text-slate-800">
+        Access restricted
+      </h1>
       <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-        Your permissions do not include <span className="font-medium text-slate-700">{label}</span>.
-        Use the navigation to reach a capability you are entitled to.
+        Your permissions do not include{" "}
+        <span className="font-medium text-slate-700">{label}</span>. Use the
+        navigation to reach a capability you are entitled to.
       </p>
     </section>
   );
@@ -41,8 +45,14 @@ export function OrganizationAdminSurface() {
     setDrawerOpen(false);
   }, [location.pathname]);
 
-  const hasAccess = useMemo(() => canAccessOrganizationAdmin(permissions), [permissions]);
-  const current = useMemo(() => locateOrganizationAdminScreen(location.pathname), [location.pathname]);
+  const hasAccess = useMemo(
+    () => canAccessOrganizationAdmin(permissions),
+    [permissions],
+  );
+  const current = useMemo(
+    () => locateOrganizationAdminScreen(location.pathname),
+    [location.pathname],
+  );
 
   const canViewCurrent = useMemo(() => {
     if (!current) return false;
@@ -83,7 +93,10 @@ export function OrganizationAdminSurface() {
         />
       ) : null}
 
-      <OrganizationAdminSidebar open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <OrganizationAdminSidebar
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      />
 
       <div className="lg:pl-72">
         <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
@@ -100,16 +113,28 @@ export function OrganizationAdminSurface() {
               <ol className="flex items-center gap-1.5 text-sm text-slate-500">
                 <li className="truncate">Organization Admin</li>
                 <li className="truncate text-slate-300">/</li>
-                <li className="truncate">{current?.section.label ?? "Dashboard"}</li>
+                <li className="truncate">
+                  {current?.section.label ?? "Dashboard"}
+                </li>
                 <li className="truncate text-slate-300">/</li>
-                <li className="truncate font-medium text-slate-800">{current?.label ?? "Overview"}</li>
+                <li className="truncate font-medium text-slate-800">
+                  {current?.label ?? "Overview"}
+                </li>
               </ol>
             </nav>
+            <NotificationBell />
           </div>
         </header>
 
-        <main id="organization-admin-content" className="mx-auto max-w-[1400px] px-4 py-6 md:px-8">
-          {canViewCurrent ? <Outlet /> : <NotAvailable label={current?.label ?? "this screen"} />}
+        <main
+          id="organization-admin-content"
+          className="mx-auto max-w-[1400px] px-4 py-6 md:px-8"
+        >
+          {canViewCurrent ? (
+            <Outlet />
+          ) : (
+            <NotAvailable label={current?.label ?? "this screen"} />
+          )}
         </main>
       </div>
     </div>

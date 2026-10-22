@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { AUTH_PUBLIC_PATHS } from "@/navigation/authNavigation";
 import { postAuthDestination } from "@app/auth/postAuthDestination";
+import { useSessionRefresh } from "@app/auth/useSessionRefresh";
 import { useAppSelector } from "@store/hooks";
 import { selectAuth } from "@services/auth/authSlice";
 
@@ -25,6 +26,7 @@ export function RequireSession({ children }: RequireSessionProps) {
   const auth = useAppSelector(selectAuth);
   const location = useLocation();
   const instanceId = auth.selectedInstance?._id ?? "demo";
+  useSessionRefresh();
 
   if (!auth.token) {
     if (isPublicPath(location.pathname)) {

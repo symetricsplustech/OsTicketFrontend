@@ -4,7 +4,10 @@ import { Button } from "@components/common/ui";
 import { DynamicFormRenderer } from "@components/common/DynamicFormRenderer";
 import { DynamicFormRenderer as DF } from "@components/common/DynamicFormRenderer";
 import type { FieldConfig } from "@components/common/DynamicFormRenderer";
-import { showSuccess, showError } from "@components/common/Toast/ToastContainer";
+import {
+  showSuccess,
+  showError,
+} from "@components/common/Toast/ToastContainer";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -19,16 +22,31 @@ interface RecordCreatePageProps {
   loading?: boolean;
 }
 
-export function RecordCreatePage({ title, description, fields, onSubmit, onCancel, initialValues, loading }: RecordCreatePageProps) {
+export function RecordCreatePage({
+  title,
+  description,
+  fields,
+  onSubmit,
+  onCancel,
+  initialValues,
+  loading,
+}: RecordCreatePageProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [values, setValues] = useState<Record<string, unknown>>(initialValues ?? {});
+  const [values, setValues] = useState<Record<string, unknown>>(
+    initialValues ?? {},
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (name: string, value: unknown) => {
     setValues((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors((prev) => { const next = { ...prev }; delete next[name]; return next; });
+    if (errors[name])
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -38,7 +56,9 @@ export function RecordCreatePage({ title, description, fields, onSubmit, onCance
     try {
       await onSubmit(values);
       showSuccess(`${title} created successfully`);
-      const back = (location.state as { from?: { pathname: string } })?.from?.pathname ?? "/";
+      const back =
+        (location.state as { from?: { pathname: string } })?.from?.pathname ??
+        "/";
       navigate(back);
     } catch (cause) {
       const msg = cause instanceof Error ? cause.message : "Creation failed";
@@ -52,14 +72,33 @@ export function RecordCreatePage({ title, description, fields, onSubmit, onCance
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="rounded-lg p-1 hover:bg-slate-100"><ArrowLeft className="h-5 w-5 text-slate-500" /></button>
+        <button
+          onClick={() => navigate(-1)}
+          className="rounded-lg p-1 hover:bg-slate-100"
+        >
+          <ArrowLeft className="h-5 w-5 text-slate-500" />
+        </button>
         <div>
           <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
-          {description ? <p className="text-sm text-slate-500">{description}</p> : null}
+          {description ? (
+            <p className="text-sm text-slate-500">{description}</p>
+          ) : null}
         </div>
       </div>
-      <DynamicFormRenderer fields={fields} values={values} onChange={handleChange} errors={errors} disabled={submitting} onSubmit={handleSubmit} submitLabel="Create" cancelLabel="Cancel" onCancel={onCancel} />
-      {errors.submit ? <p className="text-sm text-red-600">{errors.submit}</p> : null}
+      <DynamicFormRenderer
+        fields={fields}
+        values={values}
+        onChange={handleChange}
+        errors={errors}
+        disabled={submitting}
+        onSubmit={handleSubmit}
+        submitLabel="Create"
+        cancelLabel="Cancel"
+        onCancel={onCancel}
+      />
+      {errors.submit ? (
+        <p className="text-sm text-red-600">{errors.submit}</p>
+      ) : null}
     </div>
   );
 }

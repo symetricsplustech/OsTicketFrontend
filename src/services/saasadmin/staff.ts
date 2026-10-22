@@ -15,45 +15,68 @@ export const staffApi = saasadminApi.injectEndpoints({
       invalidatesTags: ["Staff"],
     }),
     getStaff: build.query<ApiSuccess<ApiRecord>, string>({
-      query: (staffId) => ({ url: `/admin/staff/${encodeURIComponent(staffId)}` }),
+      query: (staffId) => ({
+        url: `/admin/staff/${encodeURIComponent(staffId)}`,
+      }),
       providesTags: (_r, _e, staffId) => [{ type: "Staff", id: staffId }],
     }),
-    updateStaff: build.mutation<ApiSuccess<ApiRecord>, { staffId: string; body: ApiRecord }>({
+    updateStaff: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { staffId: string; body: ApiRecord }
+    >({
       query: ({ staffId, body }) => ({
         url: `/admin/staff/${encodeURIComponent(staffId)}`,
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (_r, _e, { staffId }) => ["Staff", { type: "Staff", id: staffId }],
+      invalidatesTags: (_r, _e, { staffId }) => [
+        "Staff",
+        { type: "Staff", id: staffId },
+      ],
     }),
-    inviteStaff: build.mutation<ApiSuccess<ApiRecord>, { staffId: string; body?: ApiRecord }>({
+    inviteStaff: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { staffId: string; body?: ApiRecord }
+    >({
       query: ({ staffId, body }) => ({
         url: `/admin/staff/${encodeURIComponent(staffId)}/invite`,
         method: "POST",
         body: body ?? {},
       }),
-      invalidatesTags: (_r, _e, { staffId }) => ["Staff", { type: "Staff", id: staffId }],
+      invalidatesTags: (_r, _e, { staffId }) => [
+        "Staff",
+        { type: "Staff", id: staffId },
+      ],
     }),
     activateStaff: build.mutation<ApiSuccess<ApiRecord>, string>({
       query: (staffId) => ({
         url: `/admin/staff/${encodeURIComponent(staffId)}/activate`,
         method: "POST",
       }),
-      invalidatesTags: (_r, _e, staffId) => ["Staff", { type: "Staff", id: staffId }],
+      invalidatesTags: (_r, _e, staffId) => [
+        "Staff",
+        { type: "Staff", id: staffId },
+      ],
     }),
     suspendStaff: build.mutation<ApiSuccess<ApiRecord>, string>({
       query: (staffId) => ({
         url: `/admin/staff/${encodeURIComponent(staffId)}/suspend`,
         method: "POST",
       }),
-      invalidatesTags: (_r, _e, staffId) => ["Staff", { type: "Staff", id: staffId }],
+      invalidatesTags: (_r, _e, staffId) => [
+        "Staff",
+        { type: "Staff", id: staffId },
+      ],
     }),
     deactivateStaff: build.mutation<ApiSuccess<ApiRecord>, string>({
       query: (staffId) => ({
         url: `/admin/staff/${encodeURIComponent(staffId)}/deactivate`,
         method: "POST",
       }),
-      invalidatesTags: (_r, _e, staffId) => ["Staff", { type: "Staff", id: staffId }],
+      invalidatesTags: (_r, _e, staffId) => [
+        "Staff",
+        { type: "Staff", id: staffId },
+      ],
     }),
     resetStaffPassword: build.mutation<ApiSuccess<ApiRecord>, string>({
       query: (staffId) => ({
@@ -77,13 +100,20 @@ export const staffApi = saasadminApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      invalidatesTags: (_r, _e, { staffId }) => [{ type: "Staff", id: staffId }],
+      invalidatesTags: (_r, _e, { staffId }) => [
+        { type: "Staff", id: staffId },
+      ],
     }),
     getStaffRoles: build.query<ApiSuccess<ApiRecord>, string>({
-      query: (staffId) => ({ url: `/admin/staff/${encodeURIComponent(staffId)}/roles` }),
+      query: (staffId) => ({
+        url: `/admin/staff/${encodeURIComponent(staffId)}/roles`,
+      }),
       providesTags: (_r, _e, staffId) => [{ type: "Staff", id: staffId }],
     }),
-    getStaffActivity: build.query<ApiSuccess<ApiRecord[]>, { staffId: string } & ListQuery>({
+    getStaffActivity: build.query<
+      ApiSuccess<ApiRecord[]>,
+      { staffId: string } & ListQuery
+    >({
       query: ({ staffId, ...params }) => ({
         url: `/admin/staff/${encodeURIComponent(staffId)}/activity`,
         params,
@@ -91,18 +121,27 @@ export const staffApi = saasadminApi.injectEndpoints({
       providesTags: (_r, _e, { staffId }) => [{ type: "Staff", id: staffId }],
     }),
     listStaffSessions: build.query<ApiSuccess<ApiRecord[]>, string>({
-      query: (staffId) => ({ url: `/admin/staff/${encodeURIComponent(staffId)}/sessions` }),
+      query: (staffId) => ({
+        url: `/admin/staff/${encodeURIComponent(staffId)}/sessions`,
+      }),
       providesTags: (_r, _e, staffId) => [{ type: "Staff", id: staffId }],
     }),
-    revokeStaffSession: build.mutation<ApiSuccess<ApiRecord>, { staffId: string; sessionId: string }>({
+    revokeStaffSession: build.mutation<
+      ApiSuccess<ApiRecord>,
+      { staffId: string; sessionId: string }
+    >({
       query: ({ staffId, sessionId }) => ({
         url: `/admin/staff/${encodeURIComponent(staffId)}/sessions/${encodeURIComponent(sessionId)}`,
         method: "DELETE",
       }),
-      invalidatesTags: (_r, _e, { staffId }) => [{ type: "Staff", id: staffId }],
+      invalidatesTags: (_r, _e, { staffId }) => [
+        { type: "Staff", id: staffId },
+      ],
     }),
     getStaffEffectivePermissions: build.query<ApiSuccess<ApiRecord>, string>({
-      query: (staffId) => ({ url: `/admin/staff/${encodeURIComponent(staffId)}/effective-permissions` }),
+      query: (staffId) => ({
+        url: `/admin/staff/${encodeURIComponent(staffId)}/effective-permissions`,
+      }),
       providesTags: (_r, _e, staffId) => [{ type: "Staff", id: staffId }],
     }),
   }),

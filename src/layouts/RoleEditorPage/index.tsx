@@ -142,11 +142,20 @@ export function RoleEditorPage({
                 <p className="text-slate-500 text-sm">
                   Select permissions for this role:
                 </p>
-                <Select
-                  multiple
-                  className="w-full h-64"
-                >
-                  {["itsm.incident.read", "itsm.incident.create", "itsm.incident.update", "itsm.incident.resolve", "itsm.incident.close", "itsm.change.read", "itsm.change.approve", "itsm.change.implement", "itsm.problem.read", "itsm.sla.read", "itsm.admin.read"].map((perm) => (
+                <Select multiple className="w-full h-64">
+                  {[
+                    "itsm.incident.read",
+                    "itsm.incident.create",
+                    "itsm.incident.update",
+                    "itsm.incident.resolve",
+                    "itsm.incident.close",
+                    "itsm.change.read",
+                    "itsm.change.approve",
+                    "itsm.change.implement",
+                    "itsm.problem.read",
+                    "itsm.sla.read",
+                    "itsm.admin.read",
+                  ].map((perm) => (
                     <option key={perm} value={perm}>
                       {perm}
                     </option>
@@ -160,10 +169,7 @@ export function RoleEditorPage({
                 <p className="text-slate-500 text-sm">
                   Select scopes for this role:
                 </p>
-                <Select
-                  multiple
-                  className="w-full h-48"
-                >
+                <Select multiple className="w-full h-48">
                   <option value="TENANT">TENANT</option>
                   <option value="ORGANIZATION">ORGANIZATION</option>
                   <option value="BUSINESS_UNIT">BUSINESS_UNIT</option>
@@ -178,9 +184,7 @@ export function RoleEditorPage({
 
             {activeTab === "recordConditions" && (
               <div className="space-y-4">
-                <p className="text-slate-500 text-sm">
-                  Record condition rules
-                </p>
+                <p className="text-slate-500 text-sm">Record condition rules</p>
                 <Input
                   placeholder="When field operator value…"
                   className="w-full mb-3 rounded-md border border-slate-300 p-2 text-sm"
@@ -195,9 +199,7 @@ export function RoleEditorPage({
 
             {activeTab === "fieldPolicies" && (
               <div className="space-y-4">
-                <p className="text-slate-500 text-sm">
-                  Field policies
-                </p>
+                <p className="text-slate-500 text-sm">Field policies</p>
                 <Input
                   placeholder="Visibility condition (e.g. role: admin)"
                   className="w-full mb-3 rounded-md border border-slate-300 p-2 text-sm"
@@ -211,17 +213,21 @@ export function RoleEditorPage({
 
             {activeTab === "inheritance" && (
               <div className="space-y-4">
-                <p className="text-slate-500 text-sm">
-                  Role inheritance
-                </p>
+                <p className="text-slate-500 text-sm">Role inheritance</p>
                 <Select
                   defaultValue={role.inheritsFrom || ""}
                   className="w-full mb-3"
                 >
                   <option value="">Inherits from</option>
-                  <option value="builtin:service-desk-l1">Service Desk L1</option>
-                  <option value="builtin:service-desk-l2">Service Desk L2</option>
-                  <option value="builtin:change-approver">Change Approver</option>
+                  <option value="builtin:service-desk-l1">
+                    Service Desk L1
+                  </option>
+                  <option value="builtin:service-desk-l2">
+                    Service Desk L2
+                  </option>
+                  <option value="builtin:change-approver">
+                    Change Approver
+                  </option>
                 </Select>
                 <Input
                   placeholder="Custom inheritance path"
@@ -232,9 +238,7 @@ export function RoleEditorPage({
 
             {activeTab === "members" && (
               <div className="space-y-4">
-                <p className="text-slate-500 text-sm">
-                  Role members
-                </p>
+                <p className="text-slate-500 text-sm">Role members</p>
                 <Select multiple className="w-full h-48">
                   <option value="user-1">User 1</option>
                   <option value="user-2">User 2</option>
@@ -245,9 +249,7 @@ export function RoleEditorPage({
 
             {activeTab === "groups" && (
               <div className="space-y-4">
-                <p className="text-slate-500 text-sm">
-                  Group assignments
-                </p>
+                <p className="text-slate-500 text-sm">Group assignments</p>
                 <Select multiple className="w-full h-48">
                   <option value="group-1">Assignment Group 1</option>
                   <option value="group-2">Assignment Group 2</option>
@@ -258,9 +260,7 @@ export function RoleEditorPage({
 
             {activeTab === "delegation" && (
               <div className="space-y-4">
-                <p className="text-slate-500 text-sm">
-                  Delegation settings
-                </p>
+                <p className="text-slate-500 text-sm">Delegation settings</p>
                 <Input
                   placeholder="Starts at (date)"
                   className="w-full mb-3 rounded-md border border-slate-300 p-2 text-sm"
@@ -269,10 +269,7 @@ export function RoleEditorPage({
                   placeholder="Expires at (date)"
                   className="w-full mb-3 rounded-md border border-slate-300 p-2 text-sm"
                 />
-                <Select
-                  defaultValue="active"
-                  className="w-full mb-3"
-                >
+                <Select defaultValue="active" className="w-full mb-3">
                   <option value="active">Active</option>
                   <option value="scheduled">Scheduled</option>
                   <option value="revoked">Revoked</option>
@@ -282,18 +279,13 @@ export function RoleEditorPage({
 
             {activeTab === "audit" && (
               <div className="space-y-4">
-                <p className="text-slate-500 text-sm">
-                  Audit settings
-                </p>
-                <Select
-                  defaultValue="enabled"
-                  className="w-full mb-3"
-                >
+                <p className="text-slate-500 text-sm">Audit settings</p>
+                <Select defaultValue="enabled" className="w-full mb-3">
                   <option value="enabled">Audit enabled</option>
                   <option value="disabled">Audit disabled</option>
                 </Select>
                 <p className="text-slate-400 text-xs">
-                  Prevent saas.* assignment by Instance role admins: {" "}
+                  Prevent saas.* assignment by Instance role admins:{" "}
                   <Input
                     disabled
                     defaultValue="blocked"

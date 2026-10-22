@@ -29,10 +29,13 @@ function NotAvailable({ item }: { item: SaasAdminNavigationItem }) {
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-10 text-center">
       <SearchX className="mx-auto h-8 w-8 text-slate-300" />
-      <h1 className="mt-4 text-lg font-semibold text-slate-800">Access restricted</h1>
+      <h1 className="mt-4 text-lg font-semibold text-slate-800">
+        Access restricted
+      </h1>
       <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-        Your permissions do not include <span className="font-medium text-slate-700">{item.label}</span>.
-        Use the navigation to reach a capability you are entitled to.
+        Your permissions do not include{" "}
+        <span className="font-medium text-slate-700">{item.label}</span>. Use
+        the navigation to reach a capability you are entitled to.
       </p>
     </section>
   );
@@ -57,19 +60,29 @@ export function SaasAdminSurface() {
   }, [location.pathname]);
 
   const flat = useMemo<FlatItem[]>(
-    () => SAAS_ADMIN_NAVIGATION.flatMap((section) => section.items.map((item) => ({ section, item }))),
+    () =>
+      SAAS_ADMIN_NAVIGATION.flatMap((section) =>
+        section.items.map((item) => ({ section, item })),
+      ),
     [],
   );
 
-  const hasAccess = useMemo(() => canAccessSaasAdmin(permissions), [permissions]);
+  const hasAccess = useMemo(
+    () => canAccessSaasAdmin(permissions),
+    [permissions],
+  );
 
   const matched = useMemo<FlatItem | null>(
-    () => flat.find((entry) => navPathMatches(entry.item.path, location.pathname)) ?? null,
+    () =>
+      flat.find((entry) =>
+        navPathMatches(entry.item.path, location.pathname),
+      ) ?? null,
     [flat, location.pathname],
   );
 
   const atBasePath =
-    location.pathname === SAAS_ADMIN_BASE_PATH || location.pathname === `${SAAS_ADMIN_BASE_PATH}/`;
+    location.pathname === SAAS_ADMIN_BASE_PATH ||
+    location.pathname === `${SAAS_ADMIN_BASE_PATH}/`;
 
   // Redirect the bare control-plane root to the first item the session may view.
   useEffect(() => {
@@ -97,7 +110,11 @@ export function SaasAdminSurface() {
   }
 
   const current = matched;
-  const canViewCurrent = canViewSaasAdminItem(permissions, current.section, current.item);
+  const canViewCurrent = canViewSaasAdminItem(
+    permissions,
+    current.section,
+    current.item,
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950">
@@ -117,7 +134,10 @@ export function SaasAdminSurface() {
         />
       ) : null}
 
-      <SaasAdminSidebar open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <SaasAdminSidebar
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      />
 
       <div className="lg:pl-72">
         <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
@@ -134,13 +154,18 @@ export function SaasAdminSurface() {
               <ol className="flex items-center gap-1.5 text-sm text-slate-500">
                 <li className="truncate">SaaS Admin</li>
                 <li className="truncate text-slate-300">/</li>
-                <li className="truncate font-medium text-slate-800">{current?.item.label ?? "Dashboard"}</li>
+                <li className="truncate font-medium text-slate-800">
+                  {current?.item.label ?? "Dashboard"}
+                </li>
               </ol>
             </nav>
           </div>
         </header>
 
-        <main id="saas-admin-content" className="mx-auto max-w-[1400px] px-4 py-6 md:px-8">
+        <main
+          id="saas-admin-content"
+          className="mx-auto max-w-[1400px] px-4 py-6 md:px-8"
+        >
           {canViewCurrent ? <Outlet /> : <NotAvailable item={current.item} />}
         </main>
       </div>

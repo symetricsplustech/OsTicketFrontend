@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
-import { useListCustomersQuery, useListIncidentsQuery } from "@services/tenantadmin";
+import {
+  useListCustomersQuery,
+  useListIncidentsQuery,
+} from "@services/tenantadmin";
 import { CustomerTicketsTable } from "./customerTables";
 import { inputClass } from "./ui";
 
@@ -23,11 +26,15 @@ export function OrganizationCustomerTicketsPage() {
   return (
     <div>
       <header className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Customers & Customer Contacts</p>
-        <h1 className="mt-1 text-2xl font-bold text-slate-900 md:text-3xl">Customer Ticket History</h1>
+        <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">
+          Customers & Customer Contacts
+        </p>
+        <h1 className="mt-1 text-2xl font-bold text-slate-900 md:text-3xl">
+          Customer Ticket History
+        </h1>
         <p className="mt-2 max-w-3xl text-sm text-slate-500">
-          Every incident raised for your customers, filterable by customer and status. Full ticket handling lives in
-          Incident Management.
+          Every incident raised for your customers, filterable by customer and
+          status. Full ticket handling lives in Incident Management.
         </p>
       </header>
 
@@ -42,7 +49,11 @@ export function OrganizationCustomerTicketsPage() {
               className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
             />
           </label>
-          <select className={`${inputClass} w-56`} value={customerId} onChange={(event) => setCustomerId(event.target.value)}>
+          <select
+            className={`${inputClass} w-56`}
+            value={customerId}
+            onChange={(event) => setCustomerId(event.target.value)}
+          >
             <option value="">All customers</option>
             {customers.map((customer) => (
               <option key={customer.id} value={customer.id}>
@@ -50,7 +61,11 @@ export function OrganizationCustomerTicketsPage() {
               </option>
             ))}
           </select>
-          <select className={`${inputClass} w-44`} value={statusKey} onChange={(event) => setStatusKey(event.target.value)}>
+          <select
+            className={`${inputClass} w-44`}
+            value={statusKey}
+            onChange={(event) => setStatusKey(event.target.value)}
+          >
             <option value="">All statuses</option>
             {STATUS_OPTIONS.map((status) => (
               <option key={status} value={status}>

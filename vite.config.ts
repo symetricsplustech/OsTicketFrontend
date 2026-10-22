@@ -8,7 +8,6 @@ export default defineConfig({
     alias: {
       "@app": path.resolve(__dirname, "./src/app"),
       "@layouts": path.resolve(__dirname, "./src/layouts"),
-      "@features": path.resolve(__dirname, "./src/features"),
       "@components": path.resolve(__dirname, "./src/components"),
       "@hooks": path.resolve(__dirname, "./src/hooks"),
       "@services": path.resolve(__dirname, "./src/services"),
@@ -17,7 +16,6 @@ export default defineConfig({
       "@utils": path.resolve(__dirname, "./src/utils"),
       "@constants": path.resolve(__dirname, "./src/constants"),
       "@styles": path.resolve(__dirname, "./src/styles"),
-      "@portal": path.resolve(__dirname, "./src/portal"),
       "@": path.resolve(__dirname, "./src"),
     },
   },

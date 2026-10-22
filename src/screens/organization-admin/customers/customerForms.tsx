@@ -130,8 +130,10 @@ export function CustomerFormModal({
     setError(null);
   }, [open, customer]);
 
-  const set = <K extends keyof CustomerFormState>(key: K, value: CustomerFormState[K]) =>
-    setForm((current) => ({ ...current, [key]: value }));
+  const set = <K extends keyof CustomerFormState>(
+    key: K,
+    value: CustomerFormState[K],
+  ) => setForm((current) => ({ ...current, [key]: value }));
 
   const submitting = createState.isLoading || updateState.isLoading;
 
@@ -155,59 +157,130 @@ export function CustomerFormModal({
   };
 
   return (
-    <Modal open={open} onClose={onClose} title={customer ? `Edit ${customer.name}` : "Create customer"} wide>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={customer ? `Edit ${customer.name}` : "Create customer"}
+      wide
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         {error ? <ErrorState message={error} /> : null}
         <SectionGrid>
           <Field label="Customer name">
-            <input className={inputClass} value={form.name} onChange={(e) => set("name", e.target.value)} required />
+            <input
+              className={inputClass}
+              value={form.name}
+              onChange={(e) => set("name", e.target.value)}
+              required
+            />
           </Field>
           <Field label="Customer code">
-            <input className={inputClass} value={form.code} onChange={(e) => set("code", e.target.value)} placeholder="e.g. NDC-001" />
+            <input
+              className={inputClass}
+              value={form.code}
+              onChange={(e) => set("code", e.target.value)}
+              placeholder="e.g. NDC-001"
+            />
           </Field>
           <Field label="Type">
-            <select className={inputClass} value={form.type} onChange={(e) => set("type", e.target.value as CustomerFormState["type"])}>
+            <select
+              className={inputClass}
+              value={form.type}
+              onChange={(e) =>
+                set("type", e.target.value as CustomerFormState["type"])
+              }
+            >
               <option value="COMPANY">Company</option>
               <option value="INDIVIDUAL">Individual</option>
             </select>
           </Field>
           <Field label="Status">
-            <select className={inputClass} value={form.status} onChange={(e) => set("status", e.target.value as CustomerFormState["status"])}>
+            <select
+              className={inputClass}
+              value={form.status}
+              onChange={(e) =>
+                set("status", e.target.value as CustomerFormState["status"])
+              }
+            >
               <option value="ACTIVE">Active</option>
               <option value="PROSPECT">Prospect</option>
               <option value="INACTIVE">Inactive</option>
             </select>
           </Field>
           <Field label="Industry">
-            <input className={inputClass} value={form.industry} onChange={(e) => set("industry", e.target.value)} />
+            <input
+              className={inputClass}
+              value={form.industry}
+              onChange={(e) => set("industry", e.target.value)}
+            />
           </Field>
           <Field label="Website">
-            <input className={inputClass} value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://" />
+            <input
+              className={inputClass}
+              value={form.website}
+              onChange={(e) => set("website", e.target.value)}
+              placeholder="https://"
+            />
           </Field>
           <Field label="Email">
-            <input type="email" className={inputClass} value={form.email} onChange={(e) => set("email", e.target.value)} />
+            <input
+              type="email"
+              className={inputClass}
+              value={form.email}
+              onChange={(e) => set("email", e.target.value)}
+            />
           </Field>
           <Field label="Phone">
-            <input className={inputClass} value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+            <input
+              className={inputClass}
+              value={form.phone}
+              onChange={(e) => set("phone", e.target.value)}
+            />
           </Field>
           <Field label="City">
-            <input className={inputClass} value={form.city} onChange={(e) => set("city", e.target.value)} />
+            <input
+              className={inputClass}
+              value={form.city}
+              onChange={(e) => set("city", e.target.value)}
+            />
           </Field>
           <Field label="Country">
-            <input className={inputClass} value={form.country} onChange={(e) => set("country", e.target.value)} />
+            <input
+              className={inputClass}
+              value={form.country}
+              onChange={(e) => set("country", e.target.value)}
+            />
           </Field>
           <Field label="Address">
-            <input className={inputClass} value={form.addressLine1} onChange={(e) => set("addressLine1", e.target.value)} />
+            <input
+              className={inputClass}
+              value={form.addressLine1}
+              onChange={(e) => set("addressLine1", e.target.value)}
+            />
           </Field>
           <Field label="Timezone">
-            <input className={inputClass} value={form.timezone} onChange={(e) => set("timezone", e.target.value)} placeholder="e.g. Europe/Dublin" />
+            <input
+              className={inputClass}
+              value={form.timezone}
+              onChange={(e) => set("timezone", e.target.value)}
+              placeholder="e.g. Europe/Dublin"
+            />
           </Field>
         </SectionGrid>
         <Field label="Description">
-          <textarea className={inputClass} rows={3} value={form.description} onChange={(e) => set("description", e.target.value)} />
+          <textarea
+            className={inputClass}
+            rows={3}
+            value={form.description}
+            onChange={(e) => set("description", e.target.value)}
+          />
         </Field>
         <label className="flex items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" checked={form.isDataCenter} onChange={(e) => set("isDataCenter", e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={form.isDataCenter}
+            onChange={(e) => set("isDataCenter", e.target.checked)}
+          />
           Operates data center locations
         </label>
         <div className="flex justify-end gap-2 pt-2">
@@ -215,7 +288,11 @@ export function CustomerFormModal({
             Cancel
           </button>
           <button type="submit" className={buttonPrimary} disabled={submitting}>
-            {submitting ? "Saving…" : customer ? "Save changes" : "Create customer"}
+            {submitting
+              ? "Saving…"
+              : customer
+                ? "Save changes"
+                : "Create customer"}
           </button>
         </div>
       </form>
@@ -285,8 +362,10 @@ export function ContactFormModal({
     });
   }, [open, contact, fixedCustomerId]);
 
-  const set = <K extends keyof ContactFormState>(key: K, value: ContactFormState[K]) =>
-    setForm((current) => ({ ...current, [key]: value }));
+  const set = <K extends keyof ContactFormState>(
+    key: K,
+    value: ContactFormState[K],
+  ) => setForm((current) => ({ ...current, [key]: value }));
 
   const submitting = createState.isLoading || updateState.isLoading;
 
@@ -309,7 +388,11 @@ export function ContactFormModal({
         notes: form.notes.trim() || undefined,
       };
       if (contact) {
-        await updateContact({ customerId: contact.customerId, contactId: contact.id, body }).unwrap();
+        await updateContact({
+          customerId: contact.customerId,
+          contactId: contact.id,
+          body,
+        }).unwrap();
       } else {
         await createContact({ customerId: form.customerId, body }).unwrap();
       }
@@ -321,14 +404,24 @@ export function ContactFormModal({
   };
 
   return (
-    <Modal open={open} onClose={onClose} title={contact ? "Edit contact" : "Add customer contact"} wide>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={contact ? "Edit contact" : "Add customer contact"}
+      wide
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         {error ? <ErrorState message={error} /> : null}
         <SectionGrid>
           {!contact && !fixedCustomerId ? (
             <div className="sm:col-span-2">
               <Field label="Customer">
-                <select className={inputClass} value={form.customerId} onChange={(e) => set("customerId", e.target.value)} required>
+                <select
+                  className={inputClass}
+                  value={form.customerId}
+                  onChange={(e) => set("customerId", e.target.value)}
+                  required
+                >
                   <option value="">Select a customer…</option>
                   {customers.map((customer) => (
                     <option key={customer.id} value={customer.id}>
@@ -340,22 +433,52 @@ export function ContactFormModal({
             </div>
           ) : null}
           <Field label="First name">
-            <input className={inputClass} value={form.firstName} onChange={(e) => set("firstName", e.target.value)} required />
+            <input
+              className={inputClass}
+              value={form.firstName}
+              onChange={(e) => set("firstName", e.target.value)}
+              required
+            />
           </Field>
           <Field label="Last name">
-            <input className={inputClass} value={form.lastName} onChange={(e) => set("lastName", e.target.value)} required />
+            <input
+              className={inputClass}
+              value={form.lastName}
+              onChange={(e) => set("lastName", e.target.value)}
+              required
+            />
           </Field>
           <Field label="Email">
-            <input type="email" className={inputClass} value={form.email} onChange={(e) => set("email", e.target.value)} required />
+            <input
+              type="email"
+              className={inputClass}
+              value={form.email}
+              onChange={(e) => set("email", e.target.value)}
+              required
+            />
           </Field>
           <Field label="Phone">
-            <input className={inputClass} value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+            <input
+              className={inputClass}
+              value={form.phone}
+              onChange={(e) => set("phone", e.target.value)}
+            />
           </Field>
           <Field label="Job title">
-            <input className={inputClass} value={form.jobTitle} onChange={(e) => set("jobTitle", e.target.value)} />
+            <input
+              className={inputClass}
+              value={form.jobTitle}
+              onChange={(e) => set("jobTitle", e.target.value)}
+            />
           </Field>
           <Field label="Role">
-            <select className={inputClass} value={form.role} onChange={(e) => set("role", e.target.value as ContactFormState["role"])}>
+            <select
+              className={inputClass}
+              value={form.role}
+              onChange={(e) =>
+                set("role", e.target.value as ContactFormState["role"])
+              }
+            >
               <option value="PRIMARY">Primary</option>
               <option value="TECHNICAL">Technical</option>
               <option value="BILLING">Billing</option>
@@ -364,11 +487,20 @@ export function ContactFormModal({
           </Field>
         </SectionGrid>
         <label className="flex items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" checked={form.isPrimary} onChange={(e) => set("isPrimary", e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={form.isPrimary}
+            onChange={(e) => set("isPrimary", e.target.checked)}
+          />
           Primary contact for this customer
         </label>
         <Field label="Notes">
-          <textarea className={inputClass} rows={2} value={form.notes} onChange={(e) => set("notes", e.target.value)} />
+          <textarea
+            className={inputClass}
+            rows={2}
+            value={form.notes}
+            onChange={(e) => set("notes", e.target.value)}
+          />
         </Field>
         <div className="flex justify-end gap-2 pt-2">
           <button type="button" className={buttonSecondary} onClick={onClose}>
@@ -457,8 +589,10 @@ export function SiteFormModal({
     });
   }, [open, site, fixedCustomerId]);
 
-  const set = <K extends keyof SiteFormState>(key: K, value: SiteFormState[K]) =>
-    setForm((current) => ({ ...current, [key]: value }));
+  const set = <K extends keyof SiteFormState>(
+    key: K,
+    value: SiteFormState[K],
+  ) => setForm((current) => ({ ...current, [key]: value }));
 
   const submitting = createState.isLoading || updateState.isLoading;
 
@@ -485,7 +619,11 @@ export function SiteFormModal({
         notes: form.notes.trim() || undefined,
       };
       if (site) {
-        await updateSite({ customerId: site.customerId, siteId: site.id, body }).unwrap();
+        await updateSite({
+          customerId: site.customerId,
+          siteId: site.id,
+          body,
+        }).unwrap();
       } else {
         await createSite({ customerId: form.customerId, body }).unwrap();
       }
@@ -497,14 +635,24 @@ export function SiteFormModal({
   };
 
   return (
-    <Modal open={open} onClose={onClose} title={site ? `Edit ${site.name}` : "Add customer site"} wide>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={site ? `Edit ${site.name}` : "Add customer site"}
+      wide
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         {error ? <ErrorState message={error} /> : null}
         <SectionGrid>
           {!site && !fixedCustomerId ? (
             <div className="sm:col-span-2">
               <Field label="Customer">
-                <select className={inputClass} value={form.customerId} onChange={(e) => set("customerId", e.target.value)} required>
+                <select
+                  className={inputClass}
+                  value={form.customerId}
+                  onChange={(e) => set("customerId", e.target.value)}
+                  required
+                >
                   <option value="">Select a customer…</option>
                   {customers.map((customer) => (
                     <option key={customer.id} value={customer.id}>
@@ -516,13 +664,27 @@ export function SiteFormModal({
             </div>
           ) : null}
           <Field label="Site name">
-            <input className={inputClass} value={form.name} onChange={(e) => set("name", e.target.value)} required />
+            <input
+              className={inputClass}
+              value={form.name}
+              onChange={(e) => set("name", e.target.value)}
+              required
+            />
           </Field>
           <Field label="Site code">
-            <input className={inputClass} value={form.code} onChange={(e) => set("code", e.target.value)} placeholder="e.g. NDC-IAD1" />
+            <input
+              className={inputClass}
+              value={form.code}
+              onChange={(e) => set("code", e.target.value)}
+              placeholder="e.g. NDC-IAD1"
+            />
           </Field>
           <Field label="Site type">
-            <select className={inputClass} value={form.siteType} onChange={(e) => set("siteType", e.target.value)}>
+            <select
+              className={inputClass}
+              value={form.siteType}
+              onChange={(e) => set("siteType", e.target.value)}
+            >
               <option value="SITE">Site</option>
               <option value="DATA_CENTER">Data center</option>
               <option value="OFFICE">Office</option>
@@ -531,36 +693,75 @@ export function SiteFormModal({
             </select>
           </Field>
           <Field label="Status">
-            <select className={inputClass} value={form.status} onChange={(e) => set("status", e.target.value as SiteFormState["status"])}>
+            <select
+              className={inputClass}
+              value={form.status}
+              onChange={(e) =>
+                set("status", e.target.value as SiteFormState["status"])
+              }
+            >
               <option value="ACTIVE">Active</option>
               <option value="INACTIVE">Inactive</option>
             </select>
           </Field>
           <Field label="Address">
-            <input className={inputClass} value={form.addressLine1} onChange={(e) => set("addressLine1", e.target.value)} />
+            <input
+              className={inputClass}
+              value={form.addressLine1}
+              onChange={(e) => set("addressLine1", e.target.value)}
+            />
           </Field>
           <Field label="City">
-            <input className={inputClass} value={form.city} onChange={(e) => set("city", e.target.value)} />
+            <input
+              className={inputClass}
+              value={form.city}
+              onChange={(e) => set("city", e.target.value)}
+            />
           </Field>
           <Field label="State / region">
-            <input className={inputClass} value={form.state} onChange={(e) => set("state", e.target.value)} />
+            <input
+              className={inputClass}
+              value={form.state}
+              onChange={(e) => set("state", e.target.value)}
+            />
           </Field>
           <Field label="Postal code">
-            <input className={inputClass} value={form.postalCode} onChange={(e) => set("postalCode", e.target.value)} />
+            <input
+              className={inputClass}
+              value={form.postalCode}
+              onChange={(e) => set("postalCode", e.target.value)}
+            />
           </Field>
           <Field label="Country">
-            <input className={inputClass} value={form.country} onChange={(e) => set("country", e.target.value)} />
+            <input
+              className={inputClass}
+              value={form.country}
+              onChange={(e) => set("country", e.target.value)}
+            />
           </Field>
           <Field label="Timezone">
-            <input className={inputClass} value={form.timezone} onChange={(e) => set("timezone", e.target.value)} />
+            <input
+              className={inputClass}
+              value={form.timezone}
+              onChange={(e) => set("timezone", e.target.value)}
+            />
           </Field>
         </SectionGrid>
         <label className="flex items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" checked={form.isDataCenter} onChange={(e) => set("isDataCenter", e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={form.isDataCenter}
+            onChange={(e) => set("isDataCenter", e.target.checked)}
+          />
           Data center location
         </label>
         <Field label="Notes">
-          <textarea className={inputClass} rows={2} value={form.notes} onChange={(e) => set("notes", e.target.value)} />
+          <textarea
+            className={inputClass}
+            rows={2}
+            value={form.notes}
+            onChange={(e) => set("notes", e.target.value)}
+          />
         </Field>
         <div className="flex justify-end gap-2 pt-2">
           <button type="button" className={buttonSecondary} onClick={onClose}>

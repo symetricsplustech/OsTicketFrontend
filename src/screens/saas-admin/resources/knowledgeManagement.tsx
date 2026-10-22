@@ -1,5 +1,9 @@
 import { Settings, Boxes, ShieldCheck, UserRound } from "lucide-react";
-import { asQueryHook, asMutationHook, VARIANT_FROM_STATUS } from "../components/resource/types";
+import {
+  asQueryHook,
+  asMutationHook,
+  VARIANT_FROM_STATUS,
+} from "../components/resource/types";
 import type { ResourceListConfig } from "../components/resource/types";
 import { textCol, statusCol } from "./columns";
 import {
@@ -19,10 +23,14 @@ export const KNOWLEDGE_MANAGEMENT_LISTS: ResourceListConfig[] = [
   {
     path: "/saas-admin/knowledge-management/settings",
     title: "Knowledge Base Settings",
-    description: "Knowledge base policies for authoring, publishing and review.",
+    description:
+      "Knowledge base policies for authoring, publishing and review.",
     sectionLabel: SECTION,
     rowId: "policyId",
-    source: { kind: "api", useList: asQueryHook(useListKnowledgePoliciesQuery) },
+    source: {
+      kind: "api",
+      useList: asQueryHook(useListKnowledgePoliciesQuery),
+    },
     columns: [
       textCol("name", "Policy"),
       textCol("description", "Description"),
@@ -38,8 +46,19 @@ export const KNOWLEDGE_MANAGEMENT_LISTS: ResourceListConfig[] = [
       useCreate: asMutationHook(useCreateKnowledgePolicyMutation),
     },
     stats: [
-      { key: "total", label: "Policies", compute: (rows) => rows.length, icon: <Settings className="h-5 w-5" /> },
-      { key: "enabled", label: "Enabled", compute: (rows) => rows.filter((r) => r.isEnabled).length, color: "success", icon: <Settings className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Policies",
+        compute: (rows) => rows.length,
+        icon: <Settings className="h-5 w-5" />,
+      },
+      {
+        key: "enabled",
+        label: "Enabled",
+        compute: (rows) => rows.filter((r) => r.isEnabled).length,
+        color: "success",
+        icon: <Settings className="h-5 w-5" />,
+      },
     ],
   },
   {
@@ -48,7 +67,10 @@ export const KNOWLEDGE_MANAGEMENT_LISTS: ResourceListConfig[] = [
     description: "Hierarchy of knowledge article categories.",
     sectionLabel: SECTION,
     rowId: "categoryId",
-    source: { kind: "api", useList: asQueryHook(useListKnowledgeCategoriesQuery) },
+    source: {
+      kind: "api",
+      useList: asQueryHook(useListKnowledgeCategoriesQuery),
+    },
     columns: [
       textCol("name", "Category"),
       textCol("description", "Description"),
@@ -68,7 +90,12 @@ export const KNOWLEDGE_MANAGEMENT_LISTS: ResourceListConfig[] = [
       useCreate: asMutationHook(useCreateKnowledgeCategoryMutation),
     },
     stats: [
-      { key: "total", label: "Categories", compute: (rows) => rows.length, icon: <Boxes className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Categories",
+        compute: (rows) => rows.length,
+        icon: <Boxes className="h-5 w-5" />,
+      },
     ],
   },
   {
@@ -77,7 +104,10 @@ export const KNOWLEDGE_MANAGEMENT_LISTS: ResourceListConfig[] = [
     description: "Review scheduling rules that govern content publishing.",
     sectionLabel: SECTION,
     rowId: "ruleId",
-    source: { kind: "api", useList: asQueryHook(useListKnowledgeReviewRulesQuery) },
+    source: {
+      kind: "api",
+      useList: asQueryHook(useListKnowledgeReviewRulesQuery),
+    },
     columns: [
       textCol("name", "Rule"),
       textCol("category.name", "Category"),
@@ -91,27 +121,52 @@ export const KNOWLEDGE_MANAGEMENT_LISTS: ResourceListConfig[] = [
       title: "Create Review Rule",
       fields: [
         { key: "name", label: "Name", type: "text", required: true },
-        { key: "intervalDays", label: "Review Interval (days)", type: "number" },
-        { key: "notifyBeforeDays", label: "Notify Before (days)", type: "number" },
+        {
+          key: "intervalDays",
+          label: "Review Interval (days)",
+          type: "number",
+        },
+        {
+          key: "notifyBeforeDays",
+          label: "Notify Before (days)",
+          type: "number",
+        },
       ],
       useCreate: asMutationHook(useCreateKnowledgeReviewRuleMutation),
     },
     stats: [
-      { key: "total", label: "Rules", compute: (rows) => rows.length, icon: <ShieldCheck className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Rules",
+        compute: (rows) => rows.length,
+        icon: <ShieldCheck className="h-5 w-5" />,
+      },
     ],
   },
   {
     path: "/saas-admin/knowledge-management/moderation",
     title: "Content Moderation",
-    description: "Article template status and moderation state across the knowledge base.",
+    description:
+      "Article template status and moderation state across the knowledge base.",
     sectionLabel: SECTION,
     rowId: "templateId",
-    source: { kind: "api", useList: asQueryHook(useListKnowledgeTemplatesQuery) },
+    source: {
+      kind: "api",
+      useList: asQueryHook(useListKnowledgeTemplatesQuery),
+    },
     columns: [
-      { key: "key", header: "Key", render: (r) => <span className="font-mono text-xs">{String(r.key ?? "—")}</span> },
+      {
+        key: "key",
+        header: "Key",
+        render: (r) => (
+          <span className="font-mono text-xs">{String(r.key ?? "—")}</span>
+        ),
+      },
       textCol("name", "Title"),
       textCol("category.name", "Category"),
-      statusCol("status", "State", (r) => VARIANT_FROM_STATUS(String(r.status))),
+      statusCol("status", "State", (r) =>
+        VARIANT_FROM_STATUS(String(r.status)),
+      ),
       textCol("fields", "Fields"),
     ],
     searchable: (r) => `${r.name} ${r.key}`,
@@ -124,9 +179,26 @@ export const KNOWLEDGE_MANAGEMENT_LISTS: ResourceListConfig[] = [
       useCreate: asMutationHook(useCreateKnowledgeTemplateMutation),
     },
     stats: [
-      { key: "total", label: "Templates", compute: (rows) => rows.length, icon: <UserRound className="h-5 w-5" /> },
-      { key: "enabled", label: "Published", compute: (rows) => rows.filter((r) => r.status === "ENABLED").length, color: "success", icon: <UserRound className="h-5 w-5" /> },
-      { key: "draft", label: "Draft", compute: (rows) => rows.filter((r) => r.status === "DRAFT").length, color: "warning", icon: <UserRound className="h-5 w-5" /> },
+      {
+        key: "total",
+        label: "Templates",
+        compute: (rows) => rows.length,
+        icon: <UserRound className="h-5 w-5" />,
+      },
+      {
+        key: "enabled",
+        label: "Published",
+        compute: (rows) => rows.filter((r) => r.status === "ENABLED").length,
+        color: "success",
+        icon: <UserRound className="h-5 w-5" />,
+      },
+      {
+        key: "draft",
+        label: "Draft",
+        compute: (rows) => rows.filter((r) => r.status === "DRAFT").length,
+        color: "warning",
+        icon: <UserRound className="h-5 w-5" />,
+      },
     ],
   },
 ];

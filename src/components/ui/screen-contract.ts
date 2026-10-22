@@ -2,31 +2,31 @@ export interface ScreenContract {
   // Unique screen ID and canonical route
   screenId: string;
   canonicalRoute: string;
-  
+
   // One owning module/submodule
   owningModule: string;
   owningSubmodule?: string;
-  
+
   // Parent route and breadcrumb
   parentRoute?: string;
   breadcrumb?: string;
-  
+
   // Persona(s)
   persona?: string[];
-  
+
   // Required module entitlement
   moduleEntitlement?: string;
-  
+
   // Required permissions
   requiredPermissions?: string[];
-  
+
   // Record/data scope
   recordScope?: string;
-  
+
   // Page title and context
   pageTitle: string;
   pageContext?: string;
-  
+
   // Primary/secondary actions
   primaryAction?: {
     label: string;
@@ -39,120 +39,120 @@ export interface ScreenContract {
     disabled?: boolean;
     variant?: "ghost" | "secondary";
   }[];
-  
+
   // Tabs/sections/related lists
   tabs?: TabContract[];
   sections?: SectionContract[];
   relatedLists?: RelatedListContract[];
-  
+
   // Fields and field types where applicable
   fields?: FieldContract[];
-  
+
   // Required/read-only/hidden rules
   fieldRules?: FieldRuleContract[];
-  
+
   // Default values
   defaultValues?: Record<string, any>;
-  
+
   // Reference filtering
   referenceFiltering?: ReferenceFilterContract;
-  
+
   // Validation and error messages
   validation?: ValidationContract;
-  
+
   // Drawers/modals/wizards
   drawers?: DrawerContract[];
   modals?: ModalContract[];
   wizards?: WizardContract;
-  
+
   // Context menu
   contextMenu?: ContextMenuContract;
-  
+
   // Bulk actions where applicable
   bulkActions?: BulkActionContract[];
-  
+
   // Activity/history where applicable
   activity?: ActivityContract;
-  
+
   // Attachments where applicable
   attachments?: AttachmentContract;
-  
+
   // Audit visibility
   auditVisibility?: AuditVisibilityContract;
-  
+
   // Notifications/side effects
   notifications?: NotificationContract;
-  
+
   // Search exposure
   searchExposure?: SearchExposureContract;
-  
+
   // Reporting exposure
   reportingExposure?: ReportingExposureContract;
-  
+
   // Loading/skeleton
   loading?: boolean;
   skeleton?: boolean;
-  
+
   // Empty/filtered-empty/no-results
   emptyState?: EmptyStateContract;
-  
+
   // Permission denied
   permissionDenied?: boolean;
-  
+
   // Not found
   notFound?: boolean;
-  
+
   // Partial/full failure
   failure?: FailureContract;
-  
+
   // Retry
   retry?: {
     enabled: boolean;
     onRetry: () => void;
   };
-  
+
   // Saving/success/failure
   saving?: boolean;
   success?: boolean;
   failureSave?: boolean;
-  
+
   // Dirty/unsaved guard
   dirtyCheck?: {
     hasUnsavedChanges: boolean;
     onBeforeUnload?: (e: BeforeUnloadEvent) => void;
   };
-  
+
   // Stale/concurrent update
   staleCheck?: {
     enabled: boolean;
     onStale: () => void;
   };
-  
+
   // Desktop/tablet/mobile
   viewport?: "desktop" | "tablet" | "mobile";
-  
+
   // Keyboard navigation
   keyboardNavigation?: {
     focusableElements: string[];
     escapeHandler?: () => void;
   };
-  
+
   // Screen-reader semantics
   accessibility?: {
     ariaLabel?: string;
     ariaDescribedby?: string;
     role?: string;
   };
-  
+
   // Focus management
   focusManagement?: {
     initialFocus?: string;
     onFocusLoss?: () => void;
   };
-  
+
   // Analytics events
   analyticsEvents?: AnalyticsEventContract[];
-  
+
   // Acceptance tests
   acceptanceTests?: AcceptanceTestContract;
 }
@@ -179,7 +179,15 @@ export interface RelatedListContract {
 export interface FieldContract {
   name: string;
   label: string;
-  type: "text" | "textarea" | "select" | "checkbox" | "date" | "datetime" | "reference" | "boolean";
+  type:
+    | "text"
+    | "textarea"
+    | "select"
+    | "checkbox"
+    | "date"
+    | "datetime"
+    | "reference"
+    | "boolean";
   placeholder?: string;
   defaultValue?: any;
   disabled?: boolean;

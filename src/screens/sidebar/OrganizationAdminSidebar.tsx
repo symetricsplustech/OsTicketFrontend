@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { ChevronDown, LogOut, Search, X } from "lucide-react";
-import { logout, selectAuth, selectPermissions } from "@services/auth/authSlice";
+import {
+  logout,
+  selectAuth,
+  selectPermissions,
+} from "@services/auth/authSlice";
 import { useAppDispatch, useAppSelector } from "@store/hooks";
 import { cn } from "@utils/cn";
 import {
@@ -71,9 +75,19 @@ export function OrganizationAdminSidebar({
               section.label.toLowerCase().includes(needle) ||
               item.label.toLowerCase().includes(needle),
           )
-          .map((child) => ({ key: child.key, label: child.label, path: child.path }));
-        if (children.length === 0 && item.children && item.children.length > 0) continue;
-        if (!children.length && needle && !item.label.toLowerCase().includes(needle) && !section.label.toLowerCase().includes(needle)) {
+          .map((child) => ({
+            key: child.key,
+            label: child.label,
+            path: child.path,
+          }));
+        if (children.length === 0 && item.children && item.children.length > 0)
+          continue;
+        if (
+          !children.length &&
+          needle &&
+          !item.label.toLowerCase().includes(needle) &&
+          !section.label.toLowerCase().includes(needle)
+        ) {
           continue;
         }
         items.push({
@@ -84,7 +98,12 @@ export function OrganizationAdminSidebar({
           children,
         });
       }
-      return { key: section.key, label: section.label, icon: section.icon, items };
+      return {
+        key: section.key,
+        label: section.label,
+        icon: section.icon,
+        items,
+      };
     }).filter((section) => section.items.length > 0);
   }, [permissions, query]);
 
@@ -116,8 +135,12 @@ export function OrganizationAdminSidebar({
           O
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-slate-900">{orgName}</p>
-          <p className="truncate text-xs text-slate-500">Organization Workspace</p>
+          <p className="truncate text-sm font-semibold text-slate-900">
+            {orgName}
+          </p>
+          <p className="truncate text-xs text-slate-500">
+            Organization Workspace
+          </p>
         </div>
         <button
           type="button"
@@ -142,10 +165,15 @@ export function OrganizationAdminSidebar({
         </label>
       </div>
 
-      <nav aria-label="Organization Admin" className="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
+      <nav
+        aria-label="Organization Admin"
+        className="min-h-0 flex-1 overflow-y-auto px-3 pb-4"
+      >
         {sections.length === 0 ? (
           <p className="px-2 py-6 text-center text-xs text-slate-400">
-            {searching ? "No capability matches your search." : "No organization capabilities assigned."}
+            {searching
+              ? "No capability matches your search."
+              : "No organization capabilities assigned."}
           </p>
         ) : (
           sections.map((section) => (
@@ -155,13 +183,19 @@ export function OrganizationAdminSidebar({
               searching={searching}
               expanded={expanded[section.key] ?? true}
               onToggle={() =>
-                setExpanded((value) => ({ ...value, [section.key]: !(value[section.key] ?? true) }))
+                setExpanded((value) => ({
+                  ...value,
+                  [section.key]: !(value[section.key] ?? true),
+                }))
               }
               onNavigate={onClose}
               isItemActive={isItemActive}
               expandedGroups={expanded}
               onToggleGroup={(key) =>
-                setExpanded((value) => ({ ...value, [key]: !(value[key] ?? false) }))
+                setExpanded((value) => ({
+                  ...value,
+                  [key]: !(value[key] ?? false),
+                }))
               }
             />
           ))
@@ -171,11 +205,17 @@ export function OrganizationAdminSidebar({
       <footer className="shrink-0 border-t border-slate-200 p-3">
         <div className="flex items-center gap-2 px-2.5 py-1.5">
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">
-            {(auth.user?.name ?? auth.user?.email ?? "?").charAt(0).toUpperCase()}
+            {(auth.user?.name ?? auth.user?.email ?? "?")
+              .charAt(0)
+              .toUpperCase()}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-slate-700">{auth.user?.name ?? "Signed in"}</p>
-            <p className="truncate text-xs text-slate-400">{auth.role ?? "Organization Admin"}</p>
+            <p className="truncate text-sm font-medium text-slate-700">
+              {auth.user?.name ?? "Signed in"}
+            </p>
+            <p className="truncate text-xs text-slate-400">
+              {auth.role ?? "Organization Admin"}
+            </p>
           </div>
         </div>
         <button
@@ -228,13 +268,18 @@ function Section({
         onClick={onToggle}
         className={cn(
           "flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm font-semibold transition-colors",
-          hasActiveChild ? "text-slate-900" : "text-slate-600 hover:bg-slate-50",
+          hasActiveChild
+            ? "text-slate-900"
+            : "text-slate-600 hover:bg-slate-50",
         )}
       >
         <Icon className="h-4 w-4 shrink-0" />
         <span className="min-w-0 flex-1 truncate">{section.label}</span>
         <ChevronDown
-          className={cn("h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform", expanded && "rotate-180")}
+          className={cn(
+            "h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform",
+            expanded && "rotate-180",
+          )}
         />
       </button>
       {expanded ? (
@@ -294,12 +339,17 @@ function GroupRow({
         onClick={onToggle}
         className={cn(
           "flex w-full items-center gap-1 rounded-md px-2.5 py-1.5 text-left text-sm transition-colors",
-          active ? "font-semibold text-brand-700" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+          active
+            ? "font-semibold text-brand-700"
+            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
         )}
       >
         <span className="min-w-0 flex-1 truncate">{item.label}</span>
         <ChevronDown
-          className={cn("h-3 w-3 shrink-0 text-slate-400 transition-transform", open && "rotate-180")}
+          className={cn(
+            "h-3 w-3 shrink-0 text-slate-400 transition-transform",
+            open && "rotate-180",
+          )}
         />
       </button>
       {open ? (

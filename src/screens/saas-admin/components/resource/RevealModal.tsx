@@ -25,20 +25,37 @@ function RevealField({ label, value, masked }: RevealFieldProps) {
     }
   };
 
-  const display = masked && !revealed ? "•".repeat(Math.min(value.length, 40)) : value;
+  const display =
+    masked && !revealed ? "•".repeat(Math.min(value.length, 40)) : value;
 
   return (
     <div className="space-y-1">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+        {label}
+      </p>
       <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2">
-        <code className="min-w-0 flex-1 break-all font-mono text-sm text-slate-800">{display}</code>
+        <code className="min-w-0 flex-1 break-all font-mono text-sm text-slate-800">
+          {display}
+        </code>
         {masked ? (
-          <Button variant="ghost" onClick={() => setRevealed((prev) => !prev)} aria-label={revealed ? "Hide" : "Reveal"}>
-            {revealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          <Button
+            variant="ghost"
+            onClick={() => setRevealed((prev) => !prev)}
+            aria-label={revealed ? "Hide" : "Reveal"}
+          >
+            {revealed ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
           </Button>
         ) : null}
         <Button variant="ghost" onClick={copy} aria-label="Copy">
-          {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+          {copied ? (
+            <Check className="h-4 w-4 text-emerald-600" />
+          ) : (
+            <Copy className="h-4 w-4" />
+          )}
         </Button>
       </div>
     </div>
@@ -67,7 +84,12 @@ export function RevealModal({ payload, onClose }: RevealModalProps) {
           </div>
         ) : null}
         {payload?.fields.map((field) => (
-          <RevealField key={field.label} label={field.label} value={field.value} masked={field.masked} />
+          <RevealField
+            key={field.label}
+            label={field.label}
+            value={field.value}
+            masked={field.masked}
+          />
         ))}
       </div>
     </Modal>

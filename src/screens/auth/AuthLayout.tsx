@@ -27,7 +27,13 @@ export interface AuthLayoutProps {
 }
 
 /** Split-screen shell for the unauthenticated screens. */
-export function AuthLayout({ title, description, children, footer, className }: AuthLayoutProps) {
+export function AuthLayout({
+  title,
+  description,
+  children,
+  footer,
+  className,
+}: AuthLayoutProps) {
   return (
     <div className="flex min-h-screen bg-slate-50">
       <aside className="relative hidden w-[46%] flex-col justify-between overflow-hidden bg-slate-900 px-10 py-12 lg:flex">
@@ -44,8 +50,12 @@ export function AuthLayout({ title, description, children, footer, className }: 
             N
           </span>
           <span className="text-left">
-            <strong className="block text-sm font-semibold text-white">Nexa ITSM</strong>
-            <span className="block text-xs text-slate-400">ITSM &amp; service management</span>
+            <strong className="block text-sm font-semibold text-white">
+              Nexa ITSM
+            </strong>
+            <span className="block text-xs text-slate-400">
+              ITSM &amp; service management
+            </span>
           </span>
         </Link>
 
@@ -56,10 +66,17 @@ export function AuthLayout({ title, description, children, footer, className }: 
           <ul className="mt-8 space-y-5">
             {HIGHLIGHTS.map((item) => (
               <li key={item.title} className="flex gap-3">
-                <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-400" />
+                <span
+                  aria-hidden
+                  className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-400"
+                />
                 <span>
-                  <strong className="block text-sm font-semibold text-slate-100">{item.title}</strong>
-                  <span className="mt-0.5 block text-sm text-slate-400">{item.body}</span>
+                  <strong className="block text-sm font-semibold text-slate-100">
+                    {item.title}
+                  </strong>
+                  <span className="mt-0.5 block text-sm text-slate-400">
+                    {item.body}
+                  </span>
                 </span>
               </li>
             ))}
@@ -77,15 +94,21 @@ export function AuthLayout({ title, description, children, footer, className }: 
             <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-600 text-sm font-bold text-white">
               N
             </span>
-            <span className="text-sm font-semibold text-slate-900">Nexa ITSM</span>
+            <span className="text-sm font-semibold text-slate-900">
+              Nexa ITSM
+            </span>
           </Link>
 
           <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
-          {description ? <p className="mt-2 text-sm text-slate-500">{description}</p> : null}
+          {description ? (
+            <p className="mt-2 text-sm text-slate-500">{description}</p>
+          ) : null}
 
           <div className={cn("mt-8", className)}>{children}</div>
 
-          {footer ? <div className="mt-6 text-sm text-slate-500">{footer}</div> : null}
+          {footer ? (
+            <div className="mt-6 text-sm text-slate-500">{footer}</div>
+          ) : null}
         </div>
       </main>
     </div>
