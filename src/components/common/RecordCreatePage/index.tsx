@@ -10,6 +10,7 @@ import {
 } from "@components/common/Toast/ToastContainer";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useFormValidation } from "@components/common/DynamicFormRenderer";
 
 interface RecordCreatePageProps {
   title: string;
@@ -38,6 +39,7 @@ export function RecordCreatePage({
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const { errors: formErrors, validate } = useFormValidation(fields);
 
   const handleChange = (name: string, value: unknown) => {
     setValues((prev) => ({ ...prev, [name]: value }));
@@ -53,6 +55,7 @@ export function RecordCreatePage({
     event.preventDefault();
     setSubmitting(true);
     setErrors({});
+    if (!validate()) return;
     try {
       await onSubmit(values);
       showSuccess(`${title} created successfully`);

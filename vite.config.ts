@@ -28,10 +28,7 @@ export default defineConfig({
         manualChunks: (id) => {
           // Vendor chunks
           if (id.includes("node_modules")) {
-            if (id.includes("react-dom")) {
-              return "vendor-react-dom";
-            }
-            if (id.includes("react")) {
+            if (id.includes("react-dom") || id.includes("react")) {
               return "vendor-react";
             }
             if (id.includes("redux") || id.includes("react-redux")) {

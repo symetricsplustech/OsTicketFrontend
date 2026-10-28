@@ -68,6 +68,16 @@ export function LoginPage() {
     event.preventDefault();
     setError(null);
     setSubmitting(true);
+    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
+      setError("Valid work email is required");
+      setSubmitting(false);
+      return;
+    }
+    if (!password.trim()) {
+      setError("Password is required");
+      setSubmitting(false);
+      return;
+    }
     try {
       const response = await runLogin(dispatch, {
         email: email.trim().toLowerCase(),
@@ -109,7 +119,7 @@ export function LoginPage() {
         </p>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+<form onSubmit={handleSubmit} className="space-y-5">
         {error ? (
           <div
             role="alert"
@@ -185,10 +195,6 @@ export function LoginPage() {
           <p>
             <span className="font-medium text-slate-700">Team Lead</span>{" "}
             — team.lead@acmetech.io / team.lead@123
-          </p>
-          <p>
-            <span className="font-medium text-slate-700">Operations Manager</span>{" "}
-            — ops.manager@acmetech.io / ops.manager@123
           </p>
           <p>
             <span className="font-medium text-slate-700">Remote Engineer</span>{" "}

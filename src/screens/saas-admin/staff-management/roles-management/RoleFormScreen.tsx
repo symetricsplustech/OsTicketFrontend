@@ -301,7 +301,7 @@ export function RoleFormScreen() {
         </Button>
       }
     >
-      <form onSubmit={handleSave} className="space-y-6" noValidate>
+      <form onSubmit={handleSave} className="space-y-6">
         {message ? (
           <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
             {message}
